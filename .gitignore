@@ -1,0 +1,18 @@
+# Ignore large data files
+data/roads.geojson
+data.zip
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+
+# IDEs
+.idea/
+.vscode/
+
+# Vercel
+.vercel/

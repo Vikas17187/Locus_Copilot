@@ -343,6 +343,40 @@ body.dark-theme .theme-toggle-btn .knob::after {
     background: var(--gold);
 }
 
+.theme-toggle-btn svg {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: opacity var(--transition-normal);
+    z-index: 1;
+    color: var(--text-tertiary);
+}
+
+.theme-toggle-btn .sun-icon {
+    left: 6px;
+    opacity: 1;
+}
+
+.theme-toggle-btn .moon-icon {
+    right: 6px;
+    opacity: 0;
+}
+
+body.dark-theme .theme-toggle-btn .sun-icon {
+    opacity: 0;
+}
+
+body.dark-theme .theme-toggle-btn .moon-icon {
+    opacity: 1;
+    color: var(--gold);
+}
+
+.theme-toggle-btn .knob {
+    z-index: 2;
+}
+
 /* ============================================
    UTILITY CLASSES
    ============================================ */

@@ -64,7 +64,7 @@
         
         .header-right {
             display: flex;
-            gap: 1rem;
+            gap: 1.5rem;
             align-items: center;
         }
         
@@ -77,7 +77,7 @@
             display: none !important;
         }
         
-        .header-right a, .header-right button {
+        .header-right a, .header-right button:not(.theme-toggle-btn) {
             text-decoration: none;
             color: var(--text-secondary);
             font-weight: 500;
@@ -90,13 +90,22 @@
             font-size: 0.85rem;
         }
         
-        .header-right a:hover, .header-right button:hover {
+        .header-right a:hover, .header-right button:not(.theme-toggle-btn):hover {
             color: var(--text-primary);
             background: var(--bg-secondary);
         }
         
-        .logout-btn { color: var(--error-text) !important; }
-        .logout-btn:hover { background: rgba(255, 68, 68, 0.08) !important; }
+        .logout-btn { 
+            color: var(--error-text) !important; 
+            border: 1px solid var(--error-border) !important; 
+            background: var(--error-bg) !important; 
+            font-weight: 600 !important;
+            letter-spacing: 0.5px;
+        }
+        .logout-btn:hover { 
+            background: rgba(255, 68, 68, 0.15) !important; 
+            border-color: #ff4444 !important;
+        }
         
         /* ====== LAYOUT ====== */
         .container {
@@ -1225,7 +1234,11 @@
             <a href="dashboard.html" id="dashboardLink">Dashboard</a>
             <a href="about.html">About</a>
             <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
-            <button class="theme-toggle-btn" id="themeToggle" title="Toggle dark mode"><span class="knob"></span></button>
+            <button class="theme-toggle-btn" id="themeToggle" title="Toggle dark mode">
+                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <span class="knob"></span>
+            </button>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     </div>
@@ -1285,7 +1298,7 @@
                     <button class="preset-btn" onclick="applyPreset('foot_traffic')">Traffic</button>
                     <button class="preset-btn" onclick="applyPreset('low_competition')">Low Comp</button>
                 </div>
-                <button class="btn-tertiary" onclick="loadPreferences()" style="width:100%; margin-top: 0.4rem; font-size: 0.72rem; padding: 0.45rem;">Load Saved Preferences</button>
+                <button class="btn-tertiary" onclick="loadPreferences()" style="width:100%; margin-top: 1.2rem; font-size: 0.75rem; padding: 0.5rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Load Saved Preferences</button>
             </div>
             
             <div class="section">

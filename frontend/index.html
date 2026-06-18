@@ -1268,10 +1268,7 @@
                     <option value="automobile">Automobile Repairs</option>
                     <option value="stationary">Stationary/Books</option>
                 </select>
-                <button class="smart-weight-btn" id="smartWeightBtn" onclick="applySmartWeights()" disabled>
-                    AI-Optimized Weights
-                    <span class="ml-badge">ML</span>
-                </button>
+
             </div>
             
             <div class="section">
@@ -1342,29 +1339,7 @@
                 <button class="btn-secondary" onclick="getRecommendations()">Get Recommendations</button>
             </div>
 
-            <!-- AI Zone Insights -->
-            <div class="section" style="margin-top: 1rem;">
-                <div class="section-label">AI Zone Insights <span class="ml-badge">ML</span></div>
-                <div class="zone-toggle" onclick="toggleZoneOverlay()">
-                    <span class="zone-toggle-label">Show Zone Clusters</span>
-                    <div class="toggle-switch" id="zoneToggle"></div>
-                </div>
-                <div class="zone-legend" id="zoneLegend"></div>
-            </div>
 
-            <!-- AI Personalized Recommendations -->
-            <div class="section">
-                <div class="section-label">For You <span class="ml-badge">AI</span></div>
-                <button class="smart-weight-btn" onclick="loadAIRecommendations()" style="background: linear-gradient(135deg, #059669 0%, #34d399 100%); font-size: 0.75rem;">
-                    Personalized Picks
-                </button>
-                <div class="ai-recs-panel" id="aiRecsPanel">
-                    <div class="ai-recs-header">
-                        <h3>Recommended for You</h3>
-                    </div>
-                    <div id="aiRecsList"></div>
-                </div>
-            </div>
         </div>
         
         <!-- Results Panel (Right) -->

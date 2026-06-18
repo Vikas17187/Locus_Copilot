@@ -115,11 +115,10 @@ body.dark-theme {
     display: none !important;
 }
 
-/* ============================================
-   SMOOTH TRANSITIONS
-   ============================================ */
-
-*, *::before, *::after {
+/* Selective Transitions for Performance */
+.btn, .nav-btn, .nav-link, .preset-btn, .theme-toggle-btn, .theme-toggle-btn .knob, .theme-toggle-btn .knob::after, .theme-toggle-btn svg,
+.result-item, .criterion, .ai-rec-card, .toggle-switch, .toggle-switch::after,
+.card, .owner-card, .tech-chip, .item-card, input, select, textarea {
     transition: background-color var(--transition-normal),
                 color var(--transition-normal),
                 border-color var(--transition-normal),

@@ -1342,6 +1342,27 @@
                 </div>
             </div>
             
+            <div class="section">
+                <div class="section-label">AI / ML Features</div>
+                <div class="zone-toggle" id="zoneToggle" onclick="toggleZoneOverlay()">
+                    <span class="zone-toggle-label">🌐 Show Zone Clusters <span class="ml-badge">ML</span></span>
+                    <div class="toggle-switch"></div>
+                </div>
+                <div class="zone-legend" id="zoneLegend"></div>
+                
+                <button class="smart-weight-btn" id="loadAiRecsBtn" onclick="loadAIRecommendations()" style="margin-top:0.75rem;">
+                    🔮 Personalized Recs <span class="ml-badge">AI</span>
+                </button>
+                <div class="ai-recs-panel" id="aiRecsPanel">
+                    <div class="ai-recs-header">
+                        <h3>✨ Personalized Picks</h3>
+                    </div>
+                    <div id="aiRecsList" class="ai-recs-list-container">
+                        <div class="ai-rec-empty">No history. Explore locations to get recommendations!</div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="button-group">
                 <button class="btn-primary" id="analyzeBtn" onclick="analyzeLocation()">Analyze</button>
                 <button class="btn-secondary" onclick="resetWeights()">Reset</button>
@@ -1657,7 +1678,27 @@
             });
 
             input.addEventListener('blur', () => {
-                setTimeout(() => wrapper.classList.remove('open'), 180);
+                setTimeout(() => {
+                    wrapper.classList.remove('open');
+                    const val = input.value.trim().toLowerCase();
+                    if (val) {
+                        const match = localities.find(l => 
+                            (l.locality_name || '').toLowerCase() === val || 
+                            (l.name || '').toLowerCase() === val
+                        );
+                        if (match) {
+                            selectLocality(match.name, match.locality_name || match.name);
+                        } else {
+                            const partial = localities.find(l => 
+                                (l.locality_name || '').toLowerCase().includes(val) || 
+                                (l.name || '').toLowerCase().includes(val)
+                            );
+                            if (partial) {
+                                selectLocality(partial.name, partial.locality_name || partial.name);
+                            }
+                        }
+                    }
+                }, 180);
             });
 
             input.addEventListener('keydown', (e) => {
@@ -1919,6 +1960,41 @@
             }
         }
         
+        function buildConstraintDetailsHtml(result) {
+            const cd = result.constraint_details;
+            if (!cd) return "";
+            
+            const aff = cd.affordability || {};
+            const crowd = cd.crowd_density || {};
+            const comp = cd.competition || {};
+            const acc = cd.accessibility || {};
+            
+            return `
+                <div class="constraint-details" style="margin-top: 0.6rem;">
+                    <div class="constraint-row">
+                        <span class="constraint-label">Rent Info</span>
+                        <span class="constraint-value">${aff.rent_amount || 'N/A'} (Conf: ${aff.confidence || 0}%, Source: ${aff.source || 'unknown'})</span>
+                        <span class="constraint-score">${aff.normalized_score || 0}%</span>
+                    </div>
+                    <div class="constraint-row">
+                        <span class="constraint-label">Footfall / POIs</span>
+                        <span class="constraint-value">${crowd.poi_count || 0} POIs mapped</span>
+                        <span class="constraint-score">${crowd.normalized_score || 0}%</span>
+                    </div>
+                    <div class="constraint-row">
+                        <span class="constraint-label">Competition</span>
+                        <span class="constraint-value">${comp.shop_count || 0} shops (${comp.label || 'Market Presence'})</span>
+                        <span class="constraint-score">${comp.normalized_score || 0}%</span>
+                    </div>
+                    <div class="constraint-row">
+                        <span class="constraint-label">Accessibility</span>
+                        <span class="constraint-value">${acc.transit_stops || 0} stops (Bus: ${acc.bus_stops || 0}, Metro: ${acc.metro_stops || 0})</span>
+                        <span class="constraint-score">${acc.normalized_score || 0}%</span>
+                    </div>
+                </div>
+            `;
+        }
+
         function displayResults(results) {
             const resultsList = document.getElementById("resultsList");
             const resultCount = document.getElementById("resultCount");
@@ -1933,11 +2009,13 @@
             
             resultsList.innerHTML = results.map((result, index) => {
                 const breakdown = result.breakdown || {};
-                const rentScore = (breakdown.rent * 100) || 0;
-                const crowdScore = (breakdown.crowd * 100) || 0;
-                const competitionScore = (breakdown.competition * 100) || 0;
-                const accessibilityScore = (breakdown.accessibility * 100) || 0;
+                const cd = result.constraint_details || {};
+                const rentScore = cd.affordability?.normalized_score ?? 0;
+                const crowdScore = cd.crowd_density?.normalized_score ?? 0;
+                const competitionScore = cd.competition?.normalized_score ?? 0;
+                const accessibilityScore = cd.accessibility?.normalized_score ?? 0;
                 const explainabilityHtml = buildExplainabilityHtml(result, breakdown);
+                const constraintDetailsHtml = buildConstraintDetailsHtml(result);
                 
                 return `
                 <div class="result-item ${selectedComparison.includes(index) ? 'selected' : ''}" id="result-${index}" onclick="toggleComparison(${index})">
@@ -1967,6 +2045,8 @@
                             <div class="bar-fill"><div class="bar-value" style="width: ${accessibilityScore}%"></div></div>
                         </div>
                     </div>
+                    
+                    ${constraintDetailsHtml}
                     
                     ${explainabilityHtml}
                     
@@ -2271,21 +2351,29 @@
                 };
                 
                 const scored = currentResults.map((result, idx) => {
-                    const breakdown = result.breakdown || {};
+                    const cd = result.constraint_details || {};
+                    const rentVal = (cd.affordability?.normalized_score || 0) / 100;
+                    const crowdVal = (cd.crowd_density?.normalized_score || 0) / 100;
+                    const compVal = (cd.competition?.normalized_score || 0) / 100;
+                    const accessVal = (cd.accessibility?.normalized_score || 0) / 100;
                     const totalW = weights.rent + weights.crowd + weights.competition + weights.accessibility || 1;
+                    
                     return {
                         ...result,
                         customScore: (
-                            (breakdown.rent || 0) * weights.rent +
-                            (breakdown.crowd || 0) * weights.crowd +
-                            (breakdown.competition || 0) * weights.competition +
-                            (breakdown.accessibility || 0) * weights.accessibility
+                            rentVal * weights.rent +
+                            crowdVal * weights.crowd +
+                            compVal * weights.competition +
+                            accessVal * weights.accessibility
                         ) / totalW * 100,
                         idx
                     };
                 });
                 
                 const top3 = scored.sort((a, b) => b.customScore - a.customScore).slice(0, 3);
+                
+                // Clear any previous highlights
+                document.querySelectorAll(".result-item").forEach(item => item.classList.remove("selected"));
                 selectedComparison = top3.map(r => r.idx);
                 
                 top3.forEach((r) => {
@@ -2469,15 +2557,17 @@
                 "stationary": { rent: 0.2, crowd: 0.25, competition: 0.2, accessibility: 0.35 }
             };
 
-            if (presets[bt]) {
-                const w = presets[bt];
+            const w = (smartWeightsCache && smartWeightsCache[bt]) ? smartWeightsCache[bt].weights : presets[bt];
+
+            if (w) {
                 document.getElementById("rentWeight").value = Math.round(w.rent * 100);
                 document.getElementById("crowdWeight").value = Math.round(w.crowd * 100);
                 document.getElementById("competitionWeight").value = Math.round(w.competition * 100);
                 document.getElementById("accessibilityWeight").value = Math.round(w.accessibility * 100);
                 updateValues();
                 
-                showStatus(`Weights automatically optimized for ${bt}`, "success");
+                const source = (smartWeightsCache && smartWeightsCache[bt]) ? "ML recommended" : "preset";
+                showStatus(`Weights automatically optimized (${source}) for ${bt}`, "success");
             }
         }
 

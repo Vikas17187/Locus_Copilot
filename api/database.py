@@ -5,14 +5,16 @@ Database initialization and management for Locus Copilot
 import sqlite3
 import hashlib
 import os
+import base64
+import bcrypt
 from pathlib import Path
-from passlib.context import CryptContext
+from datetime import datetime
 
 if os.getenv("VERCEL"):
     DB_PATH = Path("/tmp") / "locus_copilot.db"
 else:
     DB_PATH = Path(__file__).parent / "locus_copilot.db"
-pwd_context = CryptContext(schemes=["pbkdf2_sha256", "bcrypt"], deprecated="auto")
+
 MIN_PASSWORD_LENGTH = 6
 MAX_PASSWORD_LENGTH = 16
 MAX_BCRYPT_PASSWORD_BYTES = 72
@@ -36,15 +38,134 @@ def password_length_is_valid(password: str) -> bool:
         return False
     return MIN_PASSWORD_LENGTH <= len(password) <= MAX_PASSWORD_LENGTH
 
+
+def serialize_row(row):
+    """Serialize row database columns, converting datetimes to ISO format."""
+    if row is None:
+        return None
+    d = dict(row)
+    for k, v in d.items():
+        if isinstance(v, datetime):
+            d[k] = v.isoformat()
+    return d
+
+
+def translate_query(query: str) -> str:
+    """Translate SQLite query syntax to PostgreSQL syntax."""
+    if not query:
+        return query
+    
+    # 1. Replace SQLite parameter placeholders (?) with Postgres (%s)
+    query = query.replace("?", "%s")
+    
+    # 2. Convert SQLite AUTOINCREMENT to Postgres SERIAL
+    query = query.replace("INTEGER PRIMARY KEY AUTOINCREMENT", "SERIAL PRIMARY KEY")
+    
+    # 3. Convert COLLATE NOCASE (sqlite specific)
+    query = query.replace("COLLATE NOCASE", "")
+    
+    # 4. Remove SQLite unique index email collation
+    query = query.replace("users(email COLLATE NOCASE)", "users(email)")
+    
+    return query
+
+
+class DatabaseConnection:
+    def __init__(self, conn, is_postgres=False):
+        self.conn = conn
+        self.is_postgres = is_postgres
+
+    def cursor(self):
+        if self.is_postgres:
+            import psycopg2.extras
+            cursor = self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            return PostgresCursorWrapper(cursor)
+        else:
+            return SQLiteCursorWrapper(self.conn.cursor())
+
+    def commit(self):
+        self.conn.commit()
+
+    def close(self):
+        self.conn.close()
+
+
+class SQLiteCursorWrapper:
+    def __init__(self, cursor):
+        self.cursor = cursor
+
+    def execute(self, query, params=None):
+        if params is None:
+            self.cursor.execute(query)
+        else:
+            self.cursor.execute(query, params)
+        return self
+
+    def fetchone(self):
+        res = self.cursor.fetchone()
+        return serialize_row(res)
+
+    def fetchall(self):
+        return [serialize_row(r) for r in self.cursor.fetchall()]
+
+
+class PostgresCursorWrapper:
+    def __init__(self, cursor):
+        self.cursor = cursor
+
+    def execute(self, query, params=None):
+        translated = translate_query(query)
+        if params is None:
+            self.cursor.execute(translated)
+        else:
+            self.cursor.execute(translated, params)
+        return self
+
+    def fetchone(self):
+        res = self.cursor.fetchone()
+        return serialize_row(res)
+
+    def fetchall(self):
+        return [serialize_row(r) for r in self.cursor.fetchall()]
+
+
 def get_db_connection():
-    """Get database connection"""
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
-    return conn
+    """Get database connection (PostgreSQL if DATABASE_URL is set, else SQLite)"""
+    db_url = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL")
+    if db_url:
+        import psycopg2
+        conn = psycopg2.connect(db_url)
+        return DatabaseConnection(conn, is_postgres=True)
+    else:
+        conn = sqlite3.connect(str(DB_PATH))
+        conn.row_factory = sqlite3.Row
+        return DatabaseConnection(conn, is_postgres=False)
+
 
 def hash_password(password: str) -> str:
-    """Hash password using a stable default scheme (pbkdf2_sha256)."""
-    return pwd_context.hash(password)
+    """Hash password using bcrypt."""
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+    return hashed.decode("utf-8")
+
+
+def verify_pbkdf2_sha256(password: str, hashed: str) -> bool:
+    """Verify legacy passlib pbkdf2-sha256 hashes using standard hashlib."""
+    try:
+        parts = hashed.split('$')
+        if len(parts) < 5 or parts[1] != 'pbkdf2-sha256':
+            return False
+        rounds = int(parts[2])
+        salt_str = parts[3]
+        checksum_str = parts[4]
+        
+        # Decode custom passlib ab64
+        salt = base64.b64decode(salt_str.replace('.', '+') + '=' * ((4 - len(salt_str) % 4) % 4))
+        checksum = base64.b64decode(checksum_str.replace('.', '+') + '=' * ((4 - len(checksum_str) % 4) % 4))
+        
+        return hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, rounds, dklen=32) == checksum
+    except Exception:
+        return False
 
 
 def _legacy_sha256_hash(password: str) -> str:
@@ -173,10 +294,12 @@ def create_user(email: str, password: str, full_name: str = "") -> dict:
         cursor.execute("""
             INSERT INTO users (email, password, full_name)
             VALUES (?, ?, ?)
+            RETURNING id
         """, (email, password_hash, full_name))
         
+        row = cursor.fetchone()
+        user_id = row['id'] if row else None
         conn.commit()
-        user_id = cursor.lastrowid
         conn.close()
         
         return {"success": True, "user_id": user_id, "message": "User created successfully"}
@@ -215,14 +338,29 @@ def verify_password(email: str, password: str) -> bool:
 
     stored = user.get("password", "")
 
-    # Preferred path: passlib hash (bcrypt, pbkdf2_sha256, etc.)
-    if stored.startswith("$"):
-        if stored.startswith("$2") and password_exceeds_bcrypt_limit(password):
+    # Preferred path: bcrypt hash (starts with $2a$ or $2b$)
+    if stored.startswith("$2"):
+        if password_exceeds_bcrypt_limit(password):
             return False
         try:
-            return pwd_context.verify(password, stored)
+            return bcrypt.checkpw(password.encode("utf-8"), stored.encode("utf-8"))
         except Exception:
             return False
+
+    # Check for legacy passlib pbkdf2_sha256 hash
+    if stored.startswith("$pbkdf2-sha256$"):
+        if verify_pbkdf2_sha256(password, stored):
+            # Auto-upgrade to bcrypt
+            try:
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                cursor.execute("UPDATE users SET password = ? WHERE id = ?", (hash_password(password), user["id"]))
+                conn.commit()
+                conn.close()
+            except Exception:
+                pass
+            return True
+        return False
 
     # Backward compatibility: legacy SHA256, then auto-upgrade to current hash
     legacy_match = stored == _legacy_sha256_hash(password)
@@ -397,7 +535,7 @@ def get_user_stats() -> dict:
     # Active today
     cursor.execute("""
         SELECT COUNT(DISTINCT user_id) as count FROM searches 
-        WHERE DATE(created_at) = DATE('now')
+        WHERE DATE(created_at) = CURRENT_DATE
     """)
     active_today = dict(cursor.fetchone())['count']
     

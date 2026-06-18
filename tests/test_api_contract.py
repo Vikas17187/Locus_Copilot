@@ -3,7 +3,7 @@ import uuid
 
 import httpx
 
-from backend.main import app
+from api.index import app
 
 
 def request(method: str, path: str, payload=None):

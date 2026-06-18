@@ -4,7 +4,7 @@ JWT Token handling for Locus Copilot
 
 import os
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 
 SECRET_KEY = os.getenv("LOCUS_SECRET_KEY", "locus_copilot_demo_secret_change_me")
@@ -13,16 +13,18 @@ TOKEN_EXPIRY_HOURS = 24
 
 def create_token(user_id: int, email: str, is_admin: bool = False) -> str:
     """Create JWT token"""
+    now_utc = datetime.now(timezone.utc)
     payload = {
         "user_id": user_id,
         "email": email,
         "is_admin": is_admin,
-        "exp": datetime.utcnow() + timedelta(hours=TOKEN_EXPIRY_HOURS),
-        "iat": datetime.utcnow()
+        "exp": now_utc + timedelta(hours=TOKEN_EXPIRY_HOURS),
+        "iat": now_utc
     }
     
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     return token
+
 
 def verify_token(token: str) -> Optional[Dict]:
     """Verify JWT token and return payload"""

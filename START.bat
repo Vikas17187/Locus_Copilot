@@ -11,7 +11,7 @@ set PROJECT_DIR=%~dp0
 set VENV=%PROJECT_DIR%.venv\Scripts\python.exe
 
 echo [1/3] Starting Backend API (port 8000)...
-start /B cmd /c "cd %PROJECT_DIR%backend && %VENV% -m uvicorn main:app --host 0.0.0.0 --port 8000"
+start /B cmd /c "cd %PROJECT_DIR%api && %VENV% -m uvicorn index:app --host 0.0.0.0 --port 8000"
 timeout /t 2 /nobreak
 
 echo [2/3] Starting Frontend Server (port 8080)...

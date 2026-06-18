@@ -36,16 +36,17 @@ class DataProcessor:
         return r * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
     def _assign_cell_keys_vectorized(self, df, lat_col="lat", lon_col="lon"):
-        """Assign H3 grid cell keys to point dataframe."""
+        """Assign H3 grid cell keys to point dataframe using fast list comprehension."""
         if df.empty or not self.grid_meta:
             return df
 
         out = df.copy()
-        out["cell_key"] = out.apply(
-            lambda row: self._get_hex(row[lat_col], row[lon_col], self.grid_meta["resolution"]) 
-            if pd.notna(row[lat_col]) and pd.notna(row[lon_col]) else None, 
-            axis=1
-        )
+        resolution = self.grid_meta["resolution"]
+        out["cell_key"] = [
+            self._get_hex(lat, lon, resolution)
+            if pd.notna(lat) and pd.notna(lon) else None
+            for lat, lon in zip(out[lat_col], out[lon_col])
+        ]
         return out
 
     def load_data(self):

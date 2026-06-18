@@ -35,55 +35,17 @@ class DataProcessor:
         )
         return r * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
-    def _locate_cell_key(self, lat, lon):
-        """Return cell key for a point if it falls within grid bounds, else None."""
-        if not self.grid_meta:
-            return None
-
-        min_lat = self.grid_meta["min_lat"]
-        min_lon = self.grid_meta["min_lon"]
-        max_lat = self.grid_meta["max_lat"]
-        max_lon = self.grid_meta["max_lon"]
-        grid_size = self.grid_meta["grid_size"]
-        n_lon = self.grid_meta["n_lon"]
-
-        if not (min_lat <= lat < max_lat and min_lon <= lon < max_lon):
-            return None
-
-        lat_idx = int((lat - min_lat) / grid_size)
-        lon_idx = int((lon - min_lon) / grid_size)
-        cell_id = lat_idx * n_lon + lon_idx
-        return f"cell_{cell_id:04d}"
-
     def _assign_cell_keys_vectorized(self, df, lat_col="lat", lon_col="lon"):
-        """Assign grid cell keys to point dataframe using vectorized binning."""
+        """Assign H3 grid cell keys to point dataframe."""
         if df.empty or not self.grid_meta:
             return df
 
         out = df.copy()
-        min_lat = self.grid_meta["min_lat"]
-        min_lon = self.grid_meta["min_lon"]
-        max_lat = self.grid_meta["max_lat"]
-        max_lon = self.grid_meta["max_lon"]
-        grid_size = self.grid_meta["grid_size"]
-        n_lon = self.grid_meta["n_lon"]
-
-        mask = (
-            out[lat_col].notna()
-            & out[lon_col].notna()
-            & (out[lat_col] >= min_lat)
-            & (out[lat_col] < max_lat)
-            & (out[lon_col] >= min_lon)
-            & (out[lon_col] < max_lon)
+        out["cell_key"] = out.apply(
+            lambda row: self._get_hex(row[lat_col], row[lon_col], self.grid_meta["resolution"]) 
+            if pd.notna(row[lat_col]) and pd.notna(row[lon_col]) else None, 
+            axis=1
         )
-
-        out["cell_key"] = None
-        if mask.any():
-            lat_idx = np.floor((out.loc[mask, lat_col].to_numpy() - min_lat) / grid_size).astype(int)
-            lon_idx = np.floor((out.loc[mask, lon_col].to_numpy() - min_lon) / grid_size).astype(int)
-            cell_ids = lat_idx * n_lon + lon_idx
-            out.loc[mask, "cell_key"] = [f"cell_{cid:04d}" for cid in cell_ids]
-
         return out
 
     def load_data(self):
@@ -92,7 +54,7 @@ class DataProcessor:
 
         # Load POIs
         try:
-            with open(DATA_DIR / "osm_chennai_pois.geojson", encoding="utf-8") as f:
+            with open(DATA_DIR / "overture_chennai_pois.geojson", encoding="utf-8") as f:
                 pois_geojson = json.load(f)
                 pois_list = []
                 for feature in pois_geojson.get("features", []):
@@ -100,13 +62,14 @@ class DataProcessor:
                     geom = feature.get("geometry", {})
                     coords = geom.get("coordinates", [None, None])
                     if coords[0] is not None and coords[1] is not None:
+                        categories = props.get("categories") or {}
+                        names = props.get("names") or {}
                         pois_list.append(
                             {
                                 "lon": float(coords[0]),
                                 "lat": float(coords[1]),
-                                "amenity": props.get("amenity"),
-                                "shop": props.get("shop"),
-                                "name": props.get("name", ""),
+                                "category": categories.get("main"),
+                                "name": names.get("primary", ""),
                             }
                         )
                 self.pois_df = pd.DataFrame(pois_list) if pois_list else pd.DataFrame()
@@ -152,79 +115,62 @@ class DataProcessor:
             print(f"  Error loading rent: {e}")
             self.rent_df = pd.DataFrame()
 
-    def create_locality_grid(self, grid_size=0.02):
-        """Create grid cells covering Chennai + southern suburbs (Potheri/Kattankulathur)."""
-        print("\nCreating locality grid...")
+    def create_locality_grid(self, resolution=8):
+        """Create H3 hex cells covering Chennai + southern suburbs."""
+        import h3
+        print("\nCreating H3 locality grid...")
 
         min_lat, min_lon = 12.70, 79.96
         max_lat, max_lon = 13.30, 80.42
 
-        localities = {}
-        cell_id = 0
+        try:
+            get_hex = h3.latlng_to_cell
+            hex_to_geo = h3.cell_to_latlng
+        except AttributeError:
+            get_hex = h3.geo_to_h3
+            hex_to_geo = h3.h3_to_geo
 
-        # Keep endpoint-inclusive grid dimensions to preserve existing 744-cell geometry.
-        n_lat = int(round((max_lat - min_lat) / grid_size)) + 1
-        n_lon = int(round((max_lon - min_lon) / grid_size)) + 1
+        hexes = set()
+        for lat in np.arange(min_lat, max_lat, 0.005):
+            for lon in np.arange(min_lon, max_lon, 0.005):
+                hexes.add(get_hex(lat, lon, resolution))
 
-        for lat_idx in range(n_lat):
-            lat = min_lat + lat_idx * grid_size
-            for lon_idx in range(n_lon):
-                lon = min_lon + lon_idx * grid_size
-                cell_key = f"cell_{cell_id:04d}"
-                localities[cell_key] = {
-                    "id": cell_id,
-                    "name": f"Area {cell_id}",
-                    "lat": round(lat + grid_size / 2, 4),
-                    "lon": round(lon + grid_size / 2, 4),
-                    "bounds": {
-                        "min_lat": round(lat, 4),
-                        "max_lat": round(lat + grid_size, 4),
-                        "min_lon": round(lon, 4),
-                        "max_lon": round(lon + grid_size, 4),
-                    },
-                    "poi_count": 0,
-                    "amenities": 0,
-                    "shops": 0,
-                    "transit_stops": 0,
-                    "bus_stops": 0,
-                    "metro_stops": 0,
-                    "business_types": {bt: 0 for bt in BUSINESS_TYPES},
-                }
-                cell_id += 1
+        self.localities = {}
+        for hex_id in hexes:
+            lat, lon = hex_to_geo(hex_id)
+            self.localities[hex_id] = {
+                "id": hex_id,
+                "name": f"Hex {hex_id[-4:]}",
+                "lat": round(lat, 4),
+                "lon": round(lon, 4),
+                "poi_count": 0,
+                "amenities": 0,
+                "shops": 0,
+                "transit_stops": 0,
+                "bus_stops": 0,
+                "metro_stops": 0,
+                "business_types": {bt: 0 for bt in BUSINESS_TYPES},
+            }
 
-        max_grid_lat = min_lat + n_lat * grid_size
-        max_grid_lon = min_lon + n_lon * grid_size
-
-        self.localities = localities
-        self.grid_meta = {
-            "min_lat": min_lat,
-            "min_lon": min_lon,
-            "max_lat": max_grid_lat,
-            "max_lon": max_grid_lon,
-            "grid_size": grid_size,
-            "n_lat": n_lat,
-            "n_lon": n_lon,
-        }
-
-        print(f"  Created {len(localities)} grid cells")
-        print(f"  Lat range: {min_lat} to {round(max_grid_lat, 2)}, Lon range: {min_lon} to {round(max_grid_lon, 2)}")
+        print(f"  Created {len(self.localities)} H3 grid cells")
+        self.grid_meta = {"type": "h3", "resolution": resolution}
+        self._get_hex = get_hex
 
     def categorize_poi_by_business_type(self, row):
-        """Categorize a POI by business type."""
-        amenity = str(row.get("amenity", "")).lower()
-        shop = str(row.get("shop", "")).lower()
+        """Categorize a POI by business type based on Overture categories."""
+        cat = str(row.get("category", "")).lower()
 
-        if amenity in ["hospital", "clinic", "pharmacy", "doctors", "dentist", "blood_bank"]:
+        if "hospital" in cat or "clinic" in cat or "pharmacy" in cat or "dentist" in cat or "medical" in cat:
             return "medical"
-        if amenity in ["restaurant", "cafe", "bar", "fast_food", "ice_cream", "food_court", "food"]:
+        if "restaurant" in cat or "cafe" in cat or "bar" in cat or "food" in cat or "bakery" in cat or "ice_cream" in cat:
             return "restaurant"
-        if shop in ["computer", "electronics", "electrical"]:
+        if "electronics" in cat or "computer" in cat or "appliance" in cat:
             return "laptop"
-        if shop == "mobile_phone":
+        if "mobile" in cat or "cell_phone" in cat:
             return "mobile"
-        if shop in ["car_repair", "car", "motorcycle_repair", "motorcycle", "car_parts", "tyres"]:
+        if "auto" in cat or "car_repair" in cat or "motorcycle" in cat or "tire" in cat or "mechanic" in cat:
             return "automobile"
-        if shop in ["stationery", "books", "copyshop"]:
+        if "stationery" in cat or "book" in cat or "office_supply" in cat:
             return "stationary"
 
         return None
@@ -258,8 +204,8 @@ class DataProcessor:
                 continue
             cell = self.localities[cell_key]
             cell["poi_count"] = int(len(chunk))
-            cell["amenities"] = int(chunk["amenity"].notna().sum())
-            cell["shops"] = int(chunk["shop"].notna().sum())
+            cell["amenities"] = int(chunk["category"].notna().sum() // 2)
+            cell["shops"] = int(chunk["category"].notna().sum())
             bt_counts = chunk["business_type"].value_counts(dropna=True).to_dict()
             cell["business_types"] = {bt: int(bt_counts.get(bt, 0)) for bt in BUSINESS_TYPES}
 
@@ -331,11 +277,9 @@ class DataProcessor:
             target_lat = float(rent_row["lat"])
             target_lon = float(rent_row["lon"])
 
-            direct_key = self._locate_cell_key(target_lat, target_lon)
-            if direct_key is None:
-                sq = (lats - target_lat) ** 2 + (lons - target_lon) ** 2
-                nearest_idx = int(np.argmin(sq))
-                direct_key = keys[nearest_idx]
+            direct_key = self._get_hex(target_lat, target_lon, self.grid_meta["resolution"])
+            if direct_key not in self.localities:
+                continue
 
             direct_cell = self.localities[direct_key]
             direct_cell["rent"] = avg_rent
@@ -391,11 +335,17 @@ class DataProcessor:
                     best_rent = 50.0
                     best_dist = 12.0
 
-                decay = max(0.65, 1.0 - (best_dist / 30.0))
-                conf = max(0.12, min(0.55, 0.6 * math.exp(-best_dist / 10.0)))
-                cell["rent"] = max(20.0, best_rent * decay)
+                if best_dist <= 3.0:
+                    decay = max(0.65, 1.0 - (best_dist / 15.0))
+                    conf = max(0.12, min(0.55, 0.6 * math.exp(-best_dist / 10.0)))
+                    cell["rent"] = max(20.0, best_rent * decay)
+                else:
+                    poi_density_factor = min(cell.get("poi_count", 0), 100) / 100.0
+                    cell["rent"] = 25.0 + (poi_density_factor * 65.0)
+                    conf = 0.15
+
                 cell["rent_confidence"] = round(conf, 3)
-                cell["rent_source"] = "nearest_estimate"
+                cell["rent_source"] = "nearest_estimate" if best_dist <= 3.0 else "density_estimate"
                 estimated_count += 1
 
         print(f"  Directly mapped: {mapped_count} localities")
@@ -451,13 +401,17 @@ class DataProcessor:
         """Normalize all features to 0-1 range with robust clipping."""
         print("Normalizing features...")
 
-        poi_counts = np.array([c.get("poi_count", 0) for c in self.localities.values()], dtype=float)
+        poi_counts_raw = np.array([c.get("poi_count", 0) for c in self.localities.values()], dtype=float)
+        poi_counts_log = np.log1p(poi_counts_raw)
+        
         rents = np.array([c.get("rent", 80) for c in self.localities.values()], dtype=float)
-        transit_counts = np.array([c.get("transit_stops", 0) for c in self.localities.values()], dtype=float)
+        
+        transit_counts_raw = np.array([c.get("transit_stops", 0) for c in self.localities.values()], dtype=float)
+        transit_counts_log = np.log1p(transit_counts_raw)
 
-        poi_p5, poi_p95 = np.percentile(poi_counts, [5, 95]) if len(poi_counts) else (0, 1)
+        poi_p5, poi_p95 = np.percentile(poi_counts_log, [5, 95]) if len(poi_counts_log) else (0, 1)
         rent_p5, rent_p95 = np.percentile(rents, [5, 95]) if len(rents) else (0, 1)
-        transit_p5, transit_p95 = np.percentile(transit_counts, [5, 95]) if len(transit_counts) else (0, 1)
+        transit_p5, transit_p95 = np.percentile(transit_counts_log, [5, 95]) if len(transit_counts_log) else (0, 1)
 
         def robust_norm(value, lo, hi):
             if hi <= lo:
@@ -472,14 +426,14 @@ class DataProcessor:
 
         for cell in self.localities.values():
             poi_count = cell.get("poi_count", 0)
-            cell["crowd_normalized"] = round(robust_norm(poi_count, poi_p5, poi_p95), 6)
+            cell["crowd_normalized"] = round(robust_norm(np.log1p(poi_count), poi_p5, poi_p95), 6)
 
             rent = cell.get("rent", float(np.median(rents) if len(rents) else 80.0))
             rent_scaled = robust_norm(rent, rent_p5, rent_p95)
             cell["rent_normalized"] = round(1.0 - rent_scaled, 6)
 
             transit = cell.get("transit_stops", 0)
-            cell["accessibility_normalized"] = round(robust_norm(transit, transit_p5, transit_p95), 6)
+            cell["accessibility_normalized"] = round(robust_norm(np.log1p(transit), transit_p5, transit_p95), 6)
             cell["competition_normalized"] = round(min(max(cell.get("competition", 0), 0.0), 1.0), 6)
 
             bt_counts = cell.get("business_types", {})
@@ -512,7 +466,7 @@ class DataProcessor:
         print("=" * 60)
 
         self.load_data()
-        self.create_locality_grid(grid_size=0.02)
+        self.create_locality_grid(resolution=8)
         self.aggregate_pois_per_locality()
         self.aggregate_transit_per_locality()
         self.compute_competition_scores()

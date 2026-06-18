@@ -2445,52 +2445,27 @@
 
         function onBusinessTypeChange() {
             const bt = document.getElementById("businessTypeSelect").value;
-            const btn = document.getElementById("smartWeightBtn");
-            btn.disabled = !bt;
-        }
+            if (!bt) return;
 
-        async function applySmartWeights() {
-            const bt = document.getElementById("businessTypeSelect").value;
-            if (!bt) {
-                showStatus("Select a business type first", "error");
-                return;
+            const presets = {
+                "medical": { rent: 0.2, crowd: 0.1, competition: 0.3, accessibility: 0.4 },
+                "restaurant": { rent: 0.2, crowd: 0.45, competition: 0.15, accessibility: 0.2 },
+                "laptop": { rent: 0.25, crowd: 0.3, competition: 0.25, accessibility: 0.2 },
+                "mobile": { rent: 0.2, crowd: 0.35, competition: 0.2, accessibility: 0.25 },
+                "automobile": { rent: 0.45, crowd: 0.05, competition: 0.3, accessibility: 0.2 },
+                "stationary": { rent: 0.2, crowd: 0.25, competition: 0.2, accessibility: 0.35 }
+            };
+
+            if (presets[bt]) {
+                const w = presets[bt];
+                document.getElementById("rentWeight").value = Math.round(w.rent * 100);
+                document.getElementById("crowdWeight").value = Math.round(w.crowd * 100);
+                document.getElementById("competitionWeight").value = Math.round(w.competition * 100);
+                document.getElementById("accessibilityWeight").value = Math.round(w.accessibility * 100);
+                updateValues();
+                
+                showStatus(`Weights automatically optimized for ${bt}`, "success");
             }
-
-            let rec = null;
-
-            // Try cache first
-            if (smartWeightsCache && smartWeightsCache[bt]) {
-                rec = smartWeightsCache[bt];
-            } else {
-                try {
-                    const res = await fetch(`${API_BASE}/ml/smart-weights/${bt}`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        rec = { weights: data.recommended_weights, explanation: data.explanation };
-                    }
-                } catch (e) {
-                    showStatus("Could not load AI weights", "error");
-                    return;
-                }
-            }
-
-            if (!rec || !rec.weights) {
-                showStatus("No AI recommendation for this type", "error");
-                return;
-            }
-
-            const w = rec.weights;
-            document.getElementById("rentWeight").value = Math.round((w.rent || 0.25) * 100);
-            document.getElementById("crowdWeight").value = Math.round((w.crowd || 0.25) * 100);
-            document.getElementById("competitionWeight").value = Math.round((w.competition || 0.25) * 100);
-            document.getElementById("accessibilityWeight").value = Math.round((w.accessibility || 0.25) * 100);
-            updateValues();
-
-            // Show toast
-            const toast = document.getElementById("smartWeightToast");
-            toast.textContent = `${rec.explanation || 'AI weights applied for ' + bt}`;
-            toast.classList.add("show");
-            setTimeout(() => toast.classList.remove("show"), 3500);
         }
 
 

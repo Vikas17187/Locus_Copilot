@@ -1,6 +1,8 @@
 # Ignore large data files
 data/roads.geojson
 data.zip
+data/overture_chennai_pois.geojson
+data/overture_chennai_pois.geojson.state
 
 # Python
 __pycache__/

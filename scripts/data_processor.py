@@ -1,4 +1,4 @@
-﻿"""
+"""
 Data Processor: Aggregates raw OSM data into locality-level features.
 """
 
@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 DATA_DIR = Path(__file__).parent.parent / "data"
-LOCALITIES_OUTPUT = Path(__file__).parent.parent / "backend" / "localities.json"
+LOCALITIES_OUTPUT = Path(__file__).parent.parent / "api" / "localities.json"
 BUSINESS_TYPES = ["medical", "restaurant", "laptop", "mobile", "automobile", "stationary"]
 
 

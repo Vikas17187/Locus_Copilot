@@ -1,4 +1,4 @@
-﻿"""
+"""
 Scoring Engine: Weighted multi-criteria decision algorithm.
 Ranks locations based on user-selected criteria and weights.
 
@@ -344,7 +344,7 @@ def load_localities(path: Path) -> Dict:
 
 
 if __name__ == "__main__":
-    localities_path = Path(__file__).parent.parent / "backend" / "localities.json"
+    localities_path = Path(__file__).parent.parent / "api" / "localities.json"
 
     try:
         localities = load_localities(localities_path)

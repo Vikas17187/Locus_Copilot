@@ -1494,6 +1494,7 @@
                 document.body.classList.remove('dark-theme');
                 localStorage.setItem('theme', 'light');
             }
+            updateMapTileLayer();
         }
         
         function toggleTheme() {
@@ -1544,6 +1545,7 @@
         
         let localities = [];
         let map = null;
+        let tileLayer = null;
         let currentResults = [];
         let selectedComparison = [];
         let zoneOverlayVisible = false;
@@ -1561,16 +1563,32 @@
 
         // ==================== MAP INITIALIZATION ====================
 
+        function updateMapTileLayer() {
+            if (!map) return;
+            if (tileLayer) {
+                map.removeLayer(tileLayer);
+            }
+            const isDark = document.body.classList.contains('dark-theme');
+            const tileUrl = isDark 
+                ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+            const attribution = isDark
+                ? '© OpenStreetMap, © CartoDB'
+                : '© OpenStreetMap';
+                
+            tileLayer = L.tileLayer(tileUrl, {
+                maxZoom: 19,
+                attribution: attribution
+            }).addTo(map);
+        }
+
         function ensureMap(lat, lon, zoom) {
             lat = lat || 13.0827;
             lon = lon || 80.2707;
             zoom = zoom || 12;
             if (!map) {
                 map = L.map('map').setView([lat, lon], zoom);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
+                updateMapTileLayer();
             }
             return map;
         }

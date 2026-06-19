@@ -119,7 +119,103 @@
         }
         
         @media (max-width: 1024px) {
-            .container { grid-template-columns: 1fr; }
+            .container { 
+                grid-template-columns: 1fr; 
+                margin: 1rem auto;
+                padding: 0 1rem;
+            }
+            .control-panel {
+                position: relative !important;
+                top: 0 !important;
+                max-height: none !important;
+            }
+        }
+
+        .control-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-chevron {
+            display: none;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            transition: transform 0.25s ease;
+        }
+        
+        .control-panel-body {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 1.25rem;
+            }
+            .header-right span {
+                display: none;
+            }
+            .header-right {
+                gap: 1rem;
+            }
+            .header-right a {
+                font-size: 0.8rem;
+            }
+            .container {
+                gap: 1rem;
+                padding: 0 0.75rem;
+                margin: 0.75rem auto;
+            }
+            .control-panel {
+                padding: 1rem !important;
+            }
+            .mobile-chevron {
+                display: block;
+            }
+            .control-panel-header {
+                cursor: pointer;
+            }
+            .control-panel-body {
+                display: none;
+                margin-top: 1.25rem;
+                border-top: 1px solid var(--border-color);
+                padding-top: 1.25rem;
+            }
+            .control-panel.open .control-panel-body {
+                display: block;
+                animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .control-panel.open .mobile-chevron {
+                transform: rotate(180deg);
+            }
+            .map-container {
+                height: 320px;
+            }
+            .results-toolbar {
+                padding: 0.75rem 1rem;
+            }
+            .results-tabs {
+                padding: 0.5rem 1rem 0;
+            }
+            .results-tab-btn {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.78rem;
+            }
+            .result-item {
+                padding: 1rem !important;
+            }
+            .button-group, .button-group-full {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .button-group button, .button-group-full button {
+                width: 100%;
+            }
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         /* ====== CONTROL PANEL ====== */
@@ -1281,10 +1377,14 @@
     <!-- Main Container -->
     <div class="container">
         <!-- Control Panel (Left) -->
-        <div class="control-panel">
-            <h2>Location Analysis</h2>
+        <div class="control-panel" id="controlPanel">
+            <div class="control-panel-header" onclick="toggleMobileControls()">
+                <h2>Location Analysis</h2>
+                <span class="mobile-chevron" id="mobileChevron">▼</span>
+            </div>
             
-            <div id="statusMessage" class="status-message"></div>
+            <div class="control-panel-body" id="controlPanelBody">
+                <div id="statusMessage" class="status-message"></div>
             
             <div class="section">
                 <div class="section-label">Step 1: Select Location</div>
@@ -1395,6 +1495,7 @@
                 <button class="btn-secondary" onclick="exportResults()">Export CSV</button>
                 <button class="btn-secondary" onclick="getRecommendations()">Get Recommendations</button>
             </div>
+            </div> <!-- End of control-panel-body -->
 
 
         </div>
@@ -2926,6 +3027,12 @@
                 if (t < 1) requestAnimationFrame(tick);
             }
             requestAnimationFrame(tick);
+        }
+
+        function toggleMobileControls() {
+            if (window.innerWidth <= 768) {
+                document.getElementById("controlPanel").classList.toggle("open");
+            }
         }
     </script>
 </body>

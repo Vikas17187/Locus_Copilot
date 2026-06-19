@@ -470,6 +470,41 @@
             overflow: hidden;
         }
         
+        .results-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 0.5rem 1.5rem 0;
+            margin-bottom: 0;
+        }
+
+        .results-tab-btn {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+            border-bottom: 3px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .results-tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .results-tab-btn.active {
+            color: #1c8ea5;
+            border-bottom: 3px solid #1c8ea5;
+        }
+        
         .map-container {
             flex: 0 0 auto;
             height: 480px;
@@ -1043,7 +1078,7 @@
             flex-shrink: 0;
         }
 
-        .toggle-switch.active {
+        .zone-toggle.active .toggle-switch {
             background: linear-gradient(135deg, #0d6e8a 0%, #1c8ea5 100%);
         }
 
@@ -1060,7 +1095,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.15);
         }
 
-        .toggle-switch.active::after {
+        .zone-toggle.active .toggle-switch::after {
             transform: translateX(17px);
         }
 
@@ -1349,18 +1384,6 @@
                     <div class="toggle-switch"></div>
                 </div>
                 <div class="zone-legend" id="zoneLegend"></div>
-                
-                <button class="smart-weight-btn" id="loadAiRecsBtn" onclick="loadAIRecommendations()" style="margin-top:0.75rem;">
-                    🔮 Personalized Recs <span class="ml-badge">AI</span>
-                </button>
-                <div class="ai-recs-panel" id="aiRecsPanel">
-                    <div class="ai-recs-header">
-                        <h3>✨ Personalized Picks</h3>
-                    </div>
-                    <div id="aiRecsList" class="ai-recs-list-container">
-                        <div class="ai-rec-empty">No history. Explore locations to get recommendations!</div>
-                    </div>
-                </div>
             </div>
             
             <div class="button-group">
@@ -1382,13 +1405,23 @@
                 <div id="map"></div>
             </div>
             
+            <!-- Results Tab Navigation -->
+            <div class="results-tabs">
+                <button class="results-tab-btn active" id="tabAll" onclick="switchResultTab('all')">
+                    📋 Location Rankings
+                </button>
+                <button class="results-tab-btn" id="tabAi" onclick="switchResultTab('ai')">
+                    ✨ AI Personalized Picks <span class="ml-badge" style="background: var(--accent-color); font-size: 0.6rem; padding: 0.1rem 0.35rem; border-radius: 4px; color: #fff; font-weight: bold; margin-left: 0.2rem;">AI</span>
+                </button>
+            </div>
+
             <!-- Results Toolbar -->
-            <div class="results-toolbar">
+            <div class="results-toolbar" style="border-top: none;">
                 <div class="toolbar-left">
                     <span id="resultCount" class="result-count">0 Results</span>
                 </div>
                 <div class="toolbar-right">
-                    <div class="sort-filter">
+                    <div class="sort-filter" id="sortFilterWrapper">
                         <select id="sortBy" onchange="sortResults()">
                             <option value="score">Sort by Score</option>
                             <option value="distance">Sort by Distance</option>
@@ -1515,6 +1548,10 @@
         let selectedComparison = [];
         let zoneOverlayVisible = false;
         let zoneCircles = [];
+        let zoneOverlayData = null;
+        let zoneClusterSummary = null;
+        let currentTab = 'all';
+        let aiRecommendations = [];
         let smartWeightsCache = null;
         let selectedMarker = null;
         let radiusCircle = null;
@@ -1949,6 +1986,10 @@
                 currentDataQuality = data.data_quality || null;
                 selectedComparison = [];
                 
+                currentTab = 'all';
+                document.querySelectorAll('.results-tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById('tabAll').classList.add('active');
+                document.getElementById('sortFilterWrapper').style.display = 'block';
                 displayResults(currentResults);
                 showStatus(`Found ${currentResults.length} suitable locations!`, "success");
             } catch (error) {
@@ -2570,9 +2611,70 @@
                 showStatus(`Weights automatically optimized (${source}) for ${bt}`, "success");
             }
         }
-
-
         // ==================== ML: ZONE CLUSTERS ====================
+
+        function renderClusterLegend() {
+            const legend = document.getElementById("zoneLegend");
+            if (!zoneClusterSummary) return;
+            
+            legend.innerHTML = Object.values(zoneClusterSummary).map(c => `
+                <div class="zone-legend-item">
+                    <span class="zone-dot" style="background:${c.color}"></span>
+                    <span class="zone-legend-name">${c.icon || ''} ${c.name}</span>
+                    <span class="zone-legend-count">${c.locality_count} areas</span>
+                </div>
+            `).join("");
+            legend.classList.add("show");
+        }
+
+        function clearZoneOverlay() {
+            zoneCircles.forEach(c => { if (map) map.removeLayer(c); });
+            zoneCircles = [];
+        }
+
+        function updateZoneOverlayMap() {
+            if (!zoneOverlayVisible || !map || !zoneOverlayData) return;
+            
+            clearZoneOverlay();
+            
+            const zoom = map.getZoom();
+            const legend = document.getElementById("zoneLegend");
+            
+            if (zoom < 12) {
+                legend.innerHTML = `
+                    <div style="font-size:0.75rem; text-align:center; padding: 0.6rem; color: var(--text-secondary); background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border-color);">
+                        🔍 Please zoom in closer to view zone classifications on the map.
+                    </div>
+                `;
+                return;
+            }
+            
+            renderClusterLegend();
+
+            const bounds = map.getBounds();
+            let renderedCount = 0;
+            const maxRender = 800;
+            
+            zoneOverlayData.forEach(loc => {
+                if (!loc.lat || !loc.lon) return;
+                if (renderedCount >= maxRender) return;
+                
+                if (bounds.contains([loc.lat, loc.lon])) {
+                    const circle = L.circleMarker([loc.lat, loc.lon], {
+                        radius: 8,
+                        fillColor: loc.cluster_color || "#95a5a6",
+                        stroke: false,
+                        fillOpacity: 0.45,
+                    }).bindTooltip(
+                        `<strong>${loc.locality_name || loc.name}</strong><br>${loc.cluster_icon || ''} ${loc.cluster_name || 'Unknown'}`,
+                        { direction: "top", offset: [0, -6] }
+                    ).addTo(map);
+                    
+                    zoneCircles.push(circle);
+                    renderedCount++;
+                }
+            });
+        }
 
         async function toggleZoneOverlay() {
             const toggle = document.getElementById("zoneToggle");
@@ -2583,6 +2685,11 @@
                 zoneOverlayVisible = false;
                 toggle.classList.remove("active");
                 legend.classList.remove("show");
+                
+                if (map) {
+                    map.off("moveend", updateZoneOverlayMap);
+                    map.off("zoomend", updateZoneOverlayMap);
+                }
                 clearZoneOverlay();
                 return;
             }
@@ -2594,68 +2701,70 @@
             ensureMap();
 
             try {
-                const [mapRes, clusterRes] = await Promise.all([
-                    fetch(`${API_BASE}/ml/clusters/map`),
-                    fetch(`${API_BASE}/ml/clusters`)
-                ]);
-
-                if (!mapRes.ok || !clusterRes.ok) throw new Error("ML API unavailable");
-
-                const mapData = await mapRes.json();
-                const clusterData = await clusterRes.json();
-
-                // Draw circles
-                clearZoneOverlay();
-                (mapData.localities || []).forEach(loc => {
-                    if (!loc.lat || !loc.lon) return;
-                    const circle = L.circleMarker([loc.lat, loc.lon], {
-                        radius: 6,
-                        fillColor: loc.cluster_color || "#95a5a6",
-                        color: "#fff",
-                        weight: 1,
-                        fillOpacity: 0.55,
-                    }).bindTooltip(
-                        `<strong>${loc.locality_name || loc.name}</strong><br>${loc.cluster_icon || ''} ${loc.cluster_name || 'Unknown'}`,
-                        { direction: "top", offset: [0, -6] }
-                    ).addTo(map);
-                    zoneCircles.push(circle);
-                });
-
-                // Build legend
-                const clusters = clusterData.clusters || {};
-                legend.innerHTML = Object.values(clusters).map(c => `
-                    <div class="zone-legend-item">
-                        <span class="zone-dot" style="background:${c.color}"></span>
-                        <span class="zone-legend-name">${c.icon || ''} ${c.name}</span>
-                        <span class="zone-legend-count">${c.locality_count} areas</span>
-                    </div>
-                `).join("");
+                legend.innerHTML = '<div style="font-size:0.75rem; text-align:center; padding: 0.5rem; color: var(--text-secondary);">⌛ Loading zone data...</div>';
                 legend.classList.add("show");
+
+                if (!zoneOverlayData || !zoneClusterSummary) {
+                    const [mapRes, clusterRes] = await Promise.all([
+                        fetch(`${API_BASE}/ml/clusters/map`),
+                        fetch(`${API_BASE}/ml/clusters`)
+                    ]);
+
+                    if (!mapRes.ok || !clusterRes.ok) throw new Error("ML API unavailable");
+
+                    const mapData = await mapRes.json();
+                    const clusterData = await clusterRes.json();
+
+                    zoneOverlayData = mapData.localities || [];
+                    zoneClusterSummary = clusterData.clusters || {};
+                }
+
+                updateZoneOverlayMap();
+
+                map.on("moveend", updateZoneOverlayMap);
+                map.on("zoomend", updateZoneOverlayMap);
 
             } catch (e) {
                 console.error("Zone overlay error", e);
                 showStatus("Could not load zone data", "error");
                 zoneOverlayVisible = false;
                 toggle.classList.remove("active");
+                legend.classList.remove("show");
+                legend.innerHTML = "";
             }
         }
 
-        function clearZoneOverlay() {
-            zoneCircles.forEach(c => { if (map) map.removeLayer(c); });
-            zoneCircles = [];
+
+        // ==================== ML: PERSONALIZED RECOMMENDATIONS (TABS) ====================
+
+        function switchResultTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.results-tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (tab === 'all') {
+                document.getElementById('tabAll').classList.add('active');
+                document.getElementById('sortFilterWrapper').style.display = 'block';
+                displayResults(currentResults);
+            } else if (tab === 'ai') {
+                document.getElementById('tabAi').classList.add('active');
+                document.getElementById('sortFilterWrapper').style.display = 'none';
+                loadAIRecommendationsForTab();
+            }
         }
 
-
-        // ==================== ML: PERSONALIZED RECOMMENDATIONS ====================
-
-        async function loadAIRecommendations() {
+        async function loadAIRecommendationsForTab() {
             const token = checkAuth();
-            if (!token) return;
+            const resultsList = document.getElementById("resultsList");
+            const resultCount = document.getElementById("resultCount");
 
-            const panel = document.getElementById("aiRecsPanel");
-            const list = document.getElementById("aiRecsList");
-            panel.classList.add("show");
-            list.innerHTML = '<div class="ai-rec-empty"><div class="loading-spinner"></div><br>Analyzing your profile...</div>';
+            if (!token) {
+                resultsList.innerHTML = '<div class="empty">Please login to view personalized recommendations.</div>';
+                resultCount.textContent = "0 Results";
+                return;
+            }
+
+            resultsList.innerHTML = '<div class="empty"><div class="loading-spinner" style="margin: 2rem auto;"></div>Analyzing your search history and preferences...</div>';
+            resultCount.textContent = "Loading...";
 
             try {
                 const res = await fetch(`${API_BASE}/ml/personalized?limit=5`, {
@@ -2665,31 +2774,82 @@
                 if (!res.ok) throw new Error("Failed to load");
                 const data = await res.json();
                 const recs = data.recommendations || [];
+                aiRecommendations = recs;
 
                 if (recs.length === 0) {
-                    list.innerHTML = `
-                        <div class="ai-rec-empty">
-                            <div class="ai-rec-empty-icon">--</div>
-                            ${data.message || 'Analyze a few locations and save favorites to get personalized picks!'}
+                    resultsList.innerHTML = `
+                        <div class="empty" style="text-align: center; padding: 2.5rem 1rem;">
+                            <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">🔮</span>
+                            <strong>No search history yet.</strong><br>
+                            <span style="font-size: 0.85rem; color: var(--text-tertiary);">
+                                ${data.message || 'Explore different localities and save favorites to get personalized picks!'}
+                            </span>
                         </div>
                     `;
+                    resultCount.textContent = "0 Recommendations";
                     return;
                 }
 
-                list.innerHTML = recs.map(r => `
-                    <div class="ai-rec-card" onclick="viewAIRec(${r.lat}, ${r.lon}, '${(r.locality_name || r.name || '').replace(/'/g, "\\'")}")">
-                        <div class="ai-rec-top">
-                            <span class="ai-rec-name">${r.locality_name || r.name}</span>
-                            <span class="ai-rec-score">${r.match_score}% match</span>
-                        </div>
-                        <div class="ai-rec-reason">${r.reason || 'Similar to your preferences'}</div>
-                    </div>
-                `).join("");
+                resultCount.textContent = `${recs.length} AI Recommendations`;
+                displayAiRecommendationsList(recs);
 
             } catch (e) {
-                list.innerHTML = '<div class="ai-rec-empty">Could not load recommendations</div>';
+                resultsList.innerHTML = '<div class="empty">Could not load recommendations. Please try again.</div>';
+                resultCount.textContent = "Error";
                 console.error(e);
             }
+        }
+
+        function displayAiRecommendationsList(recs) {
+            const resultsList = document.getElementById("resultsList");
+            
+            resultsList.innerHTML = recs.map((rec, index) => {
+                const cd = rec.constraint_details || {};
+                const rentScore = cd.affordability?.normalized_score ?? 0;
+                const crowdScore = cd.crowd_density?.normalized_score ?? 0;
+                const competitionScore = cd.competition?.normalized_score ?? 0;
+                const accessibilityScore = cd.accessibility?.normalized_score ?? 0;
+                
+                return `
+                <div class="result-item" style="border-left: 4px solid #8b5cf6;" onclick="viewAIRec(${rec.lat}, ${rec.lon}, '${(rec.locality_name || rec.name || '').replace(/'/g, "\\'")}')">
+                    <div class="result-header">
+                        <div class="result-title-section">
+                            <div class="result-locality" style="display: flex; align-items: center; gap: 0.4rem;">
+                                ✨ ${rec.locality_name || rec.name}
+                            </div>
+                            <div class="result-distance" style="color: #8b5cf6; font-weight: 600;">Match Score: ${rec.match_score || 0}%</div>
+                        </div>
+                        <div class="result-score" style="background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%); font-size: 1rem; padding: 0.3rem 0.6rem;">${rec.match_score || 0}%</div>
+                    </div>
+                    
+                    <div style="font-size: 0.78rem; color: var(--text-secondary); background: var(--bg-secondary); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); margin: 0.5rem 0; border-left: 2px solid #8b5cf6; font-style: italic;">
+                        "${rec.reason || 'Recommended based on your user profile'}"
+                    </div>
+
+                    <div class="criteria-bars">
+                        <div class="criterion-bar">
+                            <div class="bar-label"><span>Afford</span><span>${rentScore.toFixed(0)}%</span></div>
+                            <div class="bar-fill"><div class="bar-value" style="width: ${rentScore}%"></div></div>
+                        </div>
+                        <div class="criterion-bar">
+                            <div class="bar-label"><span>Crowd</span><span>${crowdScore.toFixed(0)}%</span></div>
+                            <div class="bar-fill"><div class="bar-value" style="width: ${crowdScore}%"></div></div>
+                        </div>
+                        <div class="criterion-bar">
+                            <div class="bar-label"><span>Comp</span><span>${competitionScore.toFixed(0)}%</span></div>
+                            <div class="bar-fill"><div class="bar-value" style="width: ${competitionScore}%"></div></div>
+                        </div>
+                        <div class="criterion-bar">
+                            <div class="bar-label"><span>Access</span><span>${accessibilityScore.toFixed(0)}%</span></div>
+                            <div class="bar-fill"><div class="bar-value" style="width: ${accessibilityScore}%"></div></div>
+                        </div>
+                    </div>
+                    
+                    <div class="result-actions">
+                        <button class="btn-secondary" onclick="event.stopPropagation(); viewAIRec(${rec.lat}, ${rec.lon}, '${(rec.locality_name || rec.name || '').replace(/'/g, "\\'")}')">View Map</button>
+                    </div>
+                </div>
+            `}).join("");
         }
 
         function viewAIRec(lat, lon, name) {
@@ -2709,6 +2869,10 @@
                 iconSize: [28, 28],
                 iconAnchor: [14, 14]
             });
+            
+            // Clear old result markers
+            clearResultMarkers();
+            
             const m = L.marker([lat, lon], { icon: icon })
                 .bindPopup(`<strong>${name}</strong><br>AI Recommended`)
                 .addTo(map)

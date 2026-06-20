@@ -439,6 +439,7 @@ class DataProcessor:
             max_count = max((c.get("business_types", {}).get(bt, 0) for c in self.localities.values()), default=0)
             bt_max[bt] = max_count
 
+        # First pass to compute crowd normalized and segregated rents
         for cell in self.localities.values():
             poi_count = cell.get("poi_count", 0)
             cell["crowd_normalized"] = round(robust_norm(np.log1p(poi_count), poi_p5, poi_p95), 6)
@@ -446,6 +447,27 @@ class DataProcessor:
             rent = cell.get("rent", float(np.median(rents) if len(rents) else 80.0))
             rent_scaled = robust_norm(rent, rent_p5, rent_p95)
             cell["rent_normalized"] = round(1.0 - rent_scaled, 6)
+
+            # Segregate rent by property type
+            crowd = cell["crowd_normalized"]
+            cell["rent_retail"] = round(rent * (1.1 + 0.3 * crowd), 2)
+            cell["rent_office"] = round(rent * (0.9 + 0.15 * crowd), 2)
+            cell["rent_residential"] = round(rent * 0.65, 2)
+
+        # Collect arrays of segregated rents for percentile calculation
+        rents_retail = np.array([c["rent_retail"] for c in self.localities.values()], dtype=float)
+        rents_office = np.array([c["rent_office"] for c in self.localities.values()], dtype=float)
+        rents_residential = np.array([c["rent_residential"] for c in self.localities.values()], dtype=float)
+
+        rr_p5, rr_p95 = np.percentile(rents_retail, [5, 95]) if len(rents_retail) else (0, 1)
+        ro_p5, ro_p95 = np.percentile(rents_office, [5, 95]) if len(rents_office) else (0, 1)
+        res_p5, res_p95 = np.percentile(rents_residential, [5, 95]) if len(rents_residential) else (0, 1)
+
+        # Second pass to normalize segregated rents and other features
+        for cell in self.localities.values():
+            cell["rent_retail_normalized"] = round(1.0 - robust_norm(cell["rent_retail"], rr_p5, rr_p95), 6)
+            cell["rent_office_normalized"] = round(1.0 - robust_norm(cell["rent_office"], ro_p5, ro_p95), 6)
+            cell["rent_residential_normalized"] = round(1.0 - robust_norm(cell["rent_residential"], res_p5, res_p95), 6)
 
             transit = cell.get("transit_stops", 0)
             cell["accessibility_normalized"] = round(robust_norm(np.log1p(transit), transit_p5, transit_p95), 6)

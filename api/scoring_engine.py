@@ -106,13 +106,13 @@ class ScoringEngine:
             return {k: 1.0 / len(weights) for k in weights}
         return {k: v / total for k, v in weights.items()}
 
-    def compute_score(self, locality: Dict, weights: Dict[str, float]) -> float:
+    def compute_score(self, locality: Dict, weights: Dict[str, float], rent_field: str = "rent_normalized") -> float:
         """Compute weighted score for a locality using generic criteria."""
         score = 0.0
         for criterion, weight in weights.items():
             if criterion not in self.CRITERIA:
                 continue
-            field = self.CRITERIA[criterion]["field"]
+            field = rent_field if criterion == "rent" else self.CRITERIA[criterion]["field"]
             score += weight * locality.get(field, 0.0)
         return min(max(score, 0.0), 1.0)
 
@@ -171,6 +171,19 @@ class ScoringEngine:
                 if bt_count > max_bt_count:
                     max_bt_count = bt_count
 
+        # Determine rent field based on business type
+        rent_field = "rent_normalized"
+        rent_raw_field = "rent"
+        if business_type in ["restaurant", "stationary", "laptop"]:
+            rent_field = "rent_retail_normalized"
+            rent_raw_field = "rent_retail"
+        elif business_type in ["medical", "mobile", "automobile"]:
+            rent_field = "rent_office_normalized"
+            rent_raw_field = "rent_office"
+        elif business_type:
+            rent_field = "rent_residential_normalized"
+            rent_raw_field = "rent_residential"
+
         nearby = []
 
         for locality_id, locality, dist_km in candidates:
@@ -198,7 +211,7 @@ class ScoringEngine:
                     if criterion == "competition":
                         score += weight * competition_value
                     else:
-                        field = self.CRITERIA[criterion]["field"]
+                        field = rent_field if criterion == "rent" else self.CRITERIA[criterion]["field"]
                         score += weight * locality.get(field, 0.0)
 
                 support_profile = self.BUSINESS_SUPPORT_PROFILES.get(business_type, {})
@@ -225,14 +238,14 @@ class ScoringEngine:
                 score = (score + support_bonus + type_signal_bonus + mode_bonus - low_presence_penalty) * confidence_factor
                 score = min(max(score, 0.0), 1.0)
             else:
-                score = self.compute_score(locality, weights)
+                score = self.compute_score(locality, weights, rent_field=rent_field)
                 competition_value = locality.get("competition_normalized", 0)
                 bt_signal = 0.0
                 bt_strength = 0.0
                 mode = "general"
 
             breakdown = {
-                "rent": weights.get("rent", 0) * locality.get("rent_normalized", 0),
+                "rent": weights.get("rent", 0) * locality.get(rent_field, 0.0),
                 "crowd": weights.get("crowd", 0) * locality.get("crowd_normalized", 0),
                 "competition": weights.get("competition", 0) * competition_value,
                 "accessibility": weights.get("accessibility", 0) * locality.get("accessibility_normalized", 0),
@@ -256,7 +269,7 @@ class ScoringEngine:
                         "transit_stops": locality.get("transit_stops", 0),
                         "bus_stops": locality.get("bus_stops", 0),
                         "metro_stops": locality.get("metro_stops", 0),
-                        "rent": locality.get("rent", "N/A"),
+                        "rent": locality.get(rent_raw_field, "N/A"),
                         "rent_source": locality.get("rent_source", "unknown"),
                         "rent_confidence": locality.get("rent_confidence", 0.0),
                         "shops": locality.get("shops", 0),
@@ -268,8 +281,8 @@ class ScoringEngine:
                     "constraint_details": {
                         "affordability": {
                             "label": "Affordability (Lower Rent is Better)",
-                            "rent_amount": f"Rs {locality.get('rent', 0):.0f}" if isinstance(locality.get("rent"), (int, float)) else "N/A",
-                            "normalized_score": round(locality.get("rent_normalized", 0) * 100, 1),
+                            "rent_amount": f"Rs {locality.get(rent_raw_field, 0):.0f}" if isinstance(locality.get(rent_raw_field), (int, float)) else "N/A",
+                            "normalized_score": round(locality.get(rent_field, 0.0) * 100, 1),
                             "confidence": round(float(locality.get("rent_confidence", 0.0)) * 100, 1),
                             "source": locality.get("rent_source", "unknown"),
                         },

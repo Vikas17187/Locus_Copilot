@@ -349,6 +349,20 @@ class DataProcessor:
                 cell["rent_source"] = "nearest_estimate" if best_dist <= 3.0 else "density_estimate"
                 estimated_count += 1
 
+        # Apply transit-proximity rent premium boosts dynamically
+        print("Applying transit-proximity rent premiums...")
+        boosted_count = 0
+        for cell in self.localities.values():
+            transit_count = cell.get("transit_stops", 0)
+            if transit_count > 0 and cell.get("rent") is not None:
+                # Up to 25% premium based on bus/metro stops availability inside the zone
+                multiplier = 1.0 + 0.05 * min(transit_count, 5)
+                cell["rent"] = round(cell["rent"] * multiplier, 2)
+                # Boost confidence slightly since transit stops confirm high accessibility / economy
+                cell["rent_confidence"] = min(1.0, round(cell["rent_confidence"] + 0.05, 3))
+                boosted_count += 1
+        print(f"  Applied transit premium boosts to {boosted_count} cells")
+
         print(f"  Directly mapped: {mapped_count} localities")
         print(f"  Nearby interpolated updates: {nearby_updates}")
         print(f"  Nearest-estimated cells: {estimated_count}")

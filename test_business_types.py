@@ -10,7 +10,7 @@ test_cases = [
     ('laptop', 'Laptop/Electronics'),
     ('mobile', 'Mobile Services'),
     ('automobile', 'Automobile Repairs'),
-    ('stationary', 'Stationary'),
+    ('stationery', 'Stationery'),
 ]
 
 base_url = 'http://localhost:8000/api/analyze'

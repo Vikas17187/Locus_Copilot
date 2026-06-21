@@ -1358,12 +1358,14 @@
     <!-- Header -->
     <div class="header">
         <div class="header-left">
-            <h1>Locus Copilot</h1>
+            <a href="landing.html" style="text-decoration: none; color: inherit;"><h1>Locus Copilot</h1></a>
         </div>
         <div class="header-right">
             <span id="userEmail"></span>
             <a href="dashboard.html" id="dashboardLink">Dashboard</a>
+            <a href="use-cases.html">Use Cases</a>
             <a href="about.html">About</a>
+            <a href="contact.html">Contact</a>
             <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
             <button class="theme-toggle-btn" id="themeToggle" title="Toggle dark mode">
                 <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
@@ -1414,7 +1416,7 @@
                     <option value="laptop">Laptop/Electronics</option>
                     <option value="mobile">Mobile Services</option>
                     <option value="automobile">Automobile Repairs</option>
-                    <option value="stationary">Stationary/Books</option>
+                    <option value="stationery">Stationery/Books</option>
                 </select>
 
             </div>
@@ -1512,7 +1514,7 @@
                     📋 Location Rankings
                 </button>
                 <button class="results-tab-btn" id="tabAi" onclick="switchResultTab('ai')">
-                    ✨ AI Personalized Picks <span class="ml-badge" style="background: var(--accent-color); font-size: 0.6rem; padding: 0.1rem 0.35rem; border-radius: 4px; color: #fff; font-weight: bold; margin-left: 0.2rem;">AI</span>
+                    ✨ AI Personalized Picks <span class="ml-badge" style="background: var(--accent-primary); font-size: 0.6rem; padding: 0.1rem 0.35rem; border-radius: 4px; color: #fff; font-weight: bold; margin-left: 0.2rem;">AI</span>
                 </button>
             </div>
 
@@ -1575,7 +1577,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     
     <script>
-        const API_BASE = "/api";
+        // Global Fetch interceptor to handle 401 Unauthorized
+        const originalFetch = window.fetch;
+        window.fetch = async function(...args) {
+            const response = await originalFetch(...args);
+            if (response.status === 401) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("email");
+                localStorage.removeItem("is_admin");
+                window.location.href = "login.html";
+            }
+            return response;
+        };
+
+        const API_BASE = window.location.port === "8080" ? "http://localhost:8000/api" : "/api";
 
         // ==================== THEME MANAGEMENT ====================
         
@@ -1837,6 +1852,7 @@
                 setTimeout(() => {
                     wrapper.classList.remove('open');
                     const val = input.value.trim().toLowerCase();
+                    let resolved = false;
                     if (val) {
                         const match = localities.find(l => 
                             (l.locality_name || '').toLowerCase() === val || 
@@ -1844,6 +1860,7 @@
                         );
                         if (match) {
                             selectLocality(match.name, match.locality_name || match.name);
+                            resolved = true;
                         } else {
                             const partial = localities.find(l => 
                                 (l.locality_name || '').toLowerCase().includes(val) || 
@@ -1851,7 +1868,17 @@
                             );
                             if (partial) {
                                 selectLocality(partial.name, partial.locality_name || partial.name);
+                                resolved = true;
                             }
+                        }
+                    }
+                    if (!resolved) {
+                        const selectedVal = document.getElementById('localitySelect').value;
+                        const match = localities.find(l => l.name === selectedVal);
+                        if (match) {
+                            input.value = match.locality_name || match.name;
+                        } else {
+                            input.value = '';
                         }
                     }
                 }, 180);
@@ -2111,6 +2138,9 @@
                 document.getElementById('sortFilterWrapper').style.display = 'block';
                 displayResults(currentResults);
                 showStatus(`Found ${currentResults.length} suitable locations!`, "success");
+                if (window.innerWidth <= 768) {
+                    document.getElementById("controlPanel").classList.remove("open");
+                }
             } catch (error) {
                 console.error("Analysis error:", error);
                 showStatus(`Error: ${error.message}`, "error");
@@ -2714,7 +2744,7 @@
                 "laptop": { rent: 0.25, crowd: 0.3, competition: 0.25, accessibility: 0.2 },
                 "mobile": { rent: 0.2, crowd: 0.35, competition: 0.2, accessibility: 0.25 },
                 "automobile": { rent: 0.45, crowd: 0.05, competition: 0.3, accessibility: 0.2 },
-                "stationary": { rent: 0.2, crowd: 0.25, competition: 0.2, accessibility: 0.35 }
+                "stationery": { rent: 0.2, crowd: 0.25, competition: 0.2, accessibility: 0.35 }
             };
 
             const w = (smartWeightsCache && smartWeightsCache[bt]) ? smartWeightsCache[bt].weights : presets[bt];

@@ -11,7 +11,7 @@ import json
 import math
 
 
-BUSINESS_TYPES = ["medical", "restaurant", "laptop", "mobile", "automobile", "stationary"]
+BUSINESS_TYPES = ["medical", "restaurant", "laptop", "mobile", "automobile", "stationery"]
 
 
 class ScoringEngine:
@@ -50,7 +50,7 @@ class ScoringEngine:
         "laptop": {"rent": 1.0, "crowd": 1.35, "competition": 1.35, "accessibility": 1.1},
         "mobile": {"rent": 1.0, "crowd": 1.3, "competition": 1.25, "accessibility": 1.15},
         "automobile": {"rent": 1.45, "crowd": 0.75, "competition": 1.35, "accessibility": 0.95},
-        "stationary": {"rent": 1.1, "crowd": 1.25, "competition": 1.25, "accessibility": 1.35},
+        "stationery": {"rent": 1.1, "crowd": 1.25, "competition": 1.25, "accessibility": 1.35},
     }
 
     BUSINESS_COMPETITION_MODE = {
@@ -59,7 +59,7 @@ class ScoringEngine:
         "laptop": "demand_following",
         "mobile": "balanced",
         "automobile": "opportunity",
-        "stationary": "opportunity",
+        "stationery": "opportunity",
     }
 
     BUSINESS_SUPPORT_PROFILES = {
@@ -68,7 +68,7 @@ class ScoringEngine:
         "laptop": {"rent_normalized": 0.25, "crowd_normalized": 0.3, "accessibility_normalized": 0.2, "competition_normalized": 0.25},
         "mobile": {"rent_normalized": 0.2, "crowd_normalized": 0.35, "accessibility_normalized": 0.25, "competition_normalized": 0.2},
         "automobile": {"rent_normalized": 0.45, "crowd_normalized": 0.05, "accessibility_normalized": 0.2, "competition_normalized": 0.3},
-        "stationary": {"rent_normalized": 0.2, "crowd_normalized": 0.25, "accessibility_normalized": 0.35, "competition_normalized": 0.2},
+        "stationery": {"rent_normalized": 0.2, "crowd_normalized": 0.25, "accessibility_normalized": 0.35, "competition_normalized": 0.2},
     }
 
     BUSINESS_SIGNAL_MULTIPLIER = {
@@ -77,7 +77,7 @@ class ScoringEngine:
         "laptop": 0.14,
         "mobile": 0.12,
         "automobile": 0.15,
-        "stationary": 0.13,
+        "stationery": 0.13,
     }
 
     def __init__(self, localities_data: Dict):
@@ -174,7 +174,7 @@ class ScoringEngine:
         # Determine rent field based on business type
         rent_field = "rent_normalized"
         rent_raw_field = "rent"
-        if business_type in ["restaurant", "stationary", "laptop"]:
+        if business_type in ["restaurant", "stationery", "laptop"]:
             rent_field = "rent_retail_normalized"
             rent_raw_field = "rent_retail"
         elif business_type in ["medical", "mobile", "automobile"]:
@@ -281,7 +281,7 @@ class ScoringEngine:
                     "constraint_details": {
                         "affordability": {
                             "label": "Affordability (Lower Rent is Better)",
-                            "rent_amount": f"Rs {locality.get(rent_raw_field, 0):.0f}" if isinstance(locality.get(rent_raw_field), (int, float)) else "N/A",
+                            "rent_amount": f"₹{locality.get(rent_raw_field, 0):.0f}/sqft" if isinstance(locality.get(rent_raw_field), (int, float)) else "N/A",
                             "normalized_score": round(locality.get(rent_field, 0.0) * 100, 1),
                             "confidence": round(float(locality.get("rent_confidence", 0.0)) * 100, 1),
                             "source": locality.get("rent_source", "unknown"),

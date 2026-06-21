@@ -4,10 +4,16 @@ JWT Token handling for Locus Copilot
 
 import os
 import jwt
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 
+logger = logging.getLogger(__name__)
+
 SECRET_KEY = os.getenv("LOCUS_SECRET_KEY", "locus_copilot_demo_secret_change_me")
+if os.getenv("VERCEL") and SECRET_KEY == "locus_copilot_demo_secret_change_me":
+    logger.warning("WARNING: Vercel production environment detected but fallback SECRET_KEY is active. Please configure LOCUS_SECRET_KEY!")
+
 ALGORITHM = "HS256"
 TOKEN_EXPIRY_HOURS = 24
 

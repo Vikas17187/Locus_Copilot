@@ -11,7 +11,7 @@ import pandas as pd
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 LOCALITIES_OUTPUT = Path(__file__).parent.parent / "api" / "localities.json"
-BUSINESS_TYPES = ["medical", "restaurant", "laptop", "mobile", "automobile", "stationary"]
+BUSINESS_TYPES = ["medical", "restaurant", "laptop", "mobile", "automobile", "stationery"]
 
 
 class DataProcessor:
@@ -172,7 +172,7 @@ class DataProcessor:
         if "auto" in cat or "car_repair" in cat or "motorcycle" in cat or "tire" in cat or "mechanic" in cat:
             return "automobile"
         if "stationery" in cat or "book" in cat or "office_supply" in cat:
-            return "stationary"
+            return "stationery"
 
         return None
 
@@ -305,9 +305,11 @@ class DataProcessor:
                 if candidate_conf <= float(cell.get("rent_confidence", 0.0)):
                     continue
 
-                cell["rent"] = avg_rent * (1 + 0.04 * dist_km)
-                cell["rent_min"] = min_rent
-                cell["rent_max"] = max_rent
+                decay_factor = max(0.7, 1.0 - 0.05 * dist_km)
+                scaled_rent = max(20.0, avg_rent * decay_factor)
+                cell["rent"] = scaled_rent
+                cell["rent_min"] = max(15.0, min_rent * decay_factor)
+                cell["rent_max"] = max(25.0, max_rent * decay_factor)
                 cell["rent_confidence"] = round(candidate_conf, 3)
                 cell["rent_source"] = "nearby_interpolated"
                 nearby_updates += 1

@@ -313,7 +313,7 @@ class SmartWeightRecommender:
         if not localities:
             return {"error": "No data"}
 
-        business_types = ["medical", "restaurant", "laptop", "mobile", "automobile", "stationary"]
+        business_types = ["medical", "restaurant", "laptop", "mobile", "automobile", "stationery"]
         criteria = ["rent_normalized", "crowd_normalized", "competition_normalized", "accessibility_normalized"]
         criteria_keys = ["rent", "crowd", "competition", "accessibility"]
 

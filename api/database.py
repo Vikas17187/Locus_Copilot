@@ -7,8 +7,11 @@ import hashlib
 import os
 import base64
 import bcrypt
+import logging
 from pathlib import Path
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 if os.getenv("VERCEL"):
     DB_PATH = Path("/tmp") / "locus_copilot.db"
@@ -137,6 +140,8 @@ def get_db_connection():
         conn = psycopg2.connect(db_url)
         return DatabaseConnection(conn, is_postgres=True)
     else:
+        if os.getenv("VERCEL"):
+            logger.warning("WARNING: Vercel environment detected but PostgreSQL configuration (DATABASE_URL/POSTGRES_URL) is missing. Falling back to ephemeral SQLite at /tmp!")
         conn = sqlite3.connect(str(DB_PATH))
         conn.row_factory = sqlite3.Row
         return DatabaseConnection(conn, is_postgres=False)
@@ -312,6 +317,8 @@ def create_user(email: str, password: str, full_name: str = "") -> dict:
                 "success": False,
                 "message": f"Password must be {MIN_PASSWORD_LENGTH} to {MAX_PASSWORD_LENGTH} characters.",
             }
+        if any(term in message.lower() for term in ["unique constraint", "duplicate key", "already exists", "already registered"]):
+            return {"success": False, "message": "Email already registered"}
         return {"success": False, "message": "Registration failed. Please try again."}
 
 def get_user_by_email(email: str) -> dict:

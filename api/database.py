@@ -249,6 +249,17 @@ def init_database():
         )
     """)
     
+    # Localities table (for geospatial queries instead of massive JSON)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS localities (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            lat REAL,
+            lon REAL,
+            data TEXT
+        )
+    """)
+    
     conn.commit()
 
     # Canonical uniqueness guard for case-insensitive email handling.
@@ -274,6 +285,20 @@ def init_database():
     
     conn.close()
     print("✅ Database initialized")
+
+def get_all_localities_from_db() -> dict:
+    """Fetch all localities from database for ML training or caching."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, data FROM localities")
+    rows = cursor.fetchall()
+    conn.close()
+    
+    import json
+    localities = {}
+    for row in rows:
+        localities[row['id']] = json.loads(row['data'])
+    return {"localities": localities}
 
 # User functions
 def create_user(email: str, password: str, full_name: str = "") -> dict:

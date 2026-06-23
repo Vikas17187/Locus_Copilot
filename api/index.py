@@ -66,9 +66,19 @@ BACKEND_DIR = Path(__file__).parent
 localities_path = BACKEND_DIR / "localities.json"
 
 try:
-    localities_data = load_localities(localities_path)
+    if localities_path.exists():
+        localities_data = load_localities(localities_path)
+        print("✅ Localities loaded from JSON")
+    else:
+        try:
+            from .database import get_all_localities_from_db
+        except ImportError:
+            from database import get_all_localities_from_db
+            
+        localities_data = get_all_localities_from_db()
+        print(f"✅ Localities loaded from DB (count: {len(localities_data.get('localities', {}))})")
+        
     scoring_engine = ScoringEngine(localities_data)
-    print("✅ Localities loaded successfully")
 except Exception as e:
     print(f"❌ Error loading localities: {e}")
     localities_data = None

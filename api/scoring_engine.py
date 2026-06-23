@@ -155,9 +155,46 @@ class ScoringEngine:
 
         candidates = []
         max_bt_count = 0
-        for locality_id, locality in self.localities["localities"].items():
-            lat = locality.get("lat")
-            lon = locality.get("lon")
+        
+        # We can either iterate over in-memory localities (if loaded from JSON)
+        # OR query Postgres using a bounding box for performance/memory optimization.
+        use_db = True
+        if self.localities.get("localities") and len(self.localities["localities"]) > 1000:
+            # If we still have massive JSON in memory, we can use it, but DB is preferred for Phase 2
+            pass
+            
+        import math
+        import json
+        try:
+            from .database import get_db_connection
+        except ImportError:
+            from database import get_db_connection
+            
+        lat_offset = search_radius_km / 111.0
+        lon_offset = search_radius_km / (111.0 * math.cos(math.radians(reference_lat)))
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Approximate Bounding Box Query
+        cursor.execute("""
+            SELECT id, lat, lon, data 
+            FROM localities 
+            WHERE lat BETWEEN ? AND ? 
+              AND lon BETWEEN ? AND ?
+        """, (
+            reference_lat - lat_offset, reference_lat + lat_offset,
+            reference_lon - lon_offset, reference_lon + lon_offset
+        ))
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        for row in rows:
+            locality_id = row['id']
+            lat = row['lat']
+            lon = row['lon']
+            
             if lat is None or lon is None:
                 continue
 
@@ -165,6 +202,7 @@ class ScoringEngine:
             if dist_km > search_radius_km:
                 continue
 
+            locality = json.loads(row['data'])
             candidates.append((locality_id, locality, dist_km))
             if business_type:
                 bt_count = locality.get("business_types", {}).get(business_type, 0)

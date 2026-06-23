@@ -1,0 +1,16 @@
+# Ignore directories and files when deploying to Vercel
+.venv/
+venv/
+env/
+.git/
+.pytest_cache/
+data/
+data.zip
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.vercel/
+.env*
+tests/
+scripts/

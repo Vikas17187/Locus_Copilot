@@ -11,6 +11,12 @@ import logging
 from pathlib import Path
 from datetime import datetime
 
+try:
+    import psycopg2
+    PSYCOPG2_AVAILABLE = True
+except ImportError:
+    PSYCOPG2_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 if os.getenv("VERCEL"):
@@ -133,8 +139,8 @@ class PostgresCursorWrapper:
 
 
 def get_db_connection():
-    """Get database connection (PostgreSQL if DATABASE_URL is set, else SQLite)"""
-    db_url = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL")
+    """Get database connection (PostgreSQL if URL is set, else SQLite)"""
+    db_url = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL") or os.getenv("STORAGE_URL") or os.getenv("NEON_URL")
     if db_url:
         import psycopg2
         conn = psycopg2.connect(db_url)
@@ -249,7 +255,7 @@ def init_database():
     try:
         cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_nocase ON users(email COLLATE NOCASE)")
         conn.commit()
-    except sqlite3.IntegrityError:
+    except (sqlite3.IntegrityError, psycopg2.IntegrityError if PSYCOPG2_AVAILABLE else tuple()):
         # Existing legacy duplicates may block index creation; app-level checks still enforce canonical uniqueness.
         pass
     
@@ -308,7 +314,7 @@ def create_user(email: str, password: str, full_name: str = "") -> dict:
         conn.close()
         
         return {"success": True, "user_id": user_id, "message": "User created successfully"}
-    except sqlite3.IntegrityError:
+    except (sqlite3.IntegrityError, psycopg2.IntegrityError if PSYCOPG2_AVAILABLE else tuple()):
         return {"success": False, "message": "Email already registered"}
     except Exception as e:
         message = str(e)

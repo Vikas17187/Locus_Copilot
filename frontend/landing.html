@@ -20,7 +20,7 @@
 
         /* Navbar */
         .navbar {
-            background: rgba(255,252,247,0.85);
+            background: var(--bg-panel);
             border-bottom: 1px solid var(--border-color);
             padding: 0 2.5rem;
             height: 64px;
@@ -35,7 +35,7 @@
             display: flex;
             align-items: center;
         }
-        body.dark-theme .navbar { background: rgba(13, 13, 13, 0.85); }
+
         .navbar.scrolled { box-shadow: var(--shadow-md); }
         .navbar-content {
             max-width: 1200px;
@@ -309,6 +309,10 @@
                 <button class="nav-link" onclick="navigateTo(null,'index.html')">Dashboard</button>
                 <button class="nav-link" onclick="logout()" style="color:var(--error-text);">Sign out</button>
             </div>
+            <label class="switch" title="Toggle theme" style="margin-left: 1rem;">
+                <input type="checkbox" id="themeToggle" />
+                <span class="slider"></span>
+            </label>
         </div>
     </nav>
 
@@ -478,10 +482,36 @@
             card.addEventListener('mouseleave', () => { card.style.transform = ''; });
         });
 
+        // Theme management
+        function initTheme() {
+            const theme = localStorage.getItem('theme') || 'light';
+            applyTheme(theme);
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.checked = (theme === 'dark');
+                themeToggle.addEventListener('change', (e) => {
+                    applyTheme(e.target.checked ? 'dark' : 'light');
+                });
+            }
+        }
+        
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('theme', 'light');
+            }
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.checked = (theme === 'dark');
+            }
+        }
+
         // Init
         (function() {
-            const theme = localStorage.getItem('theme') || 'light';
-            if (theme === 'dark') document.body.classList.add('dark-theme');
+            initTheme();
             checkAuth();
         })();
     </script>

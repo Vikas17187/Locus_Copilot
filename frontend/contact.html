@@ -253,11 +253,18 @@
     </main>
 
     <footer class="footer">
-        <p>Locus Copilot &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></p>
+        <p>
+            Locus Copilot &middot; <a href="about.html">About</a> &middot;
+            <a href="about.html#use-cases">Use Cases</a> &middot;
+            <a href="privacy.html">Privacy</a> &middot;
+            <a href="terms.html">Terms</a>
+        </p>
     </footer>
 
     <script>
-        function navigateTo(url) {
+        function navigateTo(e, url) {
+            if (e && e.preventDefault) e.preventDefault();
+            if (typeof e === 'string' && !url) { url = e; }
             document.body.classList.add('page-exit');
             setTimeout(() => { window.location.href = url; }, 250);
         }

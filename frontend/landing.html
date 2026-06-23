@@ -296,18 +296,20 @@
     <nav class="navbar" id="navbar">
         <div class="navbar-content">
             <div class="brand">Locus <span>Copilot</span></div>
-            <div class="nav-links" id="navLinks">
-                <button class="nav-link nav-login" onclick="navigateTo(null,'login.html')">Sign in</button>
-                <button class="nav-link nav-signup" onclick="navigateTo(null,'register.html')">Get Started <span class="arrow">&rarr;</span></button>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div class="nav-links" id="navLinks">
+                    <button class="nav-link nav-login" onclick="navigateTo(null,'login.html')">Sign in</button>
+                    <button class="nav-link nav-signup" onclick="navigateTo(null,'register.html')">Get Started <span class="arrow">&rarr;</span></button>
+                </div>
+                <div class="nav-links user-menu" id="userMenu">
+                    <span class="nav-link" id="userEmail"></span>
+                    <button class="nav-link" onclick="logout()" style="color:var(--error-text);">Sign out</button>
+                </div>
+                <label class="switch" title="Toggle theme">
+                    <input type="checkbox" id="themeToggle" />
+                    <span class="slider"></span>
+                </label>
             </div>
-            <div class="nav-links user-menu" id="userMenu">
-                <span class="nav-link" id="userEmail"></span>
-                <button class="nav-link" onclick="logout()" style="color:var(--error-text);">Sign out</button>
-            </div>
-            <label class="switch" title="Toggle theme" style="margin-left: 1rem;">
-                <input type="checkbox" id="themeToggle" />
-                <span class="slider"></span>
-            </label>
         </div>
     </nav>
 
@@ -370,19 +372,7 @@
         </div>
     </section>
 
-    <footer class="footer">
-        <span>Locus Copilot</span>
-        <span class="sep">|</span>
-        <a href="about.html#use-cases">Use Cases</a>
-        <span class="sep">|</span>
-        <a href="contact.html">Contact</a>
-        <span class="sep">|</span>
-        <a href="about.html">About</a>
-        <span class="sep">|</span>
-        <a href="privacy.html">Privacy</a>
-        <span class="sep">|</span>
-        <a href="terms.html">Terms</a>
-    </footer>
+
 
     <script>
         function navigateTo(e, url) {

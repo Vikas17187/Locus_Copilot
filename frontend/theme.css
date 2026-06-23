@@ -51,6 +51,7 @@
     --transition-fast: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-normal: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
     /* Spacing scale (Apple uses 4px base) */
     --radius-sm: 10px;
@@ -525,4 +526,98 @@ body.dark-theme .switch input:checked + .slider:before {
   color: white;
   outline-color: var(--accent-primary, #6366f1);
 }
+
+/* Glassmorphic Bottom Floating Navigation Bar */
+.menu {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 520px;
+  backdrop-filter: blur(20px) saturate(180%) contrast(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%) contrast(120%);
+  background: rgba(0, 122, 255, 0.15); /* Sleek semi-transparent tint */
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.2));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  padding: 8px;
+  border-radius: 99rem;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 10000; /* Stays above maps and overlays */
+  transition: background var(--transition-normal), border-color var(--transition-normal);
+}
+
+body.dark-theme .menu {
+  background: rgba(13, 13, 13, 0.6); /* Darker glass tint for dark mode */
+}
+
+.menu::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 1px 1px 3px rgba(255, 255, 255, 0.15),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.menu a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: 0;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  text-decoration: none;
+  padding: 8px 6px;
+  border-radius: 999rem;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background 0.25s var(--ease-spring),
+    color 0.25s var(--ease-spring),
+    transform 0.25s var(--ease-spring),
+    box-shadow 0.25s ease-in-out;
+}
+
+.menu a:hover {
+  background-color: var(--bg-hover, rgba(255, 255, 255, 0.15));
+  box-shadow:
+    inset 1px 1px 3px rgba(255, 255, 255, 0.1),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.1);
+  transform: rotate(2deg) scale(1.04);
+  color: var(--accent-primary, #0284c7);
+}
+
+.menu a svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.menu a span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  margin-top: 4px;
+}
+
+.menu a.active {
+  background: var(--bg-primary, #ffffff);
+  color: var(--accent-primary, #0284c7);
+  box-shadow: var(--shadow-sm);
+}
+
+.menu a:active {
+  transform: scale(0.95);
+}
+
+/* Global spacer for screens with a bottom menu */
+.has-bottom-menu {
+  padding-bottom: 96px !important;
+}
+
 

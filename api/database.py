@@ -463,21 +463,38 @@ def update_last_login(user_id: int):
 # Search history functions
 def save_search(user_id: int, locality_name: str, lat: float, lon: float, 
                 radius: float, business_type: str, weights: dict, result_count: int):
-    """Save search to history"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    import json
-    weights_json = json.dumps(weights)
-    
-    cursor.execute("""
-        INSERT INTO searches 
-        (user_id, locality_name, latitude, longitude, search_radius, business_type, weights, result_count)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (user_id, locality_name, lat, lon, radius, business_type, weights_json, result_count))
-    
-    conn.commit()
-    conn.close()
+    """Save search to history (dual-written to SQLite and Google Cloud Firestore)"""
+    try:
+        from .firestore_db import firestore_save_search
+    except ImportError:
+        try:
+            from firestore_db import firestore_save_search
+        except ImportError:
+            firestore_save_search = None
+            
+    if firestore_save_search:
+        try:
+            firestore_save_search(user_id, locality_name, lat, lon, radius, business_type, weights, result_count)
+        except Exception:
+            pass
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        import json
+        weights_json = json.dumps(weights)
+        
+        cursor.execute("""
+            INSERT INTO searches 
+            (user_id, locality_name, latitude, longitude, search_radius, business_type, weights, result_count)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (user_id, locality_name, lat, lon, radius, business_type, weights_json, result_count))
+        
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.warning(f"Local DB save_search notice: {e}")
 
 def get_user_searches(user_id: int, limit: int = 50) -> list:
     """Get user search history"""
@@ -494,7 +511,24 @@ def get_user_searches(user_id: int, limit: int = 50) -> list:
     
     import json
     for search in searches:
-        search['weights'] = json.loads(search['weights'])
+        if isinstance(search.get('weights'), str):
+            try:
+                search['weights'] = json.loads(search['weights'])
+            except Exception:
+                pass
+
+    if (not searches or os.getenv("VERCEL")):
+        try:
+            from .firestore_db import firestore_get_user_searches
+        except ImportError:
+            try:
+                from firestore_db import firestore_get_user_searches
+            except ImportError:
+                firestore_get_user_searches = None
+        if firestore_get_user_searches:
+            f_searches = firestore_get_user_searches(user_id, limit)
+            if f_searches:
+                return f_searches
     
     return searches
 
@@ -538,17 +572,34 @@ def get_user_preferences(user_id: int) -> list:
 # Favorites functions
 def add_favorite(user_id: int, location_id: str, location_name: str, 
                 lat: float, lon: float, notes: str = ""):
-    """Add location to favorites"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    cursor.execute("""
-        INSERT INTO favorites (user_id, location_id, location_name, latitude, longitude, notes)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (user_id, location_id, location_name, lat, lon, notes))
-    
-    conn.commit()
-    conn.close()
+    """Add location to favorites (saved to Firestore cloud and local DB)"""
+    try:
+        from .firestore_db import firestore_add_favorite
+    except ImportError:
+        try:
+            from firestore_db import firestore_add_favorite
+        except ImportError:
+            firestore_add_favorite = None
+            
+    if firestore_add_favorite:
+        try:
+            firestore_add_favorite(user_id, location_id, location_name, lat, lon, notes)
+        except Exception:
+            pass
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            INSERT INTO favorites (user_id, location_id, location_name, latitude, longitude, notes)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (user_id, location_id, location_name, lat, lon, notes))
+        
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.warning(f"Local DB add_favorite notice: {e}")
 
 def get_user_favorites(user_id: int) -> list:
     """Get user favorite locations"""
@@ -562,6 +613,19 @@ def get_user_favorites(user_id: int) -> list:
     favorites = [dict(row) for row in cursor.fetchall()]
     conn.close()
     
+    if (not favorites or os.getenv("VERCEL")):
+        try:
+            from .firestore_db import firestore_get_user_favorites
+        except ImportError:
+            try:
+                from firestore_db import firestore_get_user_favorites
+            except ImportError:
+                firestore_get_user_favorites = None
+        if firestore_get_user_favorites:
+            f_favs = firestore_get_user_favorites(user_id)
+            if f_favs:
+                return f_favs
+                
     return favorites
 
 def remove_favorite(favorite_id: int, user_id: int = None):

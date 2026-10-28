@@ -1,0 +1,224 @@
+/* About specific styles */
+.about-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 5rem 2rem 7rem;
+    flex: 1;
+}
+
+.about-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+    opacity: 0;
+    animation: slideInUp 0.6s cubic-bezier(0.4,0,0.2,1) 0.1s forwards;
+}
+.about-header h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+}
+.about-header h1 em {
+    font-style: normal;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.about-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+/* Description */
+.about-section {
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: slideInUp 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+.about-section:nth-child(2) { animation-delay: 0.15s; }
+.about-section:nth-child(3) { animation-delay: 0.25s; }
+.about-section:nth-child(4) { animation-delay: 0.35s; }
+
+.about-section h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+.about-section p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 0.92rem;
+}
+
+/* Use Cases Section styling */
+.use-cases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+.use-case-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+.use-case-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-secondary);
+}
+.use-case-tag {
+    display: inline-flex;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    background: var(--accent-light);
+    color: var(--accent-primary);
+    margin-bottom: 0.75rem;
+}
+.use-case-card h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+.use-case-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-size: 0.85rem !important;
+    margin-bottom: 0.75rem;
+}
+.use-case-best {
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    font-weight: 500;
+    border-top: 1px dashed var(--border-color);
+    padding-top: 0.75rem;
+}
+
+/* Tech stack chips */
+.tech-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+.tech-chip {
+    padding: 0.35rem 0.8rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+.tech-chip:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--glow-accent);
+}
+
+/* Owner card */
+.owner-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    text-align: center;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+.owner-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--accent-gradient);
+}
+.owner-card:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent-secondary);
+    transform: translateY(-2px);
+}
+
+.owner-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.2rem;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.owner-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+}
+
+.owner-role {
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+    margin-bottom: 1.2rem;
+}
+
+.owner-links {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.owner-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+.owner-link svg { width: 16px; height: 16px; }
+
+.link-linkedin {
+    background: #0a66c2;
+    color: white;
+}
+.link-linkedin:hover { background: #004182; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(10,102,194,0.3); }
+
+.link-email {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+.link-email:hover { border-color: var(--accent-primary); color: var(--accent-primary); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+@media (max-width: 640px) {
+    .about-page { padding: 2.5rem 1.5rem 4rem; }
+    .about-header h1 { font-size: 1.7rem; }
+    .owner-links { flex-direction: column; }
+}

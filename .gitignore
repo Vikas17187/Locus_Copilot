@@ -21,3 +21,7 @@ venv/
 
 .vercel
 .env*
+api/cache/
+request_log.txt
+temp_extract/
+*.log

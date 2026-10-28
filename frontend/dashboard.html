@@ -458,7 +458,7 @@
                             <div class="item-meta">${formatCoord(f.latitude)}, ${formatCoord(f.longitude)}${f.notes ? ' &middot; ' + f.notes : ''}</div>
                         </div>
                         <div class="item-actions">
-                            <button ${f.latitude === null || f.longitude === null ? 'disabled' : ''} onclick="window.open('https://www.openstreetmap.org/?mlat=${f.latitude}&mlon=${f.longitude}&zoom=15','_blank')">Map</button>
+                            <button ${f.latitude === null || f.longitude === null ? 'disabled' : ''} onclick="window.open('https://www.google.com/maps/search/?api=1&query=${f.latitude},${f.longitude}','_blank')">Map</button>
                             <button class="remove" onclick="removeFav(${f.id})">Remove</button>
                         </div>
                     </div>

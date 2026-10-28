@@ -26,6 +26,7 @@ try:
     )
     from .auth import create_token, verify_token, extract_token_from_header
     from .ml_engine import MLEngine
+    from .google_maps import fetch_live_competitors_and_footfall
 except ImportError:
     from scoring_engine import ScoringEngine, load_localities
     from database import (
@@ -36,6 +37,7 @@ except ImportError:
     )
     from auth import create_token, verify_token, extract_token_from_header
     from ml_engine import MLEngine
+    from google_maps import fetch_live_competitors_and_footfall
 
 
 # ============================================================================
@@ -68,7 +70,7 @@ localities_path = BACKEND_DIR / "localities.json"
 try:
     if localities_path.exists():
         localities_data = load_localities(localities_path)
-        print("✅ Localities loaded from JSON")
+        print("Localities loaded from JSON")
     else:
         try:
             from .database import get_all_localities_from_db
@@ -76,30 +78,30 @@ try:
             from database import get_all_localities_from_db
             
         localities_data = get_all_localities_from_db()
-        print(f"✅ Localities loaded from DB (count: {len(localities_data.get('localities', {}))})")
+        print(f"Localities loaded from DB (count: {len(localities_data.get('localities', {}))})")
         
     scoring_engine = ScoringEngine(localities_data)
 except Exception as e:
-    print(f"❌ Error loading localities: {e}")
+    print(f"Error loading localities: {e}")
     localities_data = None
     scoring_engine = None
 
 # Initialize database
 try:
     init_database()
-    print("✅ Database initialized successfully")
+    print("Database initialized successfully")
 except Exception as e:
-    print(f"❌ Error initializing database: {e}")
+    print(f"Error initializing database: {e}")
 
 # Initialize ML Engine
 ml_engine = None
-try:
-    if localities_data:
+if localities_data:
+    try:
         ml_engine = MLEngine(localities_data)
-        print("✅ ML Engine initialized successfully")
-except Exception as e:
-    print(f"⚠️ ML Engine failed to initialize: {e}")
-    ml_engine = None
+        print("ML Engine initialized successfully")
+    except Exception as e:
+        print(f"ML Engine failed to initialize: {e}")
+        ml_engine = None
 
 
 # ============================================================================
@@ -170,6 +172,7 @@ class AnalyzeResponse(BaseModel):
     results: List[LocationScore]
     stats: Dict
     data_quality: Dict
+    live_google_intelligence: Optional[Dict] = None
 
 
 # ============================================================================
@@ -286,6 +289,8 @@ async def analyze_location(request: AnalyzeRequest):
         raise HTTPException(status_code=503, detail="Scoring engine not initialized")
     
     try:
+        with open("request_log.txt", "a") as f:
+            f.write(f"ANALYZE REQUEST: {request.dict()}\n")
         # Validate weights
         total_weight = sum(request.weights.values())
         if total_weight == 0:
@@ -359,6 +364,14 @@ async def analyze_location(request: AnalyzeRequest):
             "note": "Coverage combines POI, transit, market activity, and rent signal confidence around the selected radius.",
         }
         
+        # Fetch live Google Places intelligence with strict circuit breaker & caching
+        live_intel = fetch_live_competitors_and_footfall(
+            lat=request.reference_lat,
+            lon=request.reference_lon,
+            radius_km=request.search_radius_km,
+            business_type=request.business_type or "store"
+        )
+
         return {
             "success": True,
             "reference_location": {
@@ -369,6 +382,7 @@ async def analyze_location(request: AnalyzeRequest):
             "results": [LocationScore(**r) for r in results],
             "stats": stats,
             "data_quality": data_quality,
+            "live_google_intelligence": live_intel,
         }
     
     except Exception as e:

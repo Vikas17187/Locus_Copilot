@@ -190,24 +190,42 @@ class ScoringEngine:
         rows = cursor.fetchall()
         conn.close()
         
-        for row in rows:
-            locality_id = row['id']
-            lat = row['lat']
-            lon = row['lon']
-            
-            if lat is None or lon is None:
-                continue
+        if rows:
+            for row in rows:
+                locality_id = row['id']
+                lat = row['lat']
+                lon = row['lon']
+                
+                if lat is None or lon is None:
+                    continue
 
-            dist_km = self._haversine(reference_lat, reference_lon, lat, lon)
-            if dist_km > search_radius_km:
-                continue
+                dist_km = self._haversine(reference_lat, reference_lon, lat, lon)
+                if dist_km > search_radius_km:
+                    continue
 
-            locality = json.loads(row['data'])
-            candidates.append((locality_id, locality, dist_km))
-            if business_type:
-                bt_count = locality.get("business_types", {}).get(business_type, 0)
-                if bt_count > max_bt_count:
-                    max_bt_count = bt_count
+                locality = json.loads(row['data'])
+                candidates.append((locality_id, locality, dist_km))
+                if business_type:
+                    bt_count = locality.get("business_types", {}).get(business_type, 0)
+                    if bt_count > max_bt_count:
+                        max_bt_count = bt_count
+        elif self.localities and "localities" in self.localities:
+            # Fallback to high-speed in-memory localities (loaded from localities.json)
+            for locality_id, locality in self.localities["localities"].items():
+                lat = locality.get("lat")
+                lon = locality.get("lon")
+                if lat is None or lon is None:
+                    continue
+
+                dist_km = self._haversine(reference_lat, reference_lon, lat, lon)
+                if dist_km > search_radius_km:
+                    continue
+
+                candidates.append((locality_id, locality, dist_km))
+                if business_type:
+                    bt_count = locality.get("business_types", {}).get(business_type, 0)
+                    if bt_count > max_bt_count:
+                        max_bt_count = bt_count
 
         # Determine rent field based on business type
         rent_field = "rent_normalized"

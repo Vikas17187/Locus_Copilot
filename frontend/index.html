@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Locus Copilot - Location Intelligence</title>
     
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <!-- Google Maps Platform -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZ4Egrbf8zXbG0yYXAmbkqTiUY68KBsRA&libraries=places"></script>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
@@ -1561,8 +1561,8 @@
         </div>
     </div>
     
-    <!-- Leaflet Map Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    
+    
     
     <script>
         // Global Fetch interceptor to handle 401 Unauthorized
@@ -1673,44 +1673,41 @@
         let selectedMarker = null;
         let radiusCircle = null;
         let resultMarkers = [];
+        let competitorMarkers = [];
+        let infoWindow = null;
+        let currentLiveIntel = null;
         let ddHighlightIndex = -1;
         let currentDataQuality = null;
 
         // ==================== MAP INITIALIZATION ====================
 
         function updateMapTileLayer() {
-            if (!map) return;
-            if (tileLayer) {
-                map.removeLayer(tileLayer);
-            }
-            const isDark = document.body.classList.contains('dark-theme');
-            const tileUrl = isDark 
-                ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-                : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-            const attribution = isDark
-                ? '© OpenStreetMap, © CartoDB'
-                : '© OpenStreetMap';
-                
-            tileLayer = L.tileLayer(tileUrl, {
-                maxZoom: 19,
-                attribution: attribution
-            }).addTo(map);
+            // Google Maps handles its own crisp vector styling
         }
 
         function ensureMap(lat, lon, zoom) {
             lat = lat || 13.0827;
             lon = lon || 80.2707;
-            zoom = zoom || 12;
-            if (!map) {
-                map = L.map('map').setView([lat, lon], zoom);
-                updateMapTileLayer();
+            zoom = zoom || 13;
+            if (!map && window.google && window.google.maps) {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat: lat, lng: lon },
+                    zoom: zoom,
+                    mapTypeControl: true,
+                    zoomControl: true,
+                    streetViewControl: true,
+                    fullscreenControl: true
+                });
+                infoWindow = new google.maps.InfoWindow();
             }
             return map;
         }
 
         function clearResultMarkers() {
-            resultMarkers.forEach(m => { if (map) map.removeLayer(m); });
+            resultMarkers.forEach(m => { if (m && m.setMap) m.setMap(null); });
             resultMarkers = [];
+            competitorMarkers.forEach(m => { if (m && m.setMap) m.setMap(null); });
+            competitorMarkers = [];
         }
         
         // ==================== LOCALITY LOADING ====================
@@ -1918,90 +1915,49 @@
         // ==================== SELECTED LOCATION OVERLAY ====================
 
         function clearSelectionOverlay() {
-            if (selectedMarker && map) {
-                map.removeLayer(selectedMarker);
+            if (selectedMarker) {
+                if (selectedMarker.setMap) selectedMarker.setMap(null);
                 selectedMarker = null;
             }
-            if (radiusCircle && map) {
-                map.removeLayer(radiusCircle);
+            if (radiusCircle) {
+                if (radiusCircle.setMap) radiusCircle.setMap(null);
                 radiusCircle = null;
             }
         }
 
         function showSelectionOverlay(lat, lon) {
             ensureMap(lat, lon, 13);
-
             clearSelectionOverlay();
 
-            // Red pulsing marker for selected locality
-            const redIcon = L.divIcon({
-                className: 'selected-location-icon',
-                html: `<div style="
-                    width: 18px; height: 18px;
-                    background: #e74c3c;
-                    border: 3px solid #fff;
-                    border-radius: 50%;
-                    box-shadow: 0 0 0 3px #e74c3c44, 0 2px 8px rgba(0,0,0,0.35);
-                    animation: pulse-ring 1.8s ease-out infinite;
-                "></div>`,
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
+            selectedMarker = new google.maps.Marker({
+                position: { lat: lat, lng: lon },
+                map: map,
+                title: 'Selected Reference Location',
+                icon: {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                        <circle cx="16" cy="16" r="14" fill="#0284c7" stroke="#ffffff" stroke-width="3"/>
+                        <circle cx="16" cy="16" r="5" fill="#ffffff"/>
+                      </svg>
+                    `),
+                    scaledSize: new google.maps.Size(28, 28),
+                    anchor: new google.maps.Point(14, 14)
+                },
+                zIndex: 100
             });
-            selectedMarker = L.marker([lat, lon], { icon: redIcon, zIndexOffset: 1000 })
-                .bindPopup(`<strong>Selected Location</strong><br>Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`)
-                .addTo(map);
 
-            // Hatched / textured radius circle
             const radiusKm = parseFloat(document.getElementById('radiusInput').value) || 5;
-            radiusCircle = L.circle([lat, lon], {
+            radiusCircle = new google.maps.Circle({
+                center: { lat: lat, lng: lon },
                 radius: radiusKm * 1000,
-                color: '#e74c3c',
-                weight: 2,
-                opacity: 0.7,
-                fillColor: '#e74c3c',
-                fillOpacity: 0.07,
-                dashArray: '8, 6',
-                className: 'radius-circle-hatch'
-            }).addTo(map);
-
-            // Also add cross-hatch SVG pattern overlay
-            addHatchPattern();
-
-            map.setView([lat, lon], 13);
-        }
-
-        function addHatchPattern() {
-            // Add SVG hatch pattern to the map's SVG container
-            const svgEl = map.getRenderer(radiusCircle)?._container;
-            if (!svgEl) return;
-            let defs = svgEl.querySelector('defs');
-            if (!defs) {
-                defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-                svgEl.insertBefore(defs, svgEl.firstChild);
-            }
-            if (!defs.querySelector('#hatchPattern')) {
-                const pattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
-                pattern.setAttribute('id', 'hatchPattern');
-                pattern.setAttribute('patternUnits', 'userSpaceOnUse');
-                pattern.setAttribute('width', '10');
-                pattern.setAttribute('height', '10');
-                pattern.setAttribute('patternTransform', 'rotate(45)');
-                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('x1', '0'); line.setAttribute('y1', '0');
-                line.setAttribute('x2', '0'); line.setAttribute('y2', '10');
-                line.setAttribute('stroke', '#e74c3c');
-                line.setAttribute('stroke-width', '1.5');
-                line.setAttribute('stroke-opacity', '0.18');
-                pattern.appendChild(line);
-                defs.appendChild(pattern);
-            }
-            // Apply pattern fill to the circle path
-            setTimeout(() => {
-                const paths = svgEl.querySelectorAll('path.radius-circle-hatch');
-                paths.forEach(p => {
-                    p.style.fill = 'url(#hatchPattern)';
-                });
-            }, 100);
+                strokeColor: '#0284c7',
+                strokeOpacity: 0.85,
+                strokeWeight: 2,
+                fillColor: '#0ea5e9',
+                fillOpacity: 0.08,
+                map: map
+            });
+            if (map && map.panTo) map.panTo({ lat: lat, lng: lon });
         }
 
         function onRadiusChange() {
@@ -2129,6 +2085,7 @@
                 const data = await response.json();
                 currentResults = data.results || [];
                 currentDataQuality = data.data_quality || null;
+                currentLiveIntel = data.live_google_intelligence || null;
                 selectedComparison = [];
                 
                 currentTab = 'all';
@@ -2196,7 +2153,38 @@
             
             resultCount.textContent = `${results.length} Results`;
             
-            resultsList.innerHTML = results.map((result, index) => {
+            let groundTruthHtml = '';
+            if (currentLiveIntel && currentLiveIntel.success) {
+                const isCached = currentLiveIntel.source === 'cache';
+                groundTruthHtml = `
+                    <div style="margin-bottom:14px; padding:12px 14px; border-radius:10px; background:linear-gradient(135deg, rgba(14,165,233,0.08) 0%, rgba(99,102,241,0.08) 100%); border:1px solid rgba(14,165,233,0.25);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <div style="font-weight:700; font-size:0.8rem; color:#0284c7; text-transform:uppercase;">📍 Google Places Ground Truth</div>
+                            <span style="font-size:0.68rem; font-weight:600; padding:2px 8px; border-radius:12px; background:${isCached ? 'rgba(16,185,129,0.15)' : 'rgba(14,165,233,0.15)'}; color:${isCached ? '#059669' : '#0284c7'};">
+                                ${isCached ? '⚡ Cached (0 Quota)' : '🟢 Live Verified'}
+                            </span>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; text-align:center;">
+                            <div style="background:rgba(255,255,255,0.7); padding:6px; border-radius:6px; border:1px solid rgba(0,0,0,0.05);">
+                                <div style="font-size:0.68rem; color:#64748b;">Competitors</div>
+                                <div style="font-size:1rem; font-weight:700; color:#0f172a;">${currentLiveIntel.competitor_count}</div>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.7); padding:6px; border-radius:6px; border:1px solid rgba(0,0,0,0.05);">
+                                <div style="font-size:0.68rem; color:#64748b;">Avg Rating</div>
+                                <div style="font-size:1rem; font-weight:700; color:#eab308;">★ ${currentLiveIntel.avg_competitor_rating}</div>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.7); padding:6px; border-radius:6px; border:1px solid rgba(0,0,0,0.05);">
+                                <div style="font-size:0.68rem; color:#64748b;">Footfall Volume</div>
+                                <div style="font-size:1rem; font-weight:700; color:#10b981;">
+                                    ${currentLiveIntel.total_footfall_reviews > 1000 ? (currentLiveIntel.total_footfall_reviews/1000).toFixed(1) + 'k' : currentLiveIntel.total_footfall_reviews}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            resultsList.innerHTML = groundTruthHtml + results.map((result, index) => {
                 const breakdown = result.breakdown || {};
                 const cd = result.constraint_details || {};
                 const rentScore = cd.affordability?.normalized_score ?? 0;
@@ -2246,13 +2234,10 @@
                 </div>
             `}).join("");
             
-            // Initialize map
+            // Initialize Google Map
             ensureMap();
-            
-            // Clear old result markers (keep selection overlay + radius)
             clearResultMarkers();
-            
-            // Re-add selected location overlay if a locality is selected
+
             const selLocality = document.getElementById('localitySelect').value;
             if (selLocality) {
                 const selLoc = localities.find(l => l.name === selLocality);
@@ -2262,47 +2247,87 @@
                     showSelectionOverlay(sLat, sLon);
                 }
             }
-            
-            // Add numbered markers for results using display coordinates (actual when available)
+
+            // Plot Live Google Competitors
+            if (currentLiveIntel && currentLiveIntel.top_competitors) {
+                currentLiveIntel.top_competitors.forEach(comp => {
+                    if (!comp.lat || !comp.lon) return;
+                    const compMarker = new google.maps.Marker({
+                        position: { lat: comp.lat, lng: comp.lon },
+                        map: map,
+                        title: comp.name,
+                        icon: {
+                            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+                                <circle cx="14" cy="14" r="12" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
+                                <text x="14" y="18" font-size="11" text-anchor="middle" fill="#ffffff">🏬</text>
+                              </svg>
+                            `),
+                            scaledSize: new google.maps.Size(24, 24),
+                            anchor: new google.maps.Point(12, 12)
+                        },
+                        zIndex: 50
+                    });
+                    compMarker.addListener('click', () => {
+                        infoWindow.setContent(`
+                            <div style="padding:6px; font-family:sans-serif; min-width:180px;">
+                                <span style="background:rgba(239,68,68,0.12); color:#dc2626; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px;">VERIFIED COMPETITOR</span>
+                                <div style="font-weight:700; font-size:13px; margin:4px 0 2px 0;">${comp.name}</div>
+                                <div style="color:#64748b; font-size:12px;">★ ${comp.rating} (${comp.reviews} reviews) · ${comp.distance_meters}m away</div>
+                            </div>
+                        `);
+                        infoWindow.open(map, compMarker);
+                    });
+                    competitorMarkers.push(compMarker);
+                });
+            }
+
+            // Plot Ranked Locations
+            const rankColors = ['#0284c7', '#8b5cf6', '#10b981', '#64748b'];
+            const bounds = new google.maps.LatLngBounds();
+            if (selectedMarker) bounds.extend(selectedMarker.getPosition());
+
             results.forEach((result, idx) => {
                 const rank = idx + 1;
+                const color = rankColors[Math.min(idx, rankColors.length - 1)];
                 const markerLat = result.display_lat || result.lat;
                 const markerLon = result.display_lon || result.lon;
-                const icon = L.divIcon({
-                    className: 'result-marker-icon',
-                    html: `<div style="
-                        width: 28px; height: 28px;
-                        background: #27ae60;
-                        border: 2px solid #fff;
-                        border-radius: 50%;
-                        display: flex; align-items: center; justify-content: center;
-                        color: #fff; font-weight: 700; font-size: 13px;
-                        box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-                    ">${rank}</div>`,
-                    iconSize: [28, 28],
-                    iconAnchor: [14, 14]
+
+                const marker = new google.maps.Marker({
+                    position: { lat: markerLat, lng: markerLon },
+                    map: map,
+                    title: `#${rank} ${result.locality_name || result.name}`,
+                    icon: {
+                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                          <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
+                            <circle cx="17" cy="17" r="14" fill="${color}" stroke="#ffffff" stroke-width="2.5"/>
+                            <text x="17" y="21.5" font-size="12" font-family="Arial, sans-serif" font-weight="bold" text-anchor="middle" fill="#ffffff">${rank}</text>
+                          </svg>
+                        `),
+                        scaledSize: new google.maps.Size(28, 28),
+                        anchor: new google.maps.Point(14, 14)
+                    },
+                    zIndex: 80 - idx
                 });
-                const marker = L.marker([markerLat, markerLon], { icon: icon })
-                    .bindPopup(`
-                        <div style="min-width:160px">
-                            <strong>#${rank} ${result.locality_name || result.name}</strong><br>
-                            <span style="color:#27ae60;font-weight:600">Score: ${result.score_percent}%</span><br>
-                            <small>${(result.distance_km || 0).toFixed(2)} km away</small><br>
-                            <small>Rent: ₹${result.features?.rent || 'N/A'}/sqft</small>
+
+                bounds.extend({ lat: markerLat, lng: markerLon });
+
+                marker.addListener('click', () => {
+                    infoWindow.setContent(`
+                        <div style="padding:6px; font-family:sans-serif; min-width:180px;">
+                            <strong style="color:${color}; font-size:13px;">#${rank} ${result.locality_name || result.name}</strong><br>
+                            <span style="color:#0284c7; font-weight:700;">Score: ${result.score_percent}%</span><br>
+                            <small style="color:#64748b;">${(result.distance_km || 0).toFixed(2)} km away</small><br>
+                            <small style="color:#64748b;">Rent: ₹${result.features?.rent || 'N/A'}/sqft</small>
                         </div>
-                    `)
-                    .addTo(map);
+                    `);
+                    infoWindow.open(map, marker);
+                });
                 resultMarkers.push(marker);
             });
-            
-            // Fit bounds to include both selected location and results
-            if (results.length > 0) {
-                const allPoints = results.map(r => [r.display_lat || r.lat, r.display_lon || r.lon]);
-                if (selectedMarker) {
-                    allPoints.push(selectedMarker.getLatLng());
-                }
-                const bounds = L.latLngBounds(allPoints);
-                map.fitBounds(bounds, { padding: [50, 50] });
+
+            if (results.length > 0 && map && map.fitBounds) {
+                map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
             }
         }
 
@@ -2391,7 +2416,7 @@
             if (map && result) {
                 map.setView([result.lat, result.lon], 14);
                 if (resultMarkers[index]) {
-                    resultMarkers[index].openPopup();
+                    if (resultMarkers[index] && google.maps.event) google.maps.event.trigger(resultMarkers[index], 'click');
                 }
             }
         }
@@ -2807,20 +2832,17 @@
                 if (!loc.lat || !loc.lon) return;
                 if (renderedCount >= maxRender) return;
                 
-                if (bounds.contains([loc.lat, loc.lon])) {
-                    const circle = L.circleMarker([loc.lat, loc.lon], {
-                        radius: 8,
-                        fillColor: loc.cluster_color || "#95a5a6",
-                        stroke: false,
-                        fillOpacity: 0.45,
-                    }).bindTooltip(
-                        `<strong>${loc.locality_name || loc.name}</strong><br>${loc.cluster_icon || ''} ${loc.cluster_name || 'Unknown'}`,
-                        { direction: "top", offset: [0, -6] }
-                    ).addTo(map);
-                    
-                    zoneCircles.push(circle);
-                    renderedCount++;
-                }
+                const circle = new google.maps.Circle({
+                    center: { lat: loc.lat, lng: loc.lon },
+                    radius: 250,
+                    fillColor: loc.cluster_color || '#95a5a6',
+                    fillOpacity: 0.45,
+                    strokeColor: loc.cluster_color || '#95a5a6',
+                    strokeWeight: 1,
+                    map: map
+                });
+                zoneCircles.push(circle);
+                renderedCount++;
             });
         }
 
@@ -3002,30 +3024,28 @@
 
         function viewAIRec(lat, lon, name) {
             ensureMap(lat, lon, 14);
-            map.setView([lat, lon], 14);
-            const icon = L.divIcon({
-                className: 'result-marker-icon',
-                html: `<div style="
-                    width: 28px; height: 28px;
-                    background: #8b5cf6;
-                    border: 2px solid #fff;
-                    border-radius: 50%;
-                    display: flex; align-items: center; justify-content: center;
-                    color: #fff; font-weight: 700; font-size: 13px;
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-                ">*</div>`,
-                iconSize: [28, 28],
-                iconAnchor: [14, 14]
-            });
-            
-            // Clear old result markers
             clearResultMarkers();
-            
-            const m = L.marker([lat, lon], { icon: icon })
-                .bindPopup(`<strong>${name}</strong><br>AI Recommended`)
-                .addTo(map)
-                .openPopup();
+
+            const m = new google.maps.Marker({
+                position: { lat: lat, lng: lon },
+                map: map,
+                title: name,
+                icon: {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                      <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
+                        <circle cx="17" cy="17" r="14" fill="#8b5cf6" stroke="#ffffff" stroke-width="2.5"/>
+                        <text x="17" y="21.5" font-size="12" font-family="Arial, sans-serif" font-weight="bold" text-anchor="middle" fill="#ffffff">★</text>
+                      </svg>
+                    `),
+                    scaledSize: new google.maps.Size(28, 28),
+                    anchor: new google.maps.Point(14, 14)
+                }
+            });
+
+            infoWindow.setContent(`<strong>${name}</strong><br>AI Recommended Location`);
+            infoWindow.open(map, m);
             resultMarkers.push(m);
+            if (map && map.panTo) map.panTo({ lat: lat, lng: lon });
         }
 
         // Subtle cursor-reactive lift on interactive cards (very gentle, barely noticeable)

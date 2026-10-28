@@ -3,6 +3,9 @@ import sys
 import json
 from pathlib import Path
 
+# Ensure stdout handles emojis
+sys.stdout.reconfigure(encoding='utf-8')
+
 # Ensure api module can be imported
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -47,7 +50,14 @@ def migrate():
     cursor.execute("DELETE FROM localities")
     
     count = 0
-    batch_size = 500
+    batch_size = 2000
+    batch_data = []
+    
+    # Check if we have real psycopg2 conn for fast path
+    raw_conn = getattr(conn, 'conn', None)
+    cursor_to_use = getattr(cursor, 'cursor', cursor)
+    
+    import psycopg2.extras
     
     for loc_id, loc_data in localities.items():
         name = loc_data.get("name", "Unknown")
@@ -59,16 +69,27 @@ def migrate():
             continue
             
         loc_data_str = json.dumps(loc_data)
-        
-        cursor.execute("""
-            INSERT INTO localities (id, name, lat, lon, data)
-            VALUES (?, ?, ?, ?, ?)
-        """, (loc_id, name, lat, lon, loc_data_str))
-        
+        batch_data.append((loc_id, name, lat, lon, loc_data_str))
         count += 1
-        if count % batch_size == 0:
+        
+        if len(batch_data) >= batch_size:
+            psycopg2.extras.execute_values(
+                cursor_to_use,
+                "INSERT INTO localities (id, name, lat, lon, data) VALUES %s",
+                batch_data
+            )
+            raw_conn.commit() if raw_conn else conn.commit()
             print(f"  Inserted {count} rows...")
-            conn.commit()
+            batch_data = []
+            
+    if batch_data:
+        psycopg2.extras.execute_values(
+            cursor_to_use,
+            "INSERT INTO localities (id, name, lat, lon, data) VALUES %s",
+            batch_data
+        )
+        raw_conn.commit() if raw_conn else conn.commit()
+        print(f"  Inserted {count} rows...")
             
     conn.commit()
     conn.close()

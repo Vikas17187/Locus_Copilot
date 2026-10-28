@@ -664,24 +664,24 @@ class MLEngine:
 
     def _train_all(self):
         """Train all models on startup."""
-        print("🧠 Training ML models...")
+        print("Training ML models...")
 
         # Train clustering
         try:
             summary = self.clusterer.train(self.localities_data)
             cluster_count = len(self.clusterer.cluster_profiles)
-            print(f"   ✅ Clustering: {cluster_count} zone profiles created")
+            print(f"   Clustering: {cluster_count} zone profiles created")
         except Exception as e:
-            print(f"   ⚠️ Clustering failed: {e}")
+            print(f"   Clustering failed: {e}")
 
         # Train weight recommender
         try:
             recs = self.weight_recommender.train(self.localities_data)
-            print(f"   ✅ Smart Weights: {len(recs)} business type profiles learned")
+            print(f"   Smart Weights: {len(recs)} business type profiles learned")
         except Exception as e:
-            print(f"   ⚠️ Smart Weights failed: {e}")
+            print(f"   Smart Weights failed: {e}")
 
-        print("🧠 ML models ready!")
+        print("ML models ready!")
 
     def get_cluster_summary(self) -> Dict:
         """Get cluster overview."""

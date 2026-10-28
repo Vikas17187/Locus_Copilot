@@ -110,6 +110,10 @@ class SQLiteCursorWrapper:
             self.cursor.execute(query, params)
         return self
 
+    def executemany(self, query, params_list):
+        self.cursor.executemany(query, params_list)
+        return self
+
     def fetchone(self):
         res = self.cursor.fetchone()
         return serialize_row(res)
@@ -128,6 +132,11 @@ class PostgresCursorWrapper:
             self.cursor.execute(translated)
         else:
             self.cursor.execute(translated, params)
+        return self
+
+    def executemany(self, query, params_list):
+        translated = translate_query(query)
+        self.cursor.executemany(translated, params_list)
         return self
 
     def fetchone(self):
@@ -281,10 +290,10 @@ def init_database():
             VALUES (?, ?, ?, ?, ?)
         """, (admin_email, admin_password_hash, "Admin User", 1, 1))
         conn.commit()
-        print(f"✅ Default admin created for {admin_email}")
+    print(f"Default admin created for {admin_email}")
     
     conn.close()
-    print("✅ Database initialized")
+    print("Database initialized")
 
 def get_all_localities_from_db() -> dict:
     """Fetch all localities from database for ML training or caching."""

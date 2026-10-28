@@ -11,14 +11,20 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const currentTheme = localStorage.getItem('theme') || 'light';
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const currentTheme = savedTheme || (prefersDark ? 'dark' : 'light');
     setTheme(currentTheme);
+    document.documentElement.classList.toggle('dark-theme', currentTheme === 'dark');
     document.body.classList.toggle('dark-theme', currentTheme === 'dark');
   }, []);
 
   const toggleTheme = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTheme = e.target.checked ? 'dark' : 'light';
     setTheme(newTheme);
+    document.documentElement.classList.add('theme-transitioning');
+    setTimeout(() => document.documentElement.classList.remove('theme-transitioning'), 450);
+    document.documentElement.classList.toggle('dark-theme', newTheme === 'dark');
     document.body.classList.toggle('dark-theme', newTheme === 'dark');
     localStorage.setItem('theme', newTheme);
   };

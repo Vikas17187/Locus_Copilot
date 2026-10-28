@@ -5,14 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Locus Copilot - Location Intelligence</title>
     
+    <!-- Instantaneous Theme Bootstrapper to prevent FOUT -->
+    <script>
+        (function() {
+            var t = localStorage.getItem('theme');
+            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (t === 'dark' || (!t && prefersDark)) {
+                document.documentElement.classList.add('dark-theme');
+            } else {
+                document.documentElement.classList.remove('dark-theme');
+            }
+        })();
+    </script>
+
     <!-- Google Maps Platform -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZ4Egrbf8zXbG0yYXAmbkqTiUY68KBsRA&libraries=places"></script>
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Modern Apple Fonts (Plus Jakarta Sans & Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Theme CSS -->
-    <link rel="stylesheet" href="theme.css?v=1.1">
+    <link rel="stylesheet" href="theme.css?v=2.0">
     
     <style>
         * {
@@ -22,7 +37,7 @@
         }
         
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-body, 'Inter', sans-serif);
             background: var(--page-gradient), var(--bg-secondary);
             background-attachment: fixed;
             color: var(--text-primary);
@@ -1595,11 +1610,17 @@
             }
         }
         
-        function applyTheme(theme) {
+        function applyTheme(theme, animate = true) {
+            if (animate) {
+                document.documentElement.classList.add('theme-transitioning');
+                setTimeout(() => document.documentElement.classList.remove('theme-transitioning'), 450);
+            }
             if (theme === 'dark') {
+                document.documentElement.classList.add('dark-theme');
                 document.body.classList.add('dark-theme');
                 localStorage.setItem('theme', 'dark');
             } else {
+                document.documentElement.classList.remove('dark-theme');
                 document.body.classList.remove('dark-theme');
                 localStorage.setItem('theme', 'light');
             }
@@ -1615,8 +1636,7 @@
         function navigateTo(e, url) {
             if (e && e.preventDefault) e.preventDefault();
             if (typeof e === 'string' && !url) { url = e; }
-            document.body.classList.add('page-exit');
-            setTimeout(() => { window.location.href = url; }, 200);
+            window.location.href = url;
         }
 
         function checkAuth() {
@@ -1681,8 +1701,28 @@
 
         // ==================== MAP INITIALIZATION ====================
 
+        const APPLE_DARK_MAP_STYLE = [
+            { elementType: "geometry", stylers: [{ color: "#13161f" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#13161f" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
+            { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#f1f5f9" }] },
+            { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#38bdf8" }] },
+            { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#112022" }] },
+            { featureType: "road", elementType: "geometry", stylers: [{ color: "#1e2433" }] },
+            { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#181d28" }] },
+            { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#2d3748" }] },
+            { featureType: "transit", elementType: "geometry", stylers: [{ color: "#1b212d" }] },
+            { featureType: "water", elementType: "geometry", stylers: [{ color: "#09101a" }] },
+            { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#475569" }] }
+        ];
+
         function updateMapTileLayer() {
-            // Google Maps handles its own crisp vector styling
+            if (map && window.google && window.google.maps) {
+                const isDark = document.documentElement.classList.contains('dark-theme') || document.body.classList.contains('dark-theme');
+                map.setOptions({
+                    styles: isDark ? APPLE_DARK_MAP_STYLE : []
+                });
+            }
         }
 
         function ensureMap(lat, lon, zoom) {
@@ -1690,13 +1730,15 @@
             lon = lon || 80.2707;
             zoom = zoom || 13;
             if (!map && window.google && window.google.maps) {
+                const isDark = document.documentElement.classList.contains('dark-theme') || document.body.classList.contains('dark-theme');
                 map = new google.maps.Map(document.getElementById('map'), {
                     center: { lat: lat, lng: lon },
                     zoom: zoom,
                     mapTypeControl: true,
                     zoomControl: true,
                     streetViewControl: true,
-                    fullscreenControl: true
+                    fullscreenControl: true,
+                    styles: isDark ? APPLE_DARK_MAP_STYLE : []
                 });
                 infoWindow = new google.maps.InfoWindow();
             }

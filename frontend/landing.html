@@ -4,18 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Locus Copilot - Smart Location Intelligence</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="theme.css?v=1.1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css?v=2.0">
+    <script>
+        (function() {
+            var t = localStorage.getItem('theme');
+            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (t === 'dark' || (!t && prefersDark)) {
+                document.documentElement.classList.add('dark-theme');
+            } else {
+                document.documentElement.classList.remove('dark-theme');
+            }
+        })();
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-body, 'Inter', sans-serif);
             background: var(--page-gradient), var(--bg-secondary);
             background-attachment: fixed;
             color: var(--text-primary);
             background-color: var(--bg-secondary);
             min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        .ambient-glow {
+            position: absolute;
+            top: 2%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            height: 440px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.16) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 70%);
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.85;
         }
 
         /* Navbar */
@@ -294,6 +322,7 @@
     </style>
 </head>
 <body class="has-bottom-menu">
+    <div class="ambient-glow" aria-hidden="true"></div>
     <div class="cursor-glow" id="cursorGlow"></div>
 
     <nav class="navbar" id="navbar">
@@ -379,9 +408,9 @@
 
     <script>
         function navigateTo(e, url) {
-            if (e) e.preventDefault();
-            document.body.classList.add('page-exit');
-            setTimeout(() => { window.location.href = url; }, 250);
+            if (e && e.preventDefault) e.preventDefault();
+            if (typeof e === 'string' && !url) { url = e; }
+            window.location.href = url;
         }
         function checkAuth() {
             const token = localStorage.getItem("token");
@@ -483,11 +512,17 @@
             }
         }
         
-        function applyTheme(theme) {
+        function applyTheme(theme, animate = true) {
+            if (animate) {
+                document.documentElement.classList.add('theme-transitioning');
+                setTimeout(() => document.documentElement.classList.remove('theme-transitioning'), 450);
+            }
             if (theme === 'dark') {
+                document.documentElement.classList.add('dark-theme');
                 document.body.classList.add('dark-theme');
                 localStorage.setItem('theme', 'dark');
             } else {
+                document.documentElement.classList.remove('dark-theme');
                 document.body.classList.remove('dark-theme');
                 localStorage.setItem('theme', 'light');
             }

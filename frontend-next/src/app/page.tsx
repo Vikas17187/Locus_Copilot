@@ -11,6 +11,14 @@ export default function LandingPage() {
   const [theme, setTheme] = useState("light");
 
   useEffect(() => {
+    // Theme initialization
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const currentTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    setTheme(currentTheme);
+    document.documentElement.classList.toggle('dark-theme', currentTheme === 'dark');
+    document.body.classList.toggle('dark-theme', currentTheme === 'dark');
+
     // Check local storage for auth token
     const token = localStorage.getItem('token');
     const email = localStorage.getItem('email');
@@ -72,12 +80,16 @@ export default function LandingPage() {
   const toggleTheme = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTheme = e.target.checked ? 'dark' : 'light';
     setTheme(newTheme);
+    document.documentElement.classList.add('theme-transitioning');
+    setTimeout(() => document.documentElement.classList.remove('theme-transitioning'), 450);
+    document.documentElement.classList.toggle('dark-theme', newTheme === 'dark');
     document.body.classList.toggle('dark-theme', newTheme === 'dark');
     localStorage.setItem('theme', newTheme);
   };
 
   return (
     <>
+      <div className="ambient-glow" aria-hidden="true" />
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} id="navbar">
         <div className="navbar-content">
           <Link href="/" className="brand">

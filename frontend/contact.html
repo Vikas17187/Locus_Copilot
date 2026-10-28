@@ -4,12 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact - Locus Copilot</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="theme.css?v=1.1">
+    
+    <!-- Instantaneous Theme Bootstrapper to prevent FOUT -->
+    <script>
+        (function() {
+            var t = localStorage.getItem('theme');
+            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (t === 'dark' || (!t && prefersDark)) {
+                document.documentElement.classList.add('dark-theme');
+            } else {
+                document.documentElement.classList.remove('dark-theme');
+            }
+        })();
+    </script>
+
+    <!-- Modern Apple Fonts (Plus Jakarta Sans & Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css?v=2.0">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-body, 'Inter', sans-serif);
             background: var(--page-gradient), var(--bg-secondary);
             background-attachment: fixed;
             color: var(--text-primary);
@@ -287,8 +304,7 @@
         function navigateTo(e, url) {
             if (e && e.preventDefault) e.preventDefault();
             if (typeof e === 'string' && !url) { url = e; }
-            document.body.classList.add('page-exit');
-            setTimeout(() => { window.location.href = url; }, 250);
+            window.location.href = url;
         }
 
         async function submitForm() {
@@ -364,21 +380,27 @@
         // Theme management
         function initTheme() {
             const theme = localStorage.getItem('theme') || 'light';
-            applyTheme(theme);
+            applyTheme(theme, false);
             const themeToggle = document.getElementById('themeToggle');
             if (themeToggle) {
                 themeToggle.checked = (theme === 'dark');
                 themeToggle.addEventListener('change', (e) => {
-                    applyTheme(e.target.checked ? 'dark' : 'light');
+                    applyTheme(e.target.checked ? 'dark' : 'light', true);
                 });
             }
         }
         
-        function applyTheme(theme) {
+        function applyTheme(theme, animate = true) {
+            if (animate) {
+                document.documentElement.classList.add('theme-transitioning');
+                setTimeout(() => document.documentElement.classList.remove('theme-transitioning'), 450);
+            }
             if (theme === 'dark') {
+                document.documentElement.classList.add('dark-theme');
                 document.body.classList.add('dark-theme');
                 localStorage.setItem('theme', 'dark');
             } else {
+                document.documentElement.classList.remove('dark-theme');
                 document.body.classList.remove('dark-theme');
                 localStorage.setItem('theme', 'light');
             }

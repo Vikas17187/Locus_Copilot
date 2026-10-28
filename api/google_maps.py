@@ -43,7 +43,7 @@ CACHE_FILE = CACHE_DIR / "places_cache.json"
 QUOTA_FILE = CACHE_DIR / "quota_tracker.json"
 
 MAX_DAILY_CALLS = int(os.getenv("MAX_GOOGLE_CALLS_PER_DAY", "50"))
-GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY") or "AIzaSyCZ4Egrbf8zXbG0yYXAmbkqTiUY68KBsRA"
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "")
 
 # Google Places API (New) category mapping
 TYPE_MAPPING = {
@@ -52,7 +52,8 @@ TYPE_MAPPING = {
     "laptop": ["electronics_store"],
     "mobile": ["cell_phone_store", "electronics_store"],
     "automobile": ["car_repair", "car_dealer"],
-    "stationery": ["book_store"]
+    "stationery": ["book_store"],
+    "stationary": ["book_store"]
 }
 
 def _get_daily_call_count() -> Tuple[str, int]:

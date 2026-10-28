@@ -3,6 +3,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 
+const APPLE_DARK_MAP_STYLE = [
+  { elementType: "geometry", stylers: [{ color: "#13161f" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#13161f" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
+  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#f1f5f9" }] },
+  { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#38bdf8" }] },
+  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#112022" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#1e2433" }] },
+  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#181d28" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#2d3748" }] },
+  { featureType: "transit", elementType: "geometry", stylers: [{ color: "#1b212d" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#09101a" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#475569" }] }
+];
+
 export default function MapComponent() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -15,12 +30,17 @@ export default function MapComponent() {
 
   const { mapCenter, radius, results, selectedLocality, localities, liveGoogleIntel } = useAnalysis();
 
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "AIzaSyCZ4Egrbf8zXbG0yYXAmbkqTiUY68KBsRA";
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   const defaultCenter = { lat: 13.0827, lng: 80.2707 }; // Chennai
 
   // 1. Dynamically Load Google Maps JS Script
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    if (!apiKey) {
+      setLoadError('Google Maps API Key is required. Please set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.');
+      return;
+    }
 
     if ((window as any).google && (window as any).google.maps) {
       setIsLoaded(true);
@@ -43,17 +63,19 @@ export default function MapComponent() {
     document.head.appendChild(script);
   }, [apiKey]);
 
-  // 2. Initialize Google Map
+  // 2. Initialize Google Map with Apple vector styles
   useEffect(() => {
     if (!isLoaded || !mapContainerRef.current) return;
     if (mapInstanceRef.current) return; // Already initialized
 
     const google = (window as any).google;
     const initialCenter = mapCenter ? { lat: mapCenter[0], lng: mapCenter[1] } : defaultCenter;
+    const isDark = typeof document !== 'undefined' && (document.documentElement.classList.contains('dark-theme') || document.body.classList.contains('dark-theme'));
 
     const map = new google.maps.Map(mapContainerRef.current, {
       center: initialCenter,
       zoom: 13,
+      styles: isDark ? APPLE_DARK_MAP_STYLE : [],
       mapTypeControl: true,
       mapTypeControlOptions: {
         style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
@@ -76,6 +98,28 @@ export default function MapComponent() {
 
     infoWindowRef.current = new google.maps.InfoWindow();
     mapInstanceRef.current = map;
+  }, [isLoaded]);
+
+  // 2b. Sync Map Theme dynamically when toggling between Midnight Obsidian and Porcelain Studio
+  useEffect(() => {
+    if (!mapInstanceRef.current || typeof window === 'undefined') return;
+
+    const updateStyle = () => {
+      const isDark = document.documentElement.classList.contains('dark-theme') || document.body.classList.contains('dark-theme');
+      mapInstanceRef.current.setOptions({
+        styles: isDark ? APPLE_DARK_MAP_STYLE : []
+      });
+    };
+
+    updateStyle();
+
+    const observer = new MutationObserver(updateStyle);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    if (document.body) {
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    return () => observer.disconnect();
   }, [isLoaded]);
 
   // 3. Update Center, Radius Circle, Competitor Pins, and Result Markers

@@ -555,21 +555,38 @@ def get_user_searches(user_id: int, limit: int = 50) -> list:
 # Saved preferences functions
 def save_preference(user_id: int, preference_name: str, weights: dict, 
                    business_type: str = None, search_radius: float = 5.0, description: str = ""):
-    """Save a search preference"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    import json
-    weights_json = json.dumps(weights)
-    
-    cursor.execute("""
-        INSERT INTO saved_preferences 
-        (user_id, preference_name, weights, business_type, search_radius, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (user_id, preference_name, weights_json, business_type, search_radius, description))
-    
-    conn.commit()
-    conn.close()
+    """Save a search preference (dual-written to SQLite and Google Cloud Firestore)"""
+    try:
+        from .firestore_db import firestore_save_preference
+    except ImportError:
+        try:
+            from firestore_db import firestore_save_preference
+        except ImportError:
+            firestore_save_preference = None
+            
+    if firestore_save_preference:
+        try:
+            firestore_save_preference(user_id, preference_name, weights, business_type, search_radius, description)
+        except Exception as e:
+            logger.warning(f"Firestore save_preference notice: {e}")
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        import json
+        weights_json = json.dumps(weights)
+        
+        cursor.execute("""
+            INSERT INTO saved_preferences 
+            (user_id, preference_name, weights, business_type, search_radius, description)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (user_id, preference_name, weights_json, business_type, search_radius, description))
+        
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.warning(f"Local DB save_preference notice: {e}")
 
 def get_user_preferences(user_id: int) -> list:
     """Get user saved preferences"""
@@ -585,7 +602,24 @@ def get_user_preferences(user_id: int) -> list:
     
     import json
     for pref in prefs:
-        pref['weights'] = json.loads(pref['weights'])
+        if isinstance(pref.get('weights'), str):
+            try:
+                pref['weights'] = json.loads(pref['weights'])
+            except Exception:
+                pass
+
+    if (not prefs or os.getenv("VERCEL")):
+        try:
+            from .firestore_db import firestore_get_user_preferences
+        except ImportError:
+            try:
+                from firestore_db import firestore_get_user_preferences
+            except ImportError:
+                firestore_get_user_preferences = None
+        if firestore_get_user_preferences:
+            f_prefs = firestore_get_user_preferences(user_id)
+            if f_prefs:
+                return f_prefs
     
     return prefs
 
@@ -648,16 +682,43 @@ def get_user_favorites(user_id: int) -> list:
                 
     return favorites
 
-def remove_favorite(favorite_id: int, user_id: int = None):
-    """Remove favorite location, optionally verifying ownership."""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    if user_id is not None:
-        cursor.execute("DELETE FROM favorites WHERE id = ? AND user_id = ?", (favorite_id, user_id))
-    else:
-        cursor.execute("DELETE FROM favorites WHERE id = ?", (favorite_id,))
-    conn.commit()
-    conn.close()
+def remove_favorite(favorite_id, user_id: int = None):
+    """Remove favorite location, verifying ownership and dual-syncing to Firestore."""
+    # Dual-sync removal to Firestore
+    try:
+        from .firestore_db import firestore_remove_favorite
+    except ImportError:
+        try:
+            from firestore_db import firestore_remove_favorite
+        except ImportError:
+            firestore_remove_favorite = None
+            
+    if firestore_remove_favorite:
+        try:
+            firestore_remove_favorite(str(favorite_id))
+        except Exception as e:
+            logger.warning(f"Firestore remove_favorite notice: {e}")
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # If favorite_id is numeric, delete by id; if string, delete by location_id or id
+        try:
+            numeric_id = int(favorite_id)
+            if user_id is not None:
+                cursor.execute("DELETE FROM favorites WHERE id = ? AND user_id = ?", (numeric_id, user_id))
+            else:
+                cursor.execute("DELETE FROM favorites WHERE id = ?", (numeric_id,))
+        except (ValueError, TypeError):
+            # String Firestore document ID
+            if user_id is not None:
+                cursor.execute("DELETE FROM favorites WHERE location_id = ? AND user_id = ?", (str(favorite_id), user_id))
+            else:
+                cursor.execute("DELETE FROM favorites WHERE location_id = ?", (str(favorite_id),))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.warning(f"Local DB remove_favorite notice: {e}")
 
 # Admin functions
 def get_all_users() -> list:

@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "locus-1e383")
-API_KEY = os.getenv("FIREBASE_API_KEY") or os.getenv("GOOGLE_MAPS_API_KEY") or "AIzaSyARXAwC_P2K35FtpB3T6j5Iqw5NOLVzDQ0"
+API_KEY = os.getenv("FIREBASE_API_KEY") or os.getenv("GOOGLE_MAPS_API_KEY", "")
 BASE_URL = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents"
 
 def _dict_to_firestore_fields(data: dict) -> dict:

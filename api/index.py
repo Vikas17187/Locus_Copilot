@@ -53,7 +53,7 @@ app = FastAPI(
 )
 
 # Enable CORS for frontend
-origins_env = os.getenv("LOCUS_ALLOWED_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080")
+origins_env = os.getenv("LOCUS_ALLOWED_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080,http://localhost:3000,http://127.0.0.1:3000")
 allowed_origins = [origin.strip() for origin in origins_env.split(",") if origin.strip()]
 allow_all_origins = "*" in allowed_origins
 
@@ -556,13 +556,15 @@ async def login(request: LoginRequest):
 async def get_profile(current_user: dict = Depends(get_current_user)):
     """Get user profile"""
     user = get_user_by_email(current_user["email"])
+    if not user:
+        raise HTTPException(status_code=404, detail="User account not found")
     return {
         "id": user["id"],
         "email": user["email"],
-        "full_name": user["full_name"],
-        "is_admin": bool(user["is_admin"]),
-        "created_at": user["created_at"],
-        "last_login": user["last_login"]
+        "full_name": user.get("full_name", ""),
+        "is_admin": bool(user.get("is_admin", 0)),
+        "created_at": user.get("created_at", ""),
+        "last_login": user.get("last_login")
     }
 
 
@@ -641,8 +643,8 @@ async def get_favorites(current_user: dict = Depends(get_current_user)):
 
 
 @app.delete("/api/user/favorites/{favorite_id}", tags=["User"])
-async def delete_favorite(favorite_id: int, current_user: dict = Depends(get_current_user)):
-    """Remove favorite location"""
+async def delete_favorite(favorite_id: str, current_user: dict = Depends(get_current_user)):
+    """Remove favorite location (supports both local integer IDs and Firestore document IDs)"""
     try:
         remove_favorite(favorite_id, user_id=current_user["user_id"])
         return {"success": True, "message": "Removed from favorites"}
@@ -671,6 +673,8 @@ async def admin_get_stats(current_user: dict = Depends(get_admin_user)):
 @app.post("/api/admin/users/{user_id}/deactivate", tags=["Admin"])
 async def admin_deactivate_user(user_id: int, current_user: dict = Depends(get_admin_user)):
     """Deactivate user account (admin only)"""
+    if user_id == current_user.get("user_id"):
+        raise HTTPException(status_code=400, detail="Cannot deactivate your own administrator account")
     try:
         deactivate_user(user_id)
         return {"success": True, "message": "User deactivated"}

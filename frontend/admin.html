@@ -309,7 +309,8 @@
             return response;
         };
 
-        const API = window.location.port === "8080" ? "http://localhost:8000/api" : "/api";
+        const isLocalDev = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        const API = (isLocalDev && window.location.port !== "8000") ? "http://localhost:8000/api" : "/api";
 
         function navigateTo(e, url) {
             if (e && e.preventDefault) e.preventDefault();

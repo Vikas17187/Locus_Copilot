@@ -55,6 +55,83 @@
     font-size: 0.92rem;
 }
 
+/* Architecture Pillars */
+.pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-top: 1.25rem;
+}
+.pillar-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+}
+.pillar-card:hover {
+    border-color: var(--accent-secondary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+.pillar-icon {
+    font-size: 1.6rem;
+    margin-bottom: 0.6rem;
+    display: inline-block;
+}
+.pillar-card h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+    color: var(--text-primary);
+}
+.pillar-card p {
+    color: var(--text-secondary);
+    font-size: 0.83rem !important;
+    line-height: 1.5;
+}
+
+/* Pipeline Steps */
+.pipeline-list {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1rem;
+}
+.pipeline-step {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+.step-number {
+    background: var(--accent-gradient);
+    color: white;
+    font-weight: 700;
+    font-size: 0.8rem;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.step-content h3 {
+    font-size: 0.92rem;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+.step-content p {
+    color: var(--text-secondary);
+    font-size: 0.83rem !important;
+    line-height: 1.5;
+}
+
 /* Use Cases Section styling */
 .use-cases-grid {
     display: grid;
@@ -209,6 +286,12 @@
     color: white;
 }
 .link-linkedin:hover { background: #004182; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(10,102,194,0.3); }
+
+.link-github {
+    background: #24292e;
+    color: white;
+}
+.link-github:hover { background: #000; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
 .link-email {
     background: var(--bg-tertiary);

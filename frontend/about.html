@@ -123,6 +123,83 @@
             font-size: 0.92rem;
         }
 
+        /* Architecture Pillars */
+        .pillars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+        .pillar-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-fast);
+        }
+        .pillar-card:hover {
+            border-color: var(--accent-secondary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .pillar-icon {
+            font-size: 1.6rem;
+            margin-bottom: 0.6rem;
+            display: inline-block;
+        }
+        .pillar-card h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+            color: var(--text-primary);
+        }
+        .pillar-card p {
+            color: var(--text-secondary);
+            font-size: 0.83rem !important;
+            line-height: 1.5;
+        }
+
+        /* Pipeline Steps */
+        .pipeline-list {
+            display: grid;
+            gap: 0.85rem;
+            margin-top: 1rem;
+        }
+        .pipeline-step {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.25rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        .step-number {
+            background: var(--accent-gradient);
+            color: white;
+            font-weight: 700;
+            font-size: 0.8rem;
+            min-width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .step-content h3 {
+            font-size: 0.92rem;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+        .step-content p {
+            color: var(--text-secondary);
+            font-size: 0.83rem !important;
+            line-height: 1.5;
+        }
+
         /* Use Cases Section styling */
         .use-cases-grid {
             display: grid;
@@ -278,6 +355,12 @@
         }
         .link-linkedin:hover { background: #004182; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(10,102,194,0.3); }
 
+        .link-github {
+            background: #24292e;
+            color: white;
+        }
+        .link-github:hover { background: #000; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
         .link-email {
             background: var(--bg-tertiary);
             color: var(--text-primary);
@@ -323,17 +406,72 @@
     <div class="page">
         <div class="page-header">
             <h1>About <em>Locus Copilot</em></h1>
-            <p>A data-driven location intelligence platform built to help entrepreneurs find the best spots for their business in Chennai.</p>
+            <p>Next-generation geospatial intelligence platform empowering entrepreneurs, retail brands, and multi-location operators to discover, evaluate, and rank commercial locations across Chennai with mathematical confidence.</p>
         </div>
 
         <div class="about-section">
-            <h2>The Problem</h2>
-            <p>Choosing where to set up a business is one of the most critical decisions an entrepreneur makes. Most rely on gut feeling, word of mouth, or expensive consultants. Locus Copilot changes that by bringing objective, multi-criteria analysis to the table -- layering real rent data, crowd density, competition saturation, and transit accessibility into a single weighted score.</p>
+            <h2>The Challenge</h2>
+            <p>Choosing where to establish or expand a business has historically relied on gut feeling, broker hearsay, or static surveys that lag market reality. Setting up in an oversaturated corridor or an inaccessible transit dead-zone costs businesses millions in sunk capital. Locus Copilot transforms commercial site selection into an algorithmic science—combining granular micro-locality analytics with live Google Places ground truth intelligence.</p>
         </div>
 
         <div class="about-section">
-            <h2>How It Works</h2>
-            <p>The platform divides Chennai into a grid of 744 micro-localities, each scored across four dimensions. Users set custom weights, choose a business type, and get Haversine-accurate ranked recommendations within any search radius. ML-powered features include K-Means zone clustering, AI-optimized weight profiles per business type, and personalized picks based on search history.</p>
+            <h2>System Architecture & Pillars</h2>
+            <div class="pillars-grid">
+                <div class="pillar-card">
+                    <span class="pillar-icon">📍</span>
+                    <h3>4,345 Micro-Localities</h3>
+                    <p>Comprehensive spatial resolution across Greater Chennai Corporation, Tambaram, Avadi, and emerging growth corridors (OMR, GST Road, Sriperumbudur, ECR).</p>
+                </div>
+                <div class="pillar-card">
+                    <span class="pillar-icon">🌐</span>
+                    <h3>Google Places Ground Truth</h3>
+                    <p>Direct integration with Google Places API (New) to verify real-time competitor density, customer sentiment, and footfall volume proxies without manual surveys.</p>
+                </div>
+                <div class="pillar-card">
+                    <span class="pillar-icon">⚖️</span>
+                    <h3>Multi-Criteria Decision Scoring</h3>
+                    <p>Mathematical normalization balancing commercial rent pressure, crowd density, public transit accessibility, and competitor saturation into an objective 0–100 index.</p>
+                </div>
+                <div class="pillar-card">
+                    <span class="pillar-icon">☁️</span>
+                    <h3>Cloud-Synchronized Persistence</h3>
+                    <p>Sub-5ms spatial querying, Google Cloud Firestore serverless synchronization, and high-performance Google Maps Platform visualization.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-section">
+            <h2>How It Works (The 4-Step Pipeline)</h2>
+            <div class="pipeline-list">
+                <div class="pipeline-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Spatial Geofencing & Proximity Calculation</h3>
+                        <p>Applies the Haversine formula to compute geodesic distances across all 4,345 micro-localities, instantly isolating viable candidates within a user-defined 1km to 20km radius.</p>
+                    </div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Multi-Factor Weighted Scoring</h3>
+                        <p>Applies customizable criteria weights (Rent, Footfall, Transit Proximity, Saturation) or machine learning-optimized presets tailored to your business sector.</p>
+                    </div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Unsupervised K-Means Zoning</h3>
+                        <p>Automatically clusters localities into 5 distinct economic profiles: High Commercial Density, Emerging Suburban, Balanced Urban, Budget Residential, and Premium Enclaves.</p>
+                    </div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Live Ground Truth Verification</h3>
+                        <p>For top candidates, real-time establishment pins, verified review ratings, and footfall proxies are fetched directly from Google Maps Platform to confirm site viability before capital is committed.</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="about-section" id="use-cases">
@@ -382,16 +520,18 @@
         <div class="about-section">
             <h2>Tech Stack</h2>
             <div class="tech-grid">
-                <span class="tech-chip">Python</span>
-                <span class="tech-chip">FastAPI</span>
-                <span class="tech-chip">scikit-learn</span>
-                <span class="tech-chip">SQLite</span>
                 <span class="tech-chip">Google Maps Platform</span>
-                <span class="tech-chip">Firebase & Firestore</span>
-                <span class="tech-chip">NumPy</span>
-                <span class="tech-chip">JWT Auth</span>
-                <span class="tech-chip">Vanilla JS</span>
-                <span class="tech-chip">CSS Variables</span>
+                <span class="tech-chip">Google Places API (New)</span>
+                <span class="tech-chip">Google Cloud Firestore</span>
+                <span class="tech-chip">Python 3.12</span>
+                <span class="tech-chip">FastAPI</span>
+                <span class="tech-chip">scikit-learn (K-Means)</span>
+                <span class="tech-chip">NumPy Spatial Math</span>
+                <span class="tech-chip">SQLite / PostgreSQL</span>
+                <span class="tech-chip">Next.js & React 19</span>
+                <span class="tech-chip">TypeScript</span>
+                <span class="tech-chip">JWT Security</span>
+                <span class="tech-chip">Glassmorphic CSS</span>
             </div>
         </div>
 
@@ -405,6 +545,10 @@
                     <a class="owner-link link-linkedin" href="https://www.linkedin.com/in/vikas-chintada-4a262029b/" target="_blank" rel="noopener noreferrer">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"/></svg>
                         LinkedIn
+                    </a>
+                    <a class="owner-link link-github" href="https://github.com/Vikas17187/Locus_Copilot" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                        GitHub
                     </a>
                     <a class="owner-link link-email" href="mailto:vikasoo474@gmail.com">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>

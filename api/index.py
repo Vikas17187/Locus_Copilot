@@ -22,7 +22,8 @@ try:
         init_database, create_user, get_user_by_email, verify_password,
         save_search, get_user_searches, save_preference, get_user_preferences,
         add_favorite, get_user_favorites, remove_favorite, get_all_users,
-        get_user_stats, deactivate_user, update_last_login
+        get_user_stats, deactivate_user, update_last_login,
+        save_contact_message, get_contact_messages
     )
     from .auth import create_token, verify_token, extract_token_from_header
     from .ml_engine import MLEngine
@@ -33,7 +34,8 @@ except ImportError:
         init_database, create_user, get_user_by_email, verify_password,
         save_search, get_user_searches, save_preference, get_user_preferences,
         add_favorite, get_user_favorites, remove_favorite, get_all_users,
-        get_user_stats, deactivate_user, update_last_login
+        get_user_stats, deactivate_user, update_last_login,
+        save_contact_message, get_contact_messages
     )
     from auth import create_token, verify_token, extract_token_from_header
     from ml_engine import MLEngine
@@ -229,6 +231,13 @@ class AddFavoriteRequest(BaseModel):
     latitude: float
     longitude: float
     notes: str = ""
+
+
+class ContactRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    email: str = Field(..., min_length=3, max_length=255)
+    subject: Optional[str] = Field(None, max_length=200)
+    message: str = Field(..., min_length=1, max_length=5000)
 
 # ============================================================================
 # Endpoints
@@ -446,8 +455,54 @@ async def root():
             "localities": "GET /api/localities",
             "analyze": "POST /api/analyze",
             "analyze_preset": "GET /api/analyze/preset/{preset_name}",
+            "contact": "POST /api/contact",
         }
     }
+
+
+# ============================================================================
+# Contact Endpoints
+# ============================================================================
+
+@app.post("/api/contact", tags=["Contact"])
+async def submit_contact_form(request: ContactRequest):
+    """Submit a contact form message. Persists to Firestore and SQLite."""
+    name = request.name.strip()
+    email = request.email.strip()
+    subject = (request.subject or "").strip()
+    message = request.message.strip()
+
+    if not name or not email or not message:
+        raise HTTPException(status_code=400, detail="Name, email, and message are required.")
+    
+    if "@" not in email or "." not in email:
+        raise HTTPException(status_code=400, detail="Please enter a valid email address.")
+
+    try:
+        saved = save_contact_message(name, email, subject, message)
+        return {
+            "success": True,
+            "message": "Thank you! Your message has been received. Our team will contact you soon.",
+            "data": {
+                "id": saved.get("id"),
+                "name": name,
+                "email": email,
+                "subject": subject
+            }
+        }
+    except Exception as e:
+        print(f"Error saving contact message: {e}")
+        raise HTTPException(status_code=500, detail="Failed to save message. Please try again later.")
+
+
+@app.get("/api/contact", tags=["Contact"])
+async def list_contact_messages(limit: int = 50):
+    """Retrieve recent contact messages."""
+    try:
+        messages = get_contact_messages(limit=limit)
+        return {"success": True, "messages": messages, "count": len(messages)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ============================================================================

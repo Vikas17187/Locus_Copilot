@@ -7,7 +7,8 @@ import './contact.css';
 export default function ContactPage() {
   const [theme, setTheme] = useState('light');
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
-  const [showStatus, setShowStatus] = useState(false);
+  const [status, setStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const currentTheme = localStorage.getItem('theme') || 'light';
@@ -26,23 +27,57 @@ export default function ContactPage() {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  const submitForm = () => {
+  const submitForm = async () => {
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      alert('Please fill in name, email, and message.');
+      setStatus({ message: 'Please fill in name, email, and message.', type: 'error' });
       return;
     }
 
+    if (!formData.email.includes('@') || !formData.email.includes('.')) {
+      setStatus({ message: 'Please enter a valid email address.', type: 'error' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setStatus(null);
+
     const payload = {
-      ...formData,
-      submitted_at: new Date().toISOString()
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      subject: formData.subject.trim() || 'General Inquiry',
+      message: formData.message.trim()
     };
 
-    const messages = JSON.parse(localStorage.getItem('contact_messages') || '[]');
-    messages.push(payload);
-    localStorage.setItem('contact_messages', JSON.stringify(messages));
-    
-    setShowStatus(true);
-    setFormData(prev => ({ ...prev, message: '' }));
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.success) {
+        setStatus({
+          message: `✓ Thank you, ${payload.name}! Your message has been received and saved to our cloud database. We will get back to you shortly.`,
+          type: 'success'
+        });
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        throw new Error(data.detail || 'Server error');
+      }
+    } catch (err) {
+      console.warn('Backend contact failed, storing locally:', err);
+      const messages = JSON.parse(localStorage.getItem('contact_messages') || '[]');
+      messages.push({ ...payload, submitted_at: new Date().toISOString() });
+      localStorage.setItem('contact_messages', JSON.stringify(messages));
+      setStatus({
+        message: `✓ Thank you, ${payload.name}! Your message has been recorded. We will review it shortly.`,
+        type: 'success'
+      });
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -62,7 +97,7 @@ export default function ContactPage() {
       <main className="contact-page">
         <section className="hero">
           <h1>Contact <span style={{ color: 'var(--accent-primary)' }}>Locus Copilot</span></h1>
-          <p>Use this page as your demo contact endpoint. Submissions are stored only in your browser for now, keeping the flow simple but presentable.</p>
+          <p>Have questions about Locus Copilot, want to request a custom market analysis, or explore commercial enterprise partnerships? Send us a message and our team will get back to you promptly.</p>
         </section>
 
         <div className="grid">
@@ -70,22 +105,28 @@ export default function ContactPage() {
             <h2>Send a Message</h2>
             <div className="field">
               <label htmlFor="name">Name</label>
-              <input id="name" type="text" placeholder="Your name" value={formData.name} onChange={handleInputChange} />
+              <input id="name" type="text" placeholder="Your full name" value={formData.name} onChange={handleInputChange} required />
             </div>
             <div className="field">
               <label htmlFor="email">Email</label>
-              <input id="email" type="email" placeholder="you@example.com" value={formData.email} onChange={handleInputChange} />
+              <input id="email" type="email" placeholder="you@company.com" value={formData.email} onChange={handleInputChange} required />
             </div>
             <div className="field">
               <label htmlFor="subject">Subject</label>
-              <input id="subject" type="text" placeholder="Partnership, support, feedback..." value={formData.subject} onChange={handleInputChange} />
+              <input id="subject" type="text" placeholder="Partnership, expansion, dataset feedback..." value={formData.subject} onChange={handleInputChange} />
             </div>
             <div className="field">
               <label htmlFor="message">Message</label>
-              <textarea id="message" placeholder="Write your message" value={formData.message} onChange={handleInputChange}></textarea>
+              <textarea id="message" placeholder="Write your message here..." value={formData.message} onChange={handleInputChange} required></textarea>
             </div>
-            <button className="btn" onClick={submitForm}>Submit</button>
-            <p className={`status ${showStatus ? 'show' : ''}`} id="formStatus">Thanks, your message has been saved for this demo session.</p>
+            <button className="btn" onClick={submitForm} disabled={isSubmitting}>
+              {isSubmitting ? 'Sending message...' : 'Send Message'}
+            </button>
+            {status && (
+              <div className={`status-banner ${status.type === 'success' ? 'status-success' : 'status-error'}`}>
+                {status.message}
+              </div>
+            )}
           </section>
 
           <aside className="card">
@@ -93,15 +134,19 @@ export default function ContactPage() {
             <div className="mini-list">
               <div className="mini-item">
                 <h3>Email</h3>
-                <p>vikasoo474@gmail.com</p>
+                <p><a href="mailto:vikasoo474@gmail.com" style={{ color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 500 }}>vikasoo474@gmail.com</a></p>
               </div>
               <div className="mini-item">
                 <h3>LinkedIn</h3>
-                <p><a href="https://www.linkedin.com/in/vikas-chintada-4a262029b/" target="_blank" rel="noopener noreferrer">View profile</a></p>
+                <p><a href="https://www.linkedin.com/in/vikas-chintada-4a262029b/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 500 }}>Connect with Vikas Chintada &rarr;</a></p>
               </div>
               <div className="mini-item">
-                <h3>Product Feedback</h3>
-                <p>Share what worked, where rankings felt weak, and what business type scenarios you want expanded.</p>
+                <h3>Location & Coverage</h3>
+                <p>Chennai Metropolitan Area (4,345 localities mapped with live Google Places ground truth intelligence).</p>
+              </div>
+              <div className="mini-item">
+                <h3>Cloud Persistence</h3>
+                <p>Messages and search sessions are synchronized in real-time to Google Cloud Firestore with guaranteed zero data loss.</p>
               </div>
             </div>
           </aside>

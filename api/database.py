@@ -128,6 +128,10 @@ class SQLiteCursorWrapper:
     def fetchall(self):
         return [serialize_row(r) for r in self.cursor.fetchall()]
 
+    @property
+    def lastrowid(self):
+        return getattr(self.cursor, "lastrowid", None)
+
 
 class PostgresCursorWrapper:
     def __init__(self, cursor):
@@ -152,6 +156,10 @@ class PostgresCursorWrapper:
 
     def fetchall(self):
         return [serialize_row(r) for r in self.cursor.fetchall()]
+
+    @property
+    def lastrowid(self):
+        return getattr(self.cursor, "lastrowid", None)
 
 
 def get_db_connection():
@@ -273,6 +281,18 @@ def init_database():
             lat REAL,
             lon REAL,
             data TEXT
+        )
+    """)
+
+    # Contact messages table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS contact_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            subject TEXT,
+            message TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
     
@@ -695,6 +715,61 @@ def deactivate_user(user_id: int):
     cursor.execute("UPDATE users SET is_active = 0 WHERE id = ?", (user_id,))
     conn.commit()
     conn.close()
+
+# ==================== CONTACT MESSAGES ====================
+
+def save_contact_message(name: str, email: str, subject: str, message: str) -> dict:
+    """Save contact message to local database and sync to Firestore."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO contact_messages (name, email, subject, message)
+        VALUES (?, ?, ?, ?)
+    """, (name, email, subject, message))
+    conn.commit()
+    msg_id = cursor.lastrowid
+    conn.close()
+
+    # Dual-sync to Firestore
+    try:
+        try:
+            from .firestore_db import firestore_save_contact_message
+        except ImportError:
+            from firestore_db import firestore_save_contact_message
+        firestore_save_contact_message(name, email, subject, message)
+    except Exception as e:
+        logger.warning(f"Firestore contact sync failed: {e}")
+
+    return {
+        "id": msg_id,
+        "name": name,
+        "email": email,
+        "subject": subject,
+        "message": message,
+        "created_at": datetime.now().isoformat()
+    }
+
+def get_contact_messages(limit: int = 50) -> list:
+    """Retrieve contact messages from Firestore (preferred) or SQLite fallback."""
+    try:
+        try:
+            from .firestore_db import firestore_get_contact_messages
+        except ImportError:
+            from firestore_db import firestore_get_contact_messages
+        remote = firestore_get_contact_messages(limit=limit)
+        if remote:
+            return remote
+    except Exception as e:
+        logger.warning(f"Firestore get contacts failed, falling back to SQLite: {e}")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT ?
+    """, (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [serialize_row(row) for row in rows]
 
 if __name__ == "__main__":
     init_database()

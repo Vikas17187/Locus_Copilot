@@ -209,3 +209,49 @@ def firestore_get_user_preferences(user_id: int) -> List[Dict]:
     except Exception as e:
         print(f"[FIRESTORE ERROR] get_user_preferences: {e}")
         return []
+
+# ==================== CONTACT MESSAGES ====================
+
+def firestore_save_contact_message(name: str, email: str, subject: str, message: str) -> bool:
+    """Save a contact message to the 'contact_messages' Firestore collection."""
+    url = f"{BASE_URL}/contact_messages?key={API_KEY}"
+    payload = {
+        "fields": _dict_to_firestore_fields({
+            "name": name,
+            "email": email,
+            "subject": subject or "",
+            "message": message,
+            "created_at": datetime.now().isoformat()
+        })
+    }
+    try:
+        req = urllib.request.Request(
+            url, 
+            data=json.dumps(payload).encode("utf-8"), 
+            headers={"Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            return resp.status in (200, 201)
+    except Exception as e:
+        print(f"[FIRESTORE ERROR] save_contact_message: {e}")
+        return False
+
+def firestore_get_contact_messages(limit: int = 50) -> List[Dict]:
+    """Retrieve recent contact messages from Firestore."""
+    url = f"{BASE_URL}/contact_messages?key={API_KEY}&pageSize={limit}"
+    try:
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            docs = data.get("documents", [])
+            messages = []
+            for doc in docs:
+                parsed = _firestore_fields_to_dict(doc.get("fields", {}))
+                parsed["id"] = doc.get("name", "").split("/")[-1]
+                messages.append(parsed)
+            messages.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+            return messages
+    except Exception as e:
+        print(f"[FIRESTORE ERROR] get_contact_messages: {e}")
+        return []
+

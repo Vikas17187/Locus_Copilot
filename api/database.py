@@ -21,6 +21,13 @@ logger = logging.getLogger(__name__)
 
 if os.getenv("VERCEL"):
     DB_PATH = Path("/tmp") / "locus_copilot.db"
+    bundled_db = Path(__file__).parent / "locus_copilot.db"
+    if not DB_PATH.exists() and bundled_db.exists():
+        import shutil
+        try:
+            shutil.copy2(bundled_db, DB_PATH)
+        except Exception as e:
+            logger.warning(f"Failed to copy bundled db to /tmp: {e}")
 else:
     DB_PATH = Path(__file__).parent / "locus_copilot.db"
 
@@ -279,6 +286,28 @@ def init_database():
         # Existing legacy duplicates may block index creation; app-level checks still enforce canonical uniqueness.
         pass
     
+    # Auto-seed localities table if empty
+    try:
+        cursor.execute("SELECT count(*) FROM localities")
+        res = cursor.fetchone()
+        count = list(res.values())[0] if hasattr(res, "values") else (res[0] if res else 0)
+        if count == 0:
+            json_path = Path(__file__).parent / "localities.json"
+            if json_path.exists():
+                import json
+                with open(json_path, "r", encoding="utf-8") as f:
+                    loc_data = json.load(f)
+                records = [
+                    (k, v.get("name", k), v.get("lat"), v.get("lon"), json.dumps(v))
+                    for k, v in loc_data.get("localities", {}).items()
+                    if v.get("lat") and v.get("lon")
+                ]
+                cursor.executemany("INSERT INTO localities (id, name, lat, lon, data) VALUES (?, ?, ?, ?, ?)", records)
+                conn.commit()
+                print(f"Auto-seeded {len(records)} localities into database")
+    except Exception as e:
+        logger.warning(f"Locality auto-seed notice: {e}")
+
     # Create default admin user if not exists
     admin_email = normalize_email(os.getenv("LOCUS_ADMIN_EMAIL", "admin@locuscopilot.com"))
     admin_password = os.getenv("LOCUS_ADMIN_PASSWORD", "admin123")

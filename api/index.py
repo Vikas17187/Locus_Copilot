@@ -289,8 +289,6 @@ async def analyze_location(request: AnalyzeRequest):
         raise HTTPException(status_code=503, detail="Scoring engine not initialized")
     
     try:
-        with open("request_log.txt", "a") as f:
-            f.write(f"ANALYZE REQUEST: {request.dict()}\n")
         # Validate weights
         total_weight = sum(request.weights.values())
         if total_weight == 0:

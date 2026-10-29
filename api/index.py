@@ -244,6 +244,7 @@ class ContactRequest(BaseModel):
 # ============================================================================
 
 @app.get("/health", tags=["Health"])
+@app.get("/api/health", tags=["Health"])
 async def health_check():
     """Health check endpoint."""
     return {

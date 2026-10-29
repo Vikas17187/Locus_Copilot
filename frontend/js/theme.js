@@ -19,36 +19,48 @@
   }
 
   function applyTheme(theme, isExplicitUserAction = false) {
-    if (theme === 'dark') {
+    const isGlass = theme === 'dark' || theme === 'glass';
+    const effectiveTheme = isGlass ? 'dark' : 'light';
+
+    if (isGlass) {
       document.documentElement.classList.add('dark-theme');
       document.body && document.body.classList.add('dark-theme');
+      document.documentElement.setAttribute('data-theme', 'glass-mono');
     } else {
       document.documentElement.classList.remove('dark-theme');
       document.body && document.body.classList.remove('dark-theme');
+      document.documentElement.setAttribute('data-theme', 'executive-class');
     }
 
     if (isExplicitUserAction) {
-      localStorage.setItem('theme', theme);
+      localStorage.setItem('theme', effectiveTheme);
     }
 
-    // Update all theme toggle buttons across DOM
-    const toggles = document.querySelectorAll('.theme-toggle-btn, #themeToggleBtn');
+    // Update all theme switch pills and buttons across DOM
+    const toggles = document.querySelectorAll('.theme-switch-pill, .theme-switch-btn, .theme-toggle-btn, #themeToggleBtn');
     toggles.forEach(btn => {
-      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
-      btn.innerHTML = theme === 'dark'
-        ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
-        : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+      btn.setAttribute('aria-label', isGlass ? 'Switch to Executive Class theme' : 'Switch to Obsidian Glass theme');
+      btn.title = isGlass ? 'Current: Pure Black & White Glassmorphism · Click for Executive Class' : 'Current: Purely Professional & Class · Click for Obsidian Glass';
+
+      const labelEl = btn.querySelector('.theme-pill-text') || btn.querySelector('.pill-label');
+      if (labelEl) {
+        labelEl.textContent = isGlass ? 'Obsidian Glass' : 'Executive Class';
+      } else {
+        btn.innerHTML = isGlass
+          ? '<span class="theme-pill-dot" style="margin-right:4px;"></span><span class="theme-pill-text">Obsidian Glass</span>'
+          : '<span class="theme-pill-dot" style="margin-right:4px;"></span><span class="theme-pill-text">Executive Class</span>';
+      }
     });
 
     // Notify any map or vector listener
     if (typeof window.onThemeChanged === 'function') {
-      window.onThemeChanged(theme);
+      window.onThemeChanged(effectiveTheme);
     }
   }
 
   function toggleTheme() {
     const current = getCurrentTheme();
-    const next = current === 'dark' ? 'light' : 'dark';
+    const next = (current === 'dark' || current === 'glass') ? 'light' : 'dark';
     applyTheme(next, true);
   }
 

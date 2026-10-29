@@ -21,6 +21,8 @@ body {
   line-height: var(--line-height-base);
   color: var(--color-ink);
   background-color: var(--color-sheet);
+  background-image: var(--page-gradient);
+  background-attachment: fixed;
   min-height: 100vh;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

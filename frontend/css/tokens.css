@@ -1,79 +1,86 @@
 /**
  * Locus Copilot - Design Tokens
- * WCAG AA Contrast Compliant | IBM Plex Sans Typography | Okabe-Ito Palette
+ * 
+ * THEME 1: Pure Black & White with Glassmorphism (Obsidian Glass)
+ * THEME 2: Purely Professional and Class (Executive Studio)
  */
 
 :root {
-  /* ==================== COLOUR ROLES (LIGHT MODE) ==================== */
-  /* Ink (text, dark surfaces) - ~16:1 on white */
-  --color-ink: #0B1F33;
-  --color-text-primary: #0B1F33;
+  /* ==================== THEME 2: PURELY PROFESSIONAL AND CLASS ==================== */
+  --theme-name: 'Executive Class';
   
-  /* Secondary text - ~8:1 on white */
-  --color-text-secondary: #3E5266;
-  
-  /* Tertiary text - ~5:1 on white (WCAG AA compliant, replaces 2.6:1) */
-  --color-text-tertiary: #5F7185;
-  
-  /* Sheet (page background) - cool grey, not cream */
-  --color-sheet: #F3F5F7;
-  --color-bg-page: #F3F5F7;
-  
-  /* Surface (cards, panels) */
+  /* Sheet (page foundation) - Immaculate Alabaster / Architectural Ivory */
+  --color-sheet: #F8F9FA;
+  --color-bg-page: #F8F9FA;
+  --page-gradient: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%);
+
+  /* Surface (Cards, panels, modals) - Crisp Boardroom Porcelain */
   --color-surface: #FFFFFF;
   --color-surface-hover: #F8FAFC;
   --color-surface-elevated: #FFFFFF;
-  
-  /* Borders & Dividers */
-  --color-border: #DDE3EA;
-  --color-border-subtle: #E8EEF4;
-  --color-border-hover: #CBD5E1;
-  
-  /* Primary (Harbour Teal) - white text on light, ink text on dark; ~5:1 */
-  --color-primary: #0E7C86;
-  --color-primary-hover: #0B6B74;
-  --color-primary-subtle: rgba(14, 124, 134, 0.12);
-  --color-primary-text: #FFFFFF;
-  
-  /* Top-pick Amber - ink text only */
-  --color-top-pick: #F2A900;
-  --color-top-pick-text: #0B1F33;
-  
-  /* Semantic Status */
-  --color-success: #1B7F4B;
-  --color-success-bg: rgba(27, 127, 75, 0.10);
-  --color-warning: #9A5B00;
-  --color-warning-bg: rgba(154, 91, 0, 0.10);
-  --color-error: #B42318;
-  --color-error-bg: rgba(180, 35, 24, 0.10);
-  
-  /* Score Ramp: Single hue, light to dark */
-  --score-low: #D7EEF0;
-  --score-mid: #0E7C86;
-  --score-high: #0B3B4A;
-  
-  /* Colour-blind-safe Cluster Colors (Okabe-Ito) */
-  --cluster-1: #0072B2; /* Commercial Hub - Blue */
-  --cluster-2: #E69F00; /* Residential Zone - Orange */
-  --cluster-3: #009E73; /* Transit Corridor - Green */
-  --cluster-4: #CC79A7; /* Emerging Area - Purple */
-  --cluster-5: #56B4E9; /* Premium District - Sky Blue */
-  
-  /* Scrollbar */
-  --scrollbar-track: rgba(15, 23, 42, 0.05);
-  --scrollbar-thumb: rgba(15, 23, 42, 0.28);
-  --scrollbar-thumb-hover: rgba(15, 23, 42, 0.45);
+  --color-nav-bg: rgba(255, 255, 255, 0.88);
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(11, 31, 51, 0.05);
-  --shadow-md: 0 4px 12px rgba(11, 31, 51, 0.08);
-  --shadow-lg: 0 10px 24px rgba(11, 31, 51, 0.12);
-  
-  /* ==================== SHAPE (TWO RADII ONLY) ==================== */
-  --radius-control: 8px;   /* buttons, inputs, sliders, pills */
-  --radius-panel: 14px;    /* cards, modals, sheets, panels */
-  
-  /* ==================== Z-INDEX SCALE ==================== */
+  /* Deep Royal Ink & Dignified Slate Typography */
+  --color-ink: #0A192F;
+  --color-text-primary: #0A192F;
+  --color-text-secondary: #334155;
+  --color-text-tertiary: #64748B;
+
+  /* Architectural Hairline Borders */
+  --color-border: #E2E8F0;
+  --color-border-subtle: #F1F5F9;
+  --color-border-hover: #CBD5E1;
+
+  /* Executive Primary - Dignified Petrol Teal / Deep Harbour Navy */
+  --color-primary: #0E7490;
+  --color-primary-hover: #084C61;
+  --color-primary-subtle: rgba(14, 116, 144, 0.08);
+  --color-primary-text: #FFFFFF;
+
+  /* Top-Pick Accents - Gold Medal Amber */
+  --color-top-pick: #D97706;
+  --color-top-pick-text: #FFFFFF;
+
+  /* Status Indicators */
+  --color-success: #15803D;
+  --color-success-bg: rgba(21, 128, 61, 0.08);
+  --color-warning: #B45309;
+  --color-warning-bg: rgba(180, 83, 9, 0.08);
+  --color-error: #B91C1C;
+  --color-error-bg: rgba(185, 28, 28, 0.08);
+
+  /* Score Ramp: Classical Deep Blue / Teal Scale */
+  --score-low: #E0F2FE;
+  --score-mid: #0E7490;
+  --score-high: #0A192F;
+
+  /* Colorblind-Safe Clusters (Okabe-Ito Palette) */
+  --cluster-1: #0072B2; /* Commercial Hub - Navy Blue */
+  --cluster-2: #E69F00; /* Residential - Amber Orange */
+  --cluster-3: #009E73; /* Transit Corridor - Emerald */
+  --cluster-4: #CC79A7; /* Emerging Growth - Orchid */
+  --cluster-5: #56B4E9; /* Premium District - Azure */
+
+  /* Shadows - Soft Dignified Institutional Elevation */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 2px 4px -1px rgba(15, 23, 42, 0.03);
+  --shadow-lg: 0 16px 36px -4px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.03);
+
+  /* Glassmorphism Specs (Light mode: clean subtle frost) */
+  --glass-blur: blur(20px) saturate(180%);
+  --glass-border: 1px solid #E2E8F0;
+  --glass-specular: none;
+
+  /* Scrollbar */
+  --scrollbar-track: rgba(15, 23, 42, 0.04);
+  --scrollbar-thumb: rgba(15, 23, 42, 0.25);
+  --scrollbar-thumb-hover: rgba(15, 23, 42, 0.4);
+
+  /* Two Strict Radii */
+  --radius-control: 8px;   /* buttons, inputs, pills */
+  --radius-panel: 14px;    /* cards, modals, sheets, dialogs */
+
+  /* Z-Index Scale */
   --z-base: 1;
   --z-sticky: 100;
   --z-dock: 200;
@@ -82,11 +89,11 @@
   --z-modal: 500;
   --z-toast: 600;
 
-  /* ==================== TYPOGRAPHY SCALE ==================== */
+  /* Typography Scale */
   --font-family-base: 'IBM Plex Sans', 'Noto Sans Tamil', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-family-condensed: 'IBM Plex Sans Condensed', 'IBM Plex Sans', sans-serif;
   --font-tabular: tabular-nums;
-  
+
   --text-xs: 0.75rem;    /* 12px */
   --text-sm: 0.875rem;   /* 14px */
   --text-base: 1rem;     /* 16px */
@@ -94,57 +101,82 @@
   --text-lg: 1.4375rem;  /* 23px */
   --text-xl: 1.75rem;    /* 28px */
   --text-2xl: 2.5rem;    /* 40px */
-  
+
   --line-height-tight: 1.25;
   --line-height-base: 1.5;
   --line-height-relaxed: 1.65;
-  
   --max-content-width: 68ch;
 }
 
-/* ==================== DARK MODE OVERRIDES ==================== */
+/* ==================== THEME 1: PURE BLACK & WHITE WITH GLASSMORPHISM ==================== */
 html.dark-theme,
 body.dark-theme {
-  --color-ink: #E8EEF4;
-  --color-text-primary: #E8EEF4;
-  --color-text-secondary: #A9B8C6;
-  --color-text-tertiary: #8496A8;
-  
-  --color-sheet: #0A1624;
-  --color-bg-page: #0A1624;
-  
-  --color-surface: #10202F;
-  --color-surface-hover: #162B3F;
-  --color-surface-elevated: #162B3F;
-  
-  --color-border: #1E364D;
-  --color-border-subtle: #152738;
-  --color-border-hover: #294765;
-  
-  --color-primary: #3CC4CF;
-  --color-primary-hover: #4ED2DD;
-  --color-primary-subtle: rgba(60, 196, 207, 0.15);
-  --color-primary-text: #0B1F33;
-  
-  --color-top-pick: #F2A900;
-  --color-top-pick-text: #0B1F33;
-  
-  --color-success: #2EC275;
-  --color-success-bg: rgba(46, 194, 117, 0.15);
-  --color-warning: #FFB340;
-  --color-warning-bg: rgba(255, 179, 64, 0.15);
-  --color-error: #F87171;
-  --color-error-bg: rgba(248, 113, 113, 0.15);
-  
-  --score-low: #152A3C;
-  --score-mid: #257F8B;
-  --score-high: #3CC4CF;
-  
-  --scrollbar-track: rgba(255, 255, 255, 0.04);
-  --scrollbar-thumb: rgba(255, 255, 255, 0.22);
-  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.38);
+  --theme-name: 'Obsidian Glass';
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.55);
+  /* Sheet (page foundation) - Pure Starless Obsidian Pitch Black */
+  --color-sheet: #000000;
+  --color-bg-page: #000000;
+  --page-gradient: radial-gradient(ellipse 90% 60% at 50% -10%, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0) 70%);
+
+  /* Translucent Frosted Glass Surfaces */
+  --color-surface: rgba(18, 18, 22, 0.65);
+  --color-surface-hover: rgba(28, 28, 34, 0.85);
+  --color-surface-elevated: rgba(24, 24, 30, 0.75);
+  --color-nav-bg: rgba(6, 6, 8, 0.75);
+
+  /* Pure Stark White & High-Contrast Silver Typography */
+  --color-ink: #FFFFFF;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #A1A1AA;
+  --color-text-tertiary: #71717A;
+
+  /* Specular Hairline Borders */
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-hover: rgba(255, 255, 255, 0.28);
+
+  /* Monochromatic Stark High-Contrast Primary Controls */
+  --color-primary: #FFFFFF;
+  --color-primary-hover: #E4E4E7;
+  --color-primary-subtle: rgba(255, 255, 255, 0.12);
+  --color-primary-text: #000000;
+
+  /* Top-Pick Platinum Accent */
+  --color-top-pick: #FFFFFF;
+  --color-top-pick-text: #000000;
+
+  /* High-Luminance Semantic Status */
+  --color-success: #4ADE80;
+  --color-success-bg: rgba(74, 222, 128, 0.12);
+  --color-warning: #FBBF24;
+  --color-warning-bg: rgba(251, 191, 36, 0.12);
+  --color-error: #F87171;
+  --color-error-bg: rgba(248, 113, 113, 0.12);
+
+  /* Score Ramp: Monochrome Obsidian to Stark Platinum */
+  --score-low: rgba(255, 255, 255, 0.15);
+  --score-mid: rgba(255, 255, 255, 0.55);
+  --score-high: #FFFFFF;
+
+  /* High-Luminance Colorblind-Safe Clusters */
+  --cluster-1: #60A5FA;
+  --cluster-2: #FBBF24;
+  --cluster-3: #34D399;
+  --cluster-4: #F472B6;
+  --cluster-5: #38BDF8;
+
+  /* Glassmorphism Specs with Specular Edge Highlights */
+  --glass-blur: blur(28px) saturate(190%);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+  --glass-specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.16);
+
+  /* Deep Glass Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+
+  /* Dark Frosted Scrollbar */
+  --scrollbar-track: rgba(255, 255, 255, 0.02);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.4);
 }

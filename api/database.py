@@ -328,16 +328,27 @@ def init_database():
     except Exception as e:
         logger.warning(f"Locality auto-seed notice: {e}")
 
-    # Create default admin user if not exists
+    # Create default demo user (non-admin, safe demo account)
+    demo_email = normalize_email("demo@locuscopilot.com")
+    cursor.execute("SELECT * FROM users WHERE lower(trim(email)) = ?", (demo_email,))
+    if not cursor.fetchone():
+        demo_password_hash = hash_password("demo123")
+        cursor.execute("""
+            INSERT INTO users (email, password, full_name, is_admin, is_active)
+            VALUES (?, ?, ?, ?, ?)
+        """, (demo_email, demo_password_hash, "Demo User", 0, 1))
+        conn.commit()
+
+    # Create admin user if not exists
     admin_email = normalize_email(os.getenv("LOCUS_ADMIN_EMAIL", "admin@locuscopilot.com"))
-    admin_password = os.getenv("LOCUS_ADMIN_PASSWORD", "admin123")
+    admin_password = os.getenv("LOCUS_ADMIN_PASSWORD", "LocusAdmin2026!Secure")
     cursor.execute("SELECT * FROM users WHERE lower(trim(email)) = ?", (admin_email,))
     if not cursor.fetchone():
         admin_password_hash = hash_password(admin_password)
         cursor.execute("""
             INSERT INTO users (email, password, full_name, is_admin, is_active)
             VALUES (?, ?, ?, ?, ?)
-        """, (admin_email, admin_password_hash, "Admin User", 1, 1))
+        """, (admin_email, admin_password_hash, "System Administrator", 1, 1))
         conn.commit()
     print(f"Default admin created for {admin_email}")
     
@@ -774,6 +785,14 @@ def deactivate_user(user_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("UPDATE users SET is_active = 0 WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
+def activate_user(user_id: int):
+    """Reactivate user account"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET is_active = 1 WHERE id = ?", (user_id,))
     conn.commit()
     conn.close()
 

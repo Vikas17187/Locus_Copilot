@@ -1,328 +1,274 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in - Locus Copilot</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="theme.css?v=2.0">
-    <script>
-        (function() {
-            var t = localStorage.getItem('theme');
-            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (t === 'dark' || (!t && prefersDark)) {
-                document.documentElement.classList.add('dark-theme');
-            } else {
-                document.documentElement.classList.remove('dark-theme');
-            }
-        })();
-    </script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--page-gradient), var(--bg-secondary);
-            background-attachment: fixed;
-            color: var(--text-primary);
-            background-color: var(--bg-secondary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .back-link {
-            position: absolute;
-            top: 1.5rem;
-            left: 1.5rem;
-            color: var(--text-tertiary);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            transition: color var(--transition-fast);
-        }
-        .back-link:hover { color: var(--text-primary); }
-        .container { width: 100%; max-width: 380px; padding: 2rem; }
-        .brand {
-            text-align: center;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 2rem;
-            letter-spacing: -0.02em;
-        }
-        .brand span { color: var(--accent-primary); }
-        .card {
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            padding: 2.5rem;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg);
-            opacity: 0;
-            animation: scaleIn 0.5s cubic-bezier(0.4,0,0.2,1) 0.1s forwards;
-            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-        }
-        .card:hover {
-            box-shadow: var(--shadow-xl);
-        }
-        .card h1 {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        .card p.sub {
-            color: var(--text-tertiary);
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
-        }
-        .form-group { margin-bottom: 1.5rem; }
-        label {
-            display: block;
-            font-weight: 500;
-            font-size: 0.85rem;
-            margin-bottom: 0.55rem;
-            color: var(--text-secondary);
-        }
-        input[type="email"], input[type="password"] {
-            width: 100%;
-            padding: 0.85rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 0.95rem;
-            font-family: inherit;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            transition: all var(--transition-fast);
-        }
-        input:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px var(--accent-light);
-        }
-        .error-msg {
-            color: var(--error-text);
-            background: var(--error-bg);
-            padding: 0.75rem 1rem;
-            border-radius: var(--radius-md);
-            font-size: 0.85rem;
-            margin-bottom: 1.25rem;
-            display: none;
-            border: 1px solid var(--error-border);
-        }
-        .error-msg.show { display: block; }
-        .btn {
-            width: 100%;
-            padding: 0.9rem 1rem;
-            background: var(--accent-gradient);
-            color: white;
-            border: none;
-            border-radius: var(--radius-md);
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-        .btn:hover {
-            box-shadow: 0 6px 20px rgba(2,132,199,0.3);
-            transform: translateY(-2px);
-        }
-        .btn:active { transform: translateY(0); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .btn-demo {
-            width: 100%;
-            margin-top: 0.6rem;
-            padding: 0.75rem 1rem;
-            background: transparent;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-weight: 500;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-        .btn-demo:hover {
-            color: var(--text-primary);
-            border-color: var(--accent-primary);
-            background: var(--bg-secondary);
-        }
-        .loading-spinner {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-            margin-right: 0.4rem;
-            vertical-align: middle;
-        }
-        .footer-text {
-            text-align: center;
-            margin-top: 2rem;
-            font-size: 0.9rem;
-            color: var(--text-tertiary);
-        }
-        .footer-text a {
-            color: var(--accent-primary);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .footer-text a:hover { text-decoration: underline; }
-        @media (max-width: 480px) {
-            .back-link {
-                position: static;
-                margin: 1rem auto 0 1rem;
-                align-self: flex-start;
-            }
-            .container {
-                padding: 1rem;
-                margin-top: 0.5rem;
-            }
-            .card {
-                padding: 1.75rem 1.25rem;
-            }
-            .brand {
-                margin-bottom: 1.25rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In - Locus Copilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script>
+    (function() {
+      var t = localStorage.getItem('theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (t === 'dark' || (!t && prefersDark)) {
+        document.documentElement.classList.add('dark-theme');
+      } else {
+        document.documentElement.classList.remove('dark-theme');
+      }
+    })();
+  </script>
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: var(--color-sheet);
+    }
+    .auth-container {
+      width: 100%;
+      max-width: 420px;
+    }
+    .auth-header-bar {
+      position: absolute;
+      top: 1.25rem;
+      left: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .auth-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-panel);
+      padding: 2.25rem 2rem;
+      box-shadow: var(--shadow-md);
+    }
+    .auth-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--color-ink);
+      text-decoration: none;
+      margin-bottom: 1.5rem;
+    }
+    .auth-brand svg {
+      width: 28px;
+      height: 28px;
+      color: var(--color-primary);
+    }
+    .auth-title {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 0.35rem;
+    }
+    .auth-sub {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      margin-bottom: 1.75rem;
+    }
+    .auth-status {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-control);
+      font-size: var(--text-sm);
+      margin-bottom: 1.25rem;
+      display: none;
+    }
+    .auth-status.error {
+      background: var(--color-error-subtle);
+      border: 1px solid var(--color-error);
+      color: var(--color-error);
+      display: block;
+    }
+    .auth-status.success {
+      background: var(--color-success-subtle);
+      border: 1px solid var(--color-success);
+      color: var(--color-success);
+      display: block;
+    }
+    .demo-box {
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--color-border);
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-    <a href="landing.html" class="back-link" onclick="navigateTo(event,'landing.html')">&larr; Home</a>
-    <label class="switch" title="Toggle theme" style="position: absolute; top: 1.5rem; right: 1.5rem;">
-        <input type="checkbox" id="themeToggle" />
-        <span class="slider"></span>
-    </label>
-    <div class="container">
-        <div class="brand">Locus <span>Copilot</span></div>
-        <div class="card">
-            <h1>Welcome back</h1>
-            <p class="sub">Sign in to continue to your dashboard</p>
+  <div class="auth-header-bar">
+    <a href="index.html" class="btn btn-ghost btn-sm" aria-label="Return to home page">
+      &larr; Back to Home
+    </a>
+    <button type="button" class="theme-switch-btn" onclick="Theme.toggleTheme()" aria-label="Toggle theme">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
+  </div>
 
-            <div class="error-msg" id="errorMsg"></div>
+  <main class="auth-container">
+    <div class="auth-card">
+      <a href="index.html" class="auth-brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2a10 10 0 0 1 10 10c0 5.25-7 10-10 10S2 17.25 2 12A10 10 0 0 1 12 2z"/>
+        </svg>
+        <span>Locus <span style="color:var(--color-primary)">Copilot</span></span>
+      </a>
 
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" required placeholder="you@example.com" autocomplete="email">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required placeholder="Enter your password" autocomplete="current-password">
-                </div>
-                <button type="submit" class="btn" id="submitBtn">Sign in</button>
-                <button type="button" class="btn-demo" onclick="fillDemoCredentials()">Use Demo Account</button>
-            </form>
+      <h1 class="auth-title">Welcome back</h1>
+      <p class="auth-sub">Sign in to manage your saved localities and preferences.</p>
 
-            <div class="footer-text">
-                Don't have an account? <a href="register.html" onclick="navigateTo(event,'register.html')">Create one</a>
-            </div>
+      <div id="statusMsg" class="auth-status" role="alert" aria-live="polite"></div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="emailInput">Email Address</label>
+          <input
+            type="email"
+            id="emailInput"
+            name="email"
+            class="form-control"
+            placeholder="you@company.com"
+            required
+            autocomplete="email"
+          >
         </div>
+
+        <div class="form-group">
+          <label class="form-label" for="passwordInput">Password</label>
+          <div class="password-field-wrapper">
+            <input
+              type="password"
+              id="passwordInput"
+              name="password"
+              class="form-control"
+              placeholder="Enter your password"
+              required
+              autocomplete="current-password"
+            >
+            <button
+              type="button"
+              class="password-toggle-btn"
+              id="passwordToggleBtn"
+              onclick="togglePasswordVisibility('passwordInput', this)"
+              aria-label="Show password"
+              title="Show password"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn" style="margin-top:0.75rem;">
+          Sign In
+        </button>
+      </form>
+
+      <div class="demo-box">
+        <button type="button" class="btn btn-secondary btn-block btn-sm" onclick="fillDemoUser()">
+          Quick Fill: Demo User (demo@locuscopilot.com)
+        </button>
+        <p style="font-size:var(--text-xs);color:var(--color-text-tertiary);margin-top:0.6rem;">
+          Guest analysis requires no sign in. You can also <a href="app.html" style="color:var(--color-primary);font-weight:600;">analyze directly</a>.
+        </p>
+      </div>
+
+      <p style="font-size:var(--text-sm);color:var(--color-text-secondary);text-align:center;margin-top:1.5rem;">
+        Don't have an account? <a href="register.html" style="color:var(--color-primary);font-weight:600;">Create one</a>
+      </p>
     </div>
+  </main>
 
-    <script>
-        const isLocalDev = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-        const API_BASE = (isLocalDev && window.location.port !== "8000") ? "http://localhost:8000/api" : "/api";
+  <script src="js/dom.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Auto redirect if already signed in
+    if (Auth.getToken()) {
+      window.location.href = 'dashboard.html';
+    }
 
-        function fillDemoCredentials() {
-            document.getElementById("email").value = "admin@locuscopilot.com";
-            document.getElementById("password").value = "admin123";
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+      btn.title = isPassword ? 'Hide password' : 'Show password';
+      btn.innerHTML = isPassword
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+        : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    }
+
+    function fillDemoUser() {
+      document.getElementById('emailInput').value = 'demo@locuscopilot.com';
+      document.getElementById('passwordInput').value = 'demo123';
+      clearStatus();
+    }
+
+    function showStatus(message, type = 'error') {
+      const el = document.getElementById('statusMsg');
+      el.textContent = message;
+      el.className = `auth-status ${type}`;
+    }
+
+    function clearStatus() {
+      const el = document.getElementById('statusMsg');
+      el.className = 'auth-status';
+      el.textContent = '';
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      clearStatus();
+
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passwordInput').value;
+      const btn = document.getElementById('submitBtn');
+
+      if (!email || !password) {
+        showStatus('Please enter both your email address and password.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      try {
+        const data = await API.fetch('/auth/login', {
+          method: 'POST',
+          body: { email, password }
+        });
+
+        if (data && data.success && data.token) {
+          Auth.setAuth(data.token, data.user);
+          showStatus('Signed in successfully. Redirecting...', 'success');
+          setTimeout(() => {
+            const dest = data.user && data.user.is_admin ? 'admin.html' : 'dashboard.html';
+            window.location.href = dest;
+          }, 400);
+        } else {
+          showStatus(data.detail || 'Invalid email or password.', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Sign In';
         }
-
-        function navigateTo(e, url) {
-            if (e && e.preventDefault) e.preventDefault();
-            if (typeof e === 'string' && !url) { url = e; }
-            window.location.href = url;
-        }
-
-        // Theme management
-        function initTheme() {
-            const theme = localStorage.getItem('theme') || 'light';
-            applyTheme(theme);
-            const themeToggle = document.getElementById('themeToggle');
-            if (themeToggle) {
-                themeToggle.checked = (theme === 'dark');
-                themeToggle.addEventListener('change', (e) => {
-                    applyTheme(e.target.checked ? 'dark' : 'light');
-                });
-            }
-        }
-        
-        function applyTheme(theme) {
-            document.documentElement.classList.add('theme-transitioning');
-            document.body.classList.add('theme-transitioning');
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark-theme');
-                document.body.classList.add('dark-theme');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.documentElement.classList.remove('dark-theme');
-                document.body.classList.remove('dark-theme');
-                localStorage.setItem('theme', 'light');
-            }
-            const themeToggle = document.getElementById('themeToggle');
-            if (themeToggle) {
-                themeToggle.checked = (theme === 'dark');
-            }
-            setTimeout(() => {
-                document.documentElement.classList.remove('theme-transitioning');
-                document.body.classList.remove('theme-transitioning');
-            }, 450);
-        }
-
-        initTheme();
-
-        // Auto-redirect if already logged in
-        if (localStorage.getItem('token')) navigateTo(null, 'index.html');
-
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            const btn = document.getElementById("submitBtn");
-            const err = document.getElementById("errorMsg");
-
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loading-spinner"></span>Signing in...';
-            err.classList.remove("show");
-
-            try {
-                const res = await fetch(`${API_BASE}/auth/login`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    localStorage.setItem("token", data.token);
-                    localStorage.setItem("email", data.user.email);
-                    localStorage.setItem("is_admin", data.user.is_admin);
-                    navigateTo(null, 'index.html');
-                } else {
-                    showError(data.detail || "Invalid credentials");
-                }
-            } catch (error) {
-                showError("Connection error. Is the server running?");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = "Sign in";
-            }
-        }
-
-        function showError(msg) {
-            const el = document.getElementById("errorMsg");
-            el.textContent = msg;
-            el.classList.add("show");
-        }
-    </script>
+      } catch (err) {
+        showStatus(err.message || 'Login failed. Please verify credentials.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+      }
+    }
+  </script>
 </body>
 </html>

@@ -1,208 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms - Locus Copilot</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="theme.css?v=2.0">
-    <script>
-        (function() {
-            var t = localStorage.getItem('theme');
-            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (t === 'dark' || (!t && prefersDark)) {
-                document.documentElement.classList.add('dark-theme');
-            } else {
-                document.documentElement.classList.remove('dark-theme');
-            }
-        })();
-    </script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--page-gradient), var(--bg-secondary);
-            background-attachment: fixed;
-            color: var(--text-primary);
-            background-color: var(--bg-secondary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .navbar {
-            background: var(--bg-panel);
-            border-bottom: 1px solid var(--border-color);
-            padding: 0.85rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-
-        .navbar-content {
-            max-width: 1100px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .brand {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            text-decoration: none;
-        }
-        .brand span { color: var(--accent-primary); }
-        .nav-links { display: flex; gap: 0.4rem; align-items: center; }
-        .nav-link {
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-weight: 500;
-            font-size: 0.85rem;
-            padding: 0.45rem 0.85rem;
-            border-radius: var(--radius-sm);
-            border: none;
-            background: none;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-        .nav-link:hover { color: var(--text-primary); background: var(--bg-tertiary); }
-
-        .page {
-            max-width: 900px;
-            margin: 0 auto;
-            width: 100%;
-            padding: 3.2rem 2rem 4.5rem;
-            flex: 1;
-        }
-        h1 {
-            font-family: 'Poppins', sans-serif;
-            font-size: 2rem;
-            margin-bottom: 0.8rem;
-        }
-        .intro {
-            color: var(--text-secondary);
-            margin-bottom: 1.6rem;
-            line-height: 1.6;
-        }
-        .section {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 1rem 1.1rem;
-            margin-bottom: 0.75rem;
-        }
-        .section h2 {
-            font-size: 0.98rem;
-            margin-bottom: 0.45rem;
-            font-family: 'Poppins', sans-serif;
-        }
-        .section p {
-            color: var(--text-secondary);
-            font-size: 0.86rem;
-            line-height: 1.6;
-        }
-        .footer {
-            background: var(--bg-primary);
-            border-top: 1px solid var(--border-color);
-            padding: 1.4rem 2rem;
-            text-align: center;
-            color: var(--text-tertiary);
-            font-size: 0.8rem;
-        }
-        .footer a { color: var(--accent-primary); text-decoration: none; font-weight: 500; }
-
-        @media (max-width: 640px) {
-            .page { padding: 2.4rem 1.2rem 3.8rem; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service - Locus Copilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script>
+    (function() {
+      var t = localStorage.getItem('theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (t === 'dark' || (!t && prefersDark)) {
+        document.documentElement.classList.add('dark-theme');
+      } else {
+        document.documentElement.classList.remove('dark-theme');
+      }
+    })();
+  </script>
+  <style>
+    .page-container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 5rem;
+    }
+    .terms-header {
+      margin-bottom: 2.5rem;
+    }
+    .terms-header h1 {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .terms-header p {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+    }
+    .terms-section {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-panel);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .terms-section h2 {
+      font-size: var(--text-md);
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 0.6rem;
+    }
+    .terms-section p {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.65;
+      margin-bottom: 0.75rem;
+    }
+    .terms-section p:last-child {
+      margin-bottom: 0;
+    }
+  </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-content">
-            <a class="brand" href="landing.html">Locus <span>Copilot</span></a>
-            <div class="nav-links">
-                <label class="switch" title="Toggle theme">
-                    <input type="checkbox" id="themeToggle" />
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-    </nav>
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="index.html" class="brand-logo" aria-label="Locus Copilot Home">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2a10 10 0 0 1 10 10c0 5.25-7 10-10 10S2 17.25 2 12A10 10 0 0 1 12 2z"/>
+        </svg>
+        <span>Locus <span class="brand-accent">Copilot</span></span>
+      </a>
 
-    <main class="page">
-        <h1>Terms of Use</h1>
-        <p class="intro">These terms define how this demo should be used during evaluations and internal showcases.</p>
+      <nav aria-label="Primary Navigation">
+        <ul class="nav-links">
+          <li><a href="app.html">Analysis</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
 
-        <section class="section">
-            <h2>Demo Scope</h2>
-            <p>The platform is intended for evaluation, prototyping, and educational usage. Rankings are advisory signals, not legal or financial guarantees.</p>
-        </section>
+      <div class="nav-actions">
+        <button type="button" class="theme-switch-btn" onclick="Theme.toggleTheme()" aria-label="Toggle theme">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+        <div id="navAuthContainer"></div>
+      </div>
+    </div>
+  </header>
 
-        <section class="section">
-            <h2>Acceptable Use</h2>
-            <p>Do not use the service for unlawful activity, credential abuse, reverse engineering attempts against hosted infrastructure, or automated scraping without permission.</p>
-        </section>
+  <main class="page-container">
+    <div class="terms-header">
+      <h1>Terms of Service</h1>
+      <p>Last updated: October 2026 · Usage guidelines and advisory disclosures</p>
+    </div>
 
-        <section class="section">
-            <h2>Data Accuracy</h2>
-            <p>Market signals are derived from available datasets and may vary in freshness by locality. Always validate final site decisions with field verification and current local market checks.</p>
-        </section>
+    <section class="terms-section">
+      <h2>1. Purpose of the Platform</h2>
+      <p>
+        Locus Copilot provides commercial spatial analytics and location suitability ranking across Chennai. Scores, cluster assignments, and candidate rankings are algorithmic recommendations intended for preliminary screening and exploratory planning. They do not constitute formal real estate, legal, or financial guarantees.
+      </p>
+    </section>
 
-        <section class="section">
-            <h2>Liability Limits</h2>
-            <p>The project owner is not responsible for losses from relying solely on demo output. Production deployment should include governance, monitoring, and legal review.</p>
-        </section>
-    </main>
+    <section class="terms-section">
+      <h2>2. Data Sources &amp; Accuracy</h2>
+      <p>
+        Locality coordinates, commercial rent estimates, and transit connectivity indices are derived from public geospatial datasets and synthesized heuristics. Competitor counts and reviews are verified via live queries to the Google Places API. Because market conditions and commercial lease values fluctuate dynamically, users must conduct physical site visits and verify current rental agreements with local brokers before signing leases or deploying capital.
+      </p>
+    </section>
 
+    <section class="terms-section">
+      <h2>3. Acceptable Use Policy</h2>
+      <p>
+        You agree to use Locus Copilot solely for lawful commercial or research activities. You may not attempt to overwhelm the API infrastructure with automated request bursts, probe for unpublished endpoints, inject malicious payloads, or scrape proprietary datasets without explicit permission.
+      </p>
+    </section>
 
-    <script>
-        function navigateTo(e, url) {
-            if (e && e.preventDefault) e.preventDefault();
-            if (typeof e === 'string' && !url) { url = e; }
-            window.location.href = url;
-        }
+    <section class="terms-section">
+      <h2>4. Limitation of Liability</h2>
+      <p>
+        The platform and its analytical algorithms are provided on an "as is" and "as available" basis. To the maximum extent permitted by applicable law, the creator and maintainers of Locus Copilot shall not be held liable for commercial decisions, sunk investments, lease disputes, or revenue outcomes resulting from reliance on the tool's suggestions.
+      </p>
+    </section>
 
-        // Theme management
-        function initTheme() {
-            const theme = localStorage.getItem('theme') || 'light';
-            applyTheme(theme);
-            const themeToggle = document.getElementById('themeToggle');
-            if (themeToggle) {
-                themeToggle.checked = (theme === 'dark');
-                themeToggle.addEventListener('change', (e) => {
-                    applyTheme(e.target.checked ? 'dark' : 'light');
-                });
-            }
-        }
-        
-        function applyTheme(theme) {
-            document.documentElement.classList.add('theme-transitioning');
-            document.body.classList.add('theme-transitioning');
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark-theme');
-                document.body.classList.add('dark-theme');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.documentElement.classList.remove('dark-theme');
-                document.body.classList.remove('dark-theme');
-                localStorage.setItem('theme', 'light');
-            }
-            const themeToggle = document.getElementById('themeToggle');
-            if (themeToggle) {
-                themeToggle.checked = (theme === 'dark');
-            }
-            setTimeout(() => {
-                document.documentElement.classList.remove('theme-transitioning');
-                document.body.classList.remove('theme-transitioning');
-            }, 450);
-        }
+    <section class="terms-section">
+      <h2>5. Inquiries &amp; Modifications</h2>
+      <p>
+        These terms may be updated as new features or geographic regions are introduced. If you have questions regarding these terms, contact <a href="mailto:vikasoo474@gmail.com" style="color:var(--color-primary);font-weight:600;">vikasoo474@gmail.com</a>.
+      </p>
+    </section>
+  </main>
 
-        initTheme();
-    </script>
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-copy">
+        &copy; 2026 Locus Copilot. Built with Google Maps Platform &amp; Python FastAPI.
+      </div>
+      <ul class="footer-nav">
+        <li><a href="app.html">Analysis Tool</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="terms.html">Terms</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="js/dom.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
 </body>
 </html>

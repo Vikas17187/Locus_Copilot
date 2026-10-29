@@ -1,0 +1,150 @@
+/**
+ * Locus Copilot - Design Tokens
+ * WCAG AA Contrast Compliant | IBM Plex Sans Typography | Okabe-Ito Palette
+ */
+
+:root {
+  /* ==================== COLOUR ROLES (LIGHT MODE) ==================== */
+  /* Ink (text, dark surfaces) - ~16:1 on white */
+  --color-ink: #0B1F33;
+  --color-text-primary: #0B1F33;
+  
+  /* Secondary text - ~8:1 on white */
+  --color-text-secondary: #3E5266;
+  
+  /* Tertiary text - ~5:1 on white (WCAG AA compliant, replaces 2.6:1) */
+  --color-text-tertiary: #5F7185;
+  
+  /* Sheet (page background) - cool grey, not cream */
+  --color-sheet: #F3F5F7;
+  --color-bg-page: #F3F5F7;
+  
+  /* Surface (cards, panels) */
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #F8FAFC;
+  --color-surface-elevated: #FFFFFF;
+  
+  /* Borders & Dividers */
+  --color-border: #DDE3EA;
+  --color-border-subtle: #E8EEF4;
+  --color-border-hover: #CBD5E1;
+  
+  /* Primary (Harbour Teal) - white text on light, ink text on dark; ~5:1 */
+  --color-primary: #0E7C86;
+  --color-primary-hover: #0B6B74;
+  --color-primary-subtle: rgba(14, 124, 134, 0.12);
+  --color-primary-text: #FFFFFF;
+  
+  /* Top-pick Amber - ink text only */
+  --color-top-pick: #F2A900;
+  --color-top-pick-text: #0B1F33;
+  
+  /* Semantic Status */
+  --color-success: #1B7F4B;
+  --color-success-bg: rgba(27, 127, 75, 0.10);
+  --color-warning: #9A5B00;
+  --color-warning-bg: rgba(154, 91, 0, 0.10);
+  --color-error: #B42318;
+  --color-error-bg: rgba(180, 35, 24, 0.10);
+  
+  /* Score Ramp: Single hue, light to dark */
+  --score-low: #D7EEF0;
+  --score-mid: #0E7C86;
+  --score-high: #0B3B4A;
+  
+  /* Colour-blind-safe Cluster Colors (Okabe-Ito) */
+  --cluster-1: #0072B2; /* Commercial Hub - Blue */
+  --cluster-2: #E69F00; /* Residential Zone - Orange */
+  --cluster-3: #009E73; /* Transit Corridor - Green */
+  --cluster-4: #CC79A7; /* Emerging Area - Purple */
+  --cluster-5: #56B4E9; /* Premium District - Sky Blue */
+  
+  /* Scrollbar */
+  --scrollbar-track: rgba(15, 23, 42, 0.05);
+  --scrollbar-thumb: rgba(15, 23, 42, 0.28);
+  --scrollbar-thumb-hover: rgba(15, 23, 42, 0.45);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(11, 31, 51, 0.05);
+  --shadow-md: 0 4px 12px rgba(11, 31, 51, 0.08);
+  --shadow-lg: 0 10px 24px rgba(11, 31, 51, 0.12);
+  
+  /* ==================== SHAPE (TWO RADII ONLY) ==================== */
+  --radius-control: 8px;   /* buttons, inputs, sliders, pills */
+  --radius-panel: 14px;    /* cards, modals, sheets, panels */
+  
+  /* ==================== Z-INDEX SCALE ==================== */
+  --z-base: 1;
+  --z-sticky: 100;
+  --z-dock: 200;
+  --z-header: 300;
+  --z-drawer: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+
+  /* ==================== TYPOGRAPHY SCALE ==================== */
+  --font-family-base: 'IBM Plex Sans', 'Noto Sans Tamil', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-family-condensed: 'IBM Plex Sans Condensed', 'IBM Plex Sans', sans-serif;
+  --font-tabular: tabular-nums;
+  
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-md: 1.1875rem;  /* 19px */
+  --text-lg: 1.4375rem;  /* 23px */
+  --text-xl: 1.75rem;    /* 28px */
+  --text-2xl: 2.5rem;    /* 40px */
+  
+  --line-height-tight: 1.25;
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.65;
+  
+  --max-content-width: 68ch;
+}
+
+/* ==================== DARK MODE OVERRIDES ==================== */
+html.dark-theme,
+body.dark-theme {
+  --color-ink: #E8EEF4;
+  --color-text-primary: #E8EEF4;
+  --color-text-secondary: #A9B8C6;
+  --color-text-tertiary: #8496A8;
+  
+  --color-sheet: #0A1624;
+  --color-bg-page: #0A1624;
+  
+  --color-surface: #10202F;
+  --color-surface-hover: #162B3F;
+  --color-surface-elevated: #162B3F;
+  
+  --color-border: #1E364D;
+  --color-border-subtle: #152738;
+  --color-border-hover: #294765;
+  
+  --color-primary: #3CC4CF;
+  --color-primary-hover: #4ED2DD;
+  --color-primary-subtle: rgba(60, 196, 207, 0.15);
+  --color-primary-text: #0B1F33;
+  
+  --color-top-pick: #F2A900;
+  --color-top-pick-text: #0B1F33;
+  
+  --color-success: #2EC275;
+  --color-success-bg: rgba(46, 194, 117, 0.15);
+  --color-warning: #FFB340;
+  --color-warning-bg: rgba(255, 179, 64, 0.15);
+  --color-error: #F87171;
+  --color-error-bg: rgba(248, 113, 113, 0.15);
+  
+  --score-low: #152A3C;
+  --score-mid: #257F8B;
+  --score-high: #3CC4CF;
+  
+  --scrollbar-track: rgba(255, 255, 255, 0.04);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.22);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.38);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.55);
+}

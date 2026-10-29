@@ -22,7 +22,7 @@ try:
         init_database, create_user, get_user_by_email, verify_password,
         save_search, get_user_searches, save_preference, get_user_preferences,
         add_favorite, get_user_favorites, remove_favorite, get_all_users,
-        get_user_stats, deactivate_user, update_last_login,
+        get_user_stats, deactivate_user, activate_user, update_last_login,
         save_contact_message, get_contact_messages
     )
     from .auth import create_token, verify_token, extract_token_from_header
@@ -34,7 +34,7 @@ except ImportError:
         init_database, create_user, get_user_by_email, verify_password,
         save_search, get_user_searches, save_preference, get_user_preferences,
         add_favorite, get_user_favorites, remove_favorite, get_all_users,
-        get_user_stats, deactivate_user, update_last_login,
+        get_user_stats, deactivate_user, activate_user, update_last_login,
         save_contact_message, get_contact_messages
     )
     from auth import create_token, verify_token, extract_token_from_header
@@ -678,6 +678,16 @@ async def admin_deactivate_user(user_id: int, current_user: dict = Depends(get_a
     try:
         deactivate_user(user_id)
         return {"success": True, "message": "User deactivated"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/admin/users/{user_id}/activate", tags=["Admin"])
+async def admin_activate_user(user_id: int, current_user: dict = Depends(get_admin_user)):
+    """Reactivate user account (admin only)"""
+    try:
+        activate_user(user_id)
+        return {"success": True, "message": "User reactivated"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

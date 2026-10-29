@@ -1,3159 +1,532 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Locus Copilot - Location Intelligence</title>
-    
-    <!-- Instantaneous Theme Bootstrapper to prevent FOUT -->
-    <script>
-        (function() {
-            var t = localStorage.getItem('theme');
-            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (t === 'dark' || (!t && prefersDark)) {
-                document.documentElement.classList.add('dark-theme');
-            } else {
-                document.documentElement.classList.remove('dark-theme');
-            }
-        })();
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Locus Copilot — Smart Location Intelligence for Chennai</title>
+  <meta name="description" content="Data-driven site selection and commercial location recommendation engine for Chennai businesses.">
+  
+  <!-- Typography: IBM Plex Sans, IBM Plex Sans Condensed & Noto Sans Tamil -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Modular Design System -->
+  <link rel="stylesheet" href="css/tokens.css?v=3.0">
+  <link rel="stylesheet" href="css/base.css?v=3.0">
+  <link rel="stylesheet" href="css/layout.css?v=3.0">
+  <link rel="stylesheet" href="css/components.css?v=3.0">
 
-    <!-- Google Maps Platform -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZ4Egrbf8zXbG0yYXAmbkqTiUY68KBsRA&libraries=places"></script>
-    
-    <!-- Modern Apple Fonts (Plus Jakarta Sans & Inter) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Theme CSS -->
-    <link rel="stylesheet" href="theme.css?v=2.0">
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: var(--font-body, 'Inter', sans-serif);
-            background: var(--page-gradient), var(--bg-secondary);
-            background-attachment: fixed;
-            color: var(--text-primary);
-            background-color: var(--bg-secondary);
-        }
-        
-        /* ====== HEADER ====== */
-        .header {
-            background: var(--bg-primary);
-            padding: 0 2.5rem;
-            height: 64px;
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-        }
-        
-        .brand {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.35rem;
-            font-weight: 700;
-            letter-spacing: -0.4px;
-        }
-        
-        .brand span {
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .header-right {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-        
-        .header-right #userEmail {
-            font-weight: 500;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            padding: 0 0.5rem;
-            border-right: 1px solid var(--border-color);
-            display: none !important;
-        }
-        
-        .header-right a, .header-right button {
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-weight: 500;
-            padding: 0.5rem 0.9rem;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            border-radius: var(--radius-md);
-            transition: all var(--transition-fast);
-            font-size: 0.85rem;
-        }
-        
-        .header-right a:hover, .header-right button:hover {
-            color: var(--text-primary);
-            background: var(--bg-secondary);
-        }
-        
-        .logout { 
-            color: var(--error-text) !important; 
-        }
-        .logout:hover { 
-            background: rgba(255, 68, 68, 0.08) !important; 
-        }
-        
-        /* ====== LAYOUT ====== */
-        .container {
-            display: grid;
-            grid-template-columns: 340px 1fr;
-            gap: 1.25rem;
-            max-width: 1560px;
-            margin: 1.25rem auto;
-            padding: 0 1.5rem;
-            min-height: calc(100vh - 85px);
-        }
-        
-        @media (max-width: 1024px) {
-            .container { 
-                grid-template-columns: 1fr; 
-                margin: 1rem auto;
-                padding: 0 1rem;
-            }
-            .control-panel {
-                position: relative !important;
-                top: 0 !important;
-                max-height: none !important;
-            }
-        }
+  <!-- Flicker-Free Theme Bootstrapper (Respects OS Preference without overriding storage) -->
+  <script>
+    (function() {
+      var saved = localStorage.getItem('theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark-theme');
+      } else {
+        document.documentElement.classList.remove('dark-theme');
+      }
+    })();
+  </script>
 
-        .control-panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+  <style>
+    /* Hero Section */
+    .hero-section {
+      padding: 4.5rem 1.5rem 3.5rem;
+      max-width: 1240px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 3rem;
+      align-items: center;
+    }
 
-        .mobile-chevron {
-            display: none;
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            transition: transform 0.25s ease;
-        }
-        
-        .control-panel-body {
-            display: block;
-            padding-bottom: 80px;
-        }
+    @media (max-width: 900px) {
+      .hero-section {
+        grid-template-columns: 1fr;
+        padding: 2.5rem 1rem 2rem;
+        gap: 2rem;
+      }
+    }
 
-        @media (max-width: 768px) {
-            .header {
-                padding: 0 1.25rem;
-            }
-            .header-right #userEmail {
-                display: none;
-            }
-            .header-right {
-                gap: 1rem;
-            }
-            .header-right a {
-                font-size: 0.8rem;
-            }
-            .container {
-                gap: 1rem;
-                padding: 0 0.75rem;
-                margin: 0.75rem auto;
-            }
-            .control-panel {
-                padding: 1rem !important;
-            }
-            .mobile-chevron {
-                display: block;
-            }
-            .control-panel-header {
-                cursor: pointer;
-            }
-            .control-panel-body {
-                display: none;
-                margin-top: 1.25rem;
-                border-top: 1px solid var(--border-color);
-                padding-top: 1.25rem;
-            }
-            .control-panel.open .control-panel-body {
-                display: block;
-                animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-            .control-panel.open .mobile-chevron {
-                transform: rotate(180deg);
-            }
-            .map-container {
-                height: 320px;
-            }
-            .results-toolbar {
-                padding: 0.75rem 1rem;
-            }
-            .results-tabs {
-                padding: 0.5rem 1rem 0;
-            }
-            .results-tab-btn {
-                padding: 0.4rem 0.75rem;
-                font-size: 0.78rem;
-            }
-            .result-item {
-                padding: 1rem !important;
-            }
-            .button-group, .button-group-full {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            .button-group button, .button-group-full button {
-                width: 100%;
-            }
-        }
-        
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* ====== CONTROL PANEL ====== */
-        .control-panel {
-            background: var(--bg-primary);
-            border-radius: var(--radius-md);
-            padding: 1.5rem;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg);
-            height: fit-content;
-            max-height: calc(100vh - 85px);
-            overflow-y: auto;
-            position: sticky;
-            top: 75px;
-        }
-        
-        .control-panel h1 {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 1.25rem;
-        }
-        
-        .section {
-            margin-bottom: 1.75rem;
-        }
-        
-        .section-label {
-            font-weight: 600;
-            color: var(--text-tertiary);
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .section-label::before {
-            content: '';
-            width: 3px;
-            height: 14px;
-            background: var(--accent-gradient);
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-        
-        label {
-            display: block;
-            font-weight: 500;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
-        }
-        
-        input[type="text"],
-        input[type="number"],
-        select {
-            width: 100%;
-            padding: 0.75rem 0.875rem;
-            margin-bottom: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-            font-family: inherit;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-        }
+    .hero-content h1 {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+      color: var(--color-ink);
+    }
 
-        /* Searchable Dropdown */
-        .searchable-select {
-            position: relative;
-            width: 100%;
-            margin-bottom: 0.4rem;
-        }
-        .searchable-select .search-input {
-            width: 100%;
-            padding: 0.6rem 2.2rem 0.6rem 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            font-size: 0.85rem;
-            font-family: inherit;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            box-sizing: border-box;
-            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-        }
-        .searchable-select .search-input:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(2,132,199,0.15);
-        }
-        .searchable-select .search-input::placeholder { color: var(--text-muted, var(--text-tertiary)); }
-        .searchable-select .dd-arrow {
-            position: absolute;
-            right: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-            color: var(--text-tertiary);
-            font-size: 0.65rem;
-        }
-        .searchable-select .dd-list {
-            display: none;
-            position: absolute;
-            top: calc(100% - 1px);
-            left: 0;
-            right: 0;
-            max-height: 240px;
-            overflow-y: auto;
-            background: var(--bg-primary);
-            border: 1px solid var(--accent-primary);
-            border-top: none;
-            border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-            z-index: 999;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-        }
-        .searchable-select.open .dd-list { display: block; }
-        .searchable-select.open .search-input {
-            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-            border-color: var(--accent-primary);
-        }
-        .searchable-select .dd-item {
-            padding: 0.5rem 0.75rem;
-            cursor: pointer;
-            font-size: 0.83rem;
-            color: var(--text-primary);
-            transition: background 0.12s ease, color 0.12s ease;
-        }
-        .searchable-select .dd-item:hover,
-        .searchable-select .dd-item.highlighted {
-            background: var(--accent-primary);
-            color: #fff;
-        }
-        .searchable-select .dd-item.selected {
-            font-weight: 600;
-            background: rgba(2,132,199,0.08);
-        }
-        .searchable-select .dd-empty {
-            padding: 0.75rem;
-            color: var(--text-tertiary);
-            font-size: 0.82rem;
-            text-align: center;
-        }
-        
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(2,132,199,0.15);
-        }
-        
-        /* ====== CRITERIA / WEIGHTS ====== */
-        .criteria-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-        
-        .criterion {
-            padding: 0.875rem 1rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            transition: border-color var(--transition-fast), background var(--transition-fast);
-        }
-        
-        .criterion:hover {
-            border-color: var(--border-hover);
-            background: var(--bg-tertiary);
-        }
-        
-        .criterion-name {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.6rem;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-        }
-        
-        .criterion-value {
-            background: var(--accent-gradient);
-            color: white;
-            font-weight: 700;
-            font-size: 0.73rem;
-            padding: 0.25rem 0.65rem;
-            border-radius: var(--radius-sm);
-            min-width: 42px;
-            text-align: center;
-        }
-        
-        .criterion-description {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            margin-bottom: 0.65rem;
-        }
-        
-        input[type="range"] {
-            width: 100%;
-            height: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: var(--border-color);
-            border-radius: 2px;
-            outline: none;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: var(--accent-primary);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-            border: 2.5px solid var(--bg-primary);
-            transition: transform 0.15s ease;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.15);
-        }
-        
-        input[type="range"]::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            background: var(--accent-primary);
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2.5px solid var(--bg-primary);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-        }
-        
-        /* ====== PRESETS ====== */
-        .presets {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.65rem;
-            margin-bottom: 0.75rem;
-        }
-        
-        .preset-btn {
-            padding: 0.6rem 0.75rem;
-            background: var(--bg-primary);
-            color: var(--accent-primary);
-            border: 1.5px solid var(--accent-primary);
-            border-radius: var(--radius-md);
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-        
-        .preset-btn:hover {
-            background: var(--accent-primary);
-            color: #fff;
-        }
-        
-        /* ====== BUTTONS ====== */
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-        }
-        
-        .button-group-full {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.65rem;
-            margin-top: 0.75rem;
-        }
-        
-        .button-group-full .btn-secondary {
-            flex: 1;
-            min-width: 0;
-            padding: 0.6rem 0.5rem;
-            font-size: 0.73rem;
-        }
-        
-        button {
-            padding: 0.65rem;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        
-        .btn-primary {
-            background: var(--accent-gradient);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            box-shadow: 0 4px 16px rgba(2,132,199,0.3);
-            transform: translateY(-1px);
-        }
-        
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-        
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--bg-hover);
-            border-color: var(--border-hover);
-        }
-        
-        .btn-tertiary {
-            background: transparent;
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-        
-        .btn-tertiary:hover {
-            background: var(--bg-secondary);
-            border-color: var(--border-hover);
-        }
-        
-        /* ====== RESULTS PANEL ====== */
-        .results-panel {
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .results-tabs {
-            display: flex;
-            gap: 0.5rem;
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border-color);
-            padding: 0.5rem 1.5rem 0;
-            margin-bottom: 0;
-        }
+    .hero-content p {
+      font-size: var(--text-md);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-relaxed);
+      margin-bottom: 2rem;
+    }
 
-        .results-tab-btn {
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.85rem;
-            font-weight: 600;
-            padding: 0.5rem 1.25rem;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            color: var(--text-secondary);
-            border-bottom: 3px solid transparent;
-            margin-bottom: -1px;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
 
-        .results-tab-btn:hover {
-            color: var(--text-primary);
-        }
+    .hero-tagline-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-primary);
+      background: var(--color-primary-subtle);
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-control);
+      margin-bottom: 1.25rem;
+    }
 
-        .results-tab-btn.active {
-            color: #1c8ea5;
-            border-bottom: 3px solid #1c8ea5;
-        }
-        
-        .map-container {
-            flex: 0 0 auto;
-            height: 480px;
-            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-            overflow: hidden;
-        }
-        
-        #map {
-            width: 100%;
-            height: 100%;
-        }
-        
-        /* ====== TOOLBAR ====== */
-        .results-toolbar {
-            padding: 0.875rem 1.5rem;
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .toolbar-left, .toolbar-right {
-            display: flex;
-            gap: 0.75rem;
-            align-items: center;
-        }
-        
-        .result-count {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
+    /* Hero Interactive Product Preview Card */
+    .hero-preview-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-panel);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .quality-badge {
-            font-size: 0.74rem;
-            font-weight: 600;
-            padding: 0.25rem 0.55rem;
-            border-radius: 999px;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            background: var(--bg-primary);
-        }
+    .preview-header {
+      padding: 0.85rem 1.25rem;
+      background: var(--color-sheet);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: var(--text-xs);
+      font-weight: 600;
+    }
 
-        .quality-badge.high {
-            color: var(--success-text);
-            border-color: var(--success-border);
-            background: var(--success-bg);
-        }
+    .preview-map-mock {
+      height: 220px;
+      background: #0E1726;
+      position: relative;
+      overflow: hidden;
+    }
 
-        .quality-badge.medium {
-            color: var(--info-text);
-            border-color: var(--info-border);
-            background: var(--info-bg);
-        }
+    /* Orchestrated Pin Drop Animation (5 -> 1) */
+    .map-pin-mock {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: var(--color-primary-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      border: 2px solid #FFFFFF;
+      animation: pinDrop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
 
-        .quality-badge.low {
-            color: var(--error-text);
-            border-color: var(--error-border);
-            background: var(--error-bg);
-        }
-        
-        .sort-filter select {
-            padding: 0.35rem 0.6rem;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            color: var(--text-primary);
-        }
-        
-        .results-list {
-            flex: 0 0 auto;
-            max-height: 420px;
-            overflow-y: auto;
-            padding: 1.25rem 1.5rem;
-            padding-bottom: 80px;
-            background: var(--bg-secondary);
-        }
-        
-        .results-list.empty {
-            text-align: center;
-            color: var(--text-tertiary);
-            padding: 3rem 1.5rem;
-            font-size: 0.92rem;
-        }
-        
-        .result-item {
-            padding: 1.1rem 1.25rem;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            margin-bottom: 0.75rem;
-            cursor: pointer;
-            transition: transform 0.32s cubic-bezier(0.4,0,0.2,1),
-                        box-shadow 0.32s cubic-bezier(0.4,0,0.2,1),
-                        border-color 0.32s cubic-bezier(0.4,0,0.2,1),
-                        background 0.32s cubic-bezier(0.4,0,0.2,1);
-            opacity: 0;
-            animation: resultSlideIn 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
-        }
-        
-        .result-item:nth-child(1) { animation-delay: 0.02s; }
-        .result-item:nth-child(2) { animation-delay: 0.06s; }
-        .result-item:nth-child(3) { animation-delay: 0.10s; }
-        .result-item:nth-child(4) { animation-delay: 0.14s; }
-        .result-item:nth-child(5) { animation-delay: 0.18s; }
-        .result-item:nth-child(6) { animation-delay: 0.22s; }
-        .result-item:nth-child(7) { animation-delay: 0.26s; }
-        .result-item:nth-child(8) { animation-delay: 0.30s; }
-        .result-item:nth-child(9) { animation-delay: 0.34s; }
-        .result-item:nth-child(10) { animation-delay: 0.38s; }
-        
-        @keyframes resultSlideIn {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        
-        .result-item:hover {
-            border-color: var(--accent-secondary);
-            box-shadow: 0 4px 20px var(--glow-accent);
-            transform: translateY(-2px);
-        }
-        
-        .result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 0.75rem;
-            gap: 1rem;
-        }
-        
-        .result-title-section { flex: 1; }
-        
-        .result-locality {
-            font-weight: 700;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            margin-bottom: 0.2rem;
-            line-height: 1.35;
-        }
-        
-        .result-area {
-            font-size: 0.8rem;
-            color: var(--text-tertiary);
-            font-weight: 500;
-        }
-        
-        .result-distance {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            margin-top: 0.1rem;
-        }
-        
-        .result-score {
-            background: var(--accent-gradient);
-            color: white;
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 0.82rem;
-            text-align: center;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        
-        /* ====== CRITERIA BARS ====== */
-        .criteria-bars {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem 1rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .criterion-bar {
-            font-size: 0.7rem;
-        }
-        
-        .bar-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.2rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        
-        .bar-fill {
-            height: 3px;
-            background: var(--border-color);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        
-        .bar-value {
-            height: 100%;
-            background: var(--accent-gradient);
-            border-radius: 2px;
-            transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
-        }
-        
-        /* ====== CONSTRAINT DETAILS ====== */
-        .constraint-details {
-            background: var(--bg-secondary);
-            border-radius: 6px;
-            padding: 0.6rem 0.75rem;
-            margin-top: 0.5rem;
-            border: 1px solid var(--border-color);
-            font-size: 0.72rem;
-        }
-        
-        .constraint-row {
-            display: grid;
-            grid-template-columns: 100px 1fr 56px;
-            gap: 0.6rem;
-            padding: 0.35rem 0;
-            border-bottom: 1px solid var(--border-color);
-            align-items: center;
-        }
-        
-        .constraint-row:last-child { border-bottom: none; }
-        
-        .constraint-label {
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-        
-        .constraint-value {
-            color: var(--text-tertiary);
-        }
-        
-        .constraint-score {
-            background: var(--accent-gradient);
-            color: white;
-            padding: 0.2rem 0.45rem;
-            border-radius: 4px;
-            text-align: center;
-            font-weight: 600;
-            font-size: 0.68rem;
-        }
+    @keyframes pinDrop {
+      0% { opacity: 0; transform: translateY(-30px) scale(0.6); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
 
-        .explain-panel {
-            margin-top: 0.55rem;
-            border: 1px solid var(--border-color);
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 0.65rem 0.7rem;
-        }
+    .pin-5 { top: 30%; left: 22%; animation-delay: 0.1s; background: var(--cluster-1); }
+    .pin-4 { top: 65%; left: 35%; animation-delay: 0.25s; background: var(--cluster-4); }
+    .pin-3 { top: 25%; left: 70%; animation-delay: 0.4s; background: var(--cluster-3); }
+    .pin-2 { top: 70%; left: 68%; animation-delay: 0.55s; background: var(--cluster-2); }
+    .pin-1 { top: 45%; left: 48%; animation-delay: 0.7s; background: var(--color-top-pick); color: var(--color-top-pick-text); width: 34px; height: 34px; z-index: 10; font-size: 14px; }
 
-        .explain-title {
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--accent-primary);
-            margin-bottom: 0.35rem;
-        }
+    .preview-score-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
 
-        .explain-text {
-            font-size: 0.76rem;
-            color: var(--text-secondary);
-            line-height: 1.45;
-            margin-bottom: 0.45rem;
-        }
+    /* Section Styles */
+    .section-wrap {
+      padding: 4rem 1.5rem;
+      max-width: 1240px;
+      margin: 0 auto;
+    }
 
-        .driver-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.35rem;
-        }
+    .section-title-wrap {
+      margin-bottom: 2.5rem;
+      text-align: center;
+    }
 
-        .driver-chip {
-            font-size: 0.68rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            background: var(--bg-primary);
-            padding: 0.18rem 0.5rem;
-            border-radius: 999px;
-        }
-        
-        /* ====== RESULT ACTIONS ====== */
-        .result-actions {
-            display: flex;
-            gap: 0.4rem;
-            margin-top: 0.6rem;
-        }
-        
-        .result-actions button {
-            flex: 1;
-            padding: 0.35rem 0.5rem;
-            font-size: 0.68rem;
-            text-transform: none;
-            letter-spacing: 0;
-            font-weight: 600;
-        }
-        
-        .result-item.selected {
-            border-color: var(--accent-primary);
-            background: var(--accent-light);
-        }
-        
-        /* ====== STATUS MESSAGES ====== */
-        .status-message {
-            padding: 0.65rem 0.85rem;
-            border-radius: var(--radius-sm);
-            margin-bottom: 0.75rem;
-            font-size: 0.82rem;
-            display: none;
-            animation: resultSlideIn 0.3s ease;
-        }
-        
-        .status-message.show { display: block; }
-        .status-message.info { background: var(--info-bg); color: var(--info-text); border: 1px solid var(--info-border); }
-        .status-message.error { background: var(--error-bg); color: var(--error-text); border: 1px solid var(--error-border); }
-        .status-message.success { background: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid var(--border-color);
-            border-top-color: var(--accent-primary);
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            vertical-align: middle;
-        }
-        
-        /* ====== COMPARISON MODAL ====== */
-        .comparison-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-        }
-        
-        .comparison-modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.2s ease;
-        }
+    .section-title-wrap h2 {
+      font-size: var(--text-xl);
+      margin-bottom: 0.5rem;
+    }
 
-        .onboarding-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(7, 10, 14, 0.56);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1400;
-            padding: 1rem;
-        }
+    .section-title-wrap p {
+      margin: 0 auto;
+    }
 
-        .onboarding-modal.active {
-            display: flex;
-            animation: fadeIn 0.28s ease;
-        }
+    /* 4-Step Sequence Grid */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
 
-        .onboarding-content {
-            width: min(560px, 100%);
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 1.1rem 1.2rem;
-            box-shadow: var(--shadow-lg);
-        }
+    .step-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-panel);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
 
-        .onboarding-content h3 {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.1rem;
-            margin-bottom: 0.35rem;
-        }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-control);
+      background: var(--color-primary-subtle);
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: var(--text-sm);
+    }
 
-        .onboarding-content p {
-            font-size: 0.86rem;
-            color: var(--text-secondary);
-            line-height: 1.55;
-            margin-bottom: 0.8rem;
-        }
+    /* Business Type Quick Pick Grid */
+    .business-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
 
-        .onboarding-list {
-            display: grid;
-            gap: 0.45rem;
-            margin-bottom: 0.95rem;
-        }
+    .business-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-panel);
+      padding: 1.25rem 1rem;
+      text-align: center;
+      text-decoration: none;
+      color: var(--color-ink);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    }
 
-        .onboarding-item {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            background: var(--bg-secondary);
-            border-radius: var(--radius-sm);
-            padding: 0.55rem 0.6rem;
-        }
+    .business-card:hover {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-2px);
+      text-decoration: none;
+    }
 
-        .onboarding-actions {
-            display: flex;
-            gap: 0.45rem;
-            justify-content: flex-end;
-        }
+    .business-card .biz-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-control);
+      background: var(--color-sheet);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-primary);
+    }
 
-        .onboarding-actions button {
-            min-width: 124px;
-        }
-        
-        .comparison-content {
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            padding: 1.75rem;
-            max-width: 88vw;
-            max-height: 88vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-xl);
-            animation: scaleIn 0.25s cubic-bezier(0.4,0,0.2,1);
-        }
-        
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.25rem;
-            margin-top: 1.25rem;
-        }
-        
-        .comparison-card {
-            padding: 1.25rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            transition: border-color var(--transition-fast);
-        }
-        
-        .comparison-card:hover {
-            border-color: var(--accent-secondary);
-        }
-        
-        .comparison-card h3 {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.75rem;
-        }
-        
-        .comparison-metric {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.6rem 0;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.85rem;
-        }
-        
-        .comparison-metric:last-child { border-bottom: none; }
-        
-        .comparison-metric-label {
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        
-        .comparison-metric-value {
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        
-        .coord-info {
-            margin-top: 0.5rem;
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            line-height: 1.6;
-        }
+    .business-card .biz-title {
+      font-weight: 600;
+      font-size: var(--text-sm);
+    }
 
-        .result-name {
-            font-weight: 700;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            margin-bottom: 0.3rem;
-        }
+    .business-card .biz-hint {
+      font-size: var(--text-xs);
+      color: var(--color-text-tertiary);
+    }
 
-        /* ===== ML / AI Feature Styles ===== */
+    /* Transparency & Limits Box */
+    .disclosure-box {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-panel);
+      padding: 2rem;
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
 
-        .ml-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.2rem;
-            padding: 0.15rem 0.45rem;
-            border-radius: 3px;
-            font-size: 0.6rem;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            background: linear-gradient(135deg, #0d6e8a 0%, #1c8ea5 100%);
-            color: #fff;
-            vertical-align: middle;
-        }
-
-        .smart-weight-btn {
-            width: 100%;
-            margin-top: 0.5rem;
-            padding: 0.55rem 0.8rem;
-            background: linear-gradient(135deg, #0d6e8a 0%, #1c8ea5 100%);
-            color: #fff;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.35rem;
-        }
-
-        .smart-weight-btn:hover {
-            box-shadow: 0 8px 22px rgba(13, 110, 138, 0.35);
-            transform: translateY(-1px);
-        }
-
-        .smart-weight-btn:active {
-            transform: translateY(0);
-        }
-
-        .smart-weight-btn:disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .zone-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.6rem 0.75rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            margin-top: 0.4rem;
-            cursor: pointer;
-            transition: border-color var(--transition-fast), background var(--transition-fast);
-        }
-
-        .zone-toggle:hover {
-            border-color: var(--border-hover);
-            background: var(--bg-tertiary);
-        }
-
-        .zone-toggle-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-        }
-
-        .toggle-switch {
-            width: 36px;
-            height: 19px;
-            background: var(--border-color);
-            border-radius: 10px;
-            position: relative;
-            transition: background 0.25s cubic-bezier(0.4,0,0.2,1);
-            flex-shrink: 0;
-        }
-
-        .zone-toggle.active .toggle-switch {
-            background: linear-gradient(135deg, #0d6e8a 0%, #1c8ea5 100%);
-        }
-
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 15px;
-            height: 15px;
-            background: #fff;
-            border-radius: 50%;
-            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-        }
-
-        .zone-toggle.active .toggle-switch::after {
-            transform: translateX(17px);
-        }
-
-        .zone-legend {
-            display: none;
-            flex-direction: column;
-            gap: 0.3rem;
-            margin-top: 0.5rem;
-            padding: 0.65rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-        }
-
-        .zone-legend.show {
-            display: flex;
-            animation: resultSlideIn 0.3s ease;
-        }
-
-        .zone-legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            font-size: 0.74rem;
-        }
-
-        .zone-dot {
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .zone-legend-name {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .zone-legend-count {
-            color: var(--text-tertiary);
-            font-size: 0.68rem;
-            margin-left: auto;
-        }
-
-        .ai-recs-panel {
-            margin-top: 0.6rem;
-            padding: 0.75rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            display: none;
-        }
-
-        .ai-recs-panel.show {
-            display: block;
-            animation: resultSlideIn 0.3s cubic-bezier(0.4,0,0.2,1);
-        }
-
-        .ai-recs-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-
-        .ai-recs-header h3 {
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-        }
-
-        .ai-rec-card {
-            padding: 0.6rem 0.7rem;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            margin-bottom: 0.35rem;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-            cursor: pointer;
-        }
-
-        .ai-rec-card:hover {
-            border-color: var(--border-hover);
-            box-shadow: var(--shadow-sm);
-            transform: translateY(-1px);
-        }
-
-        .ai-rec-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.2rem;
-        }
-
-        .ai-rec-name {
-            font-weight: 600;
-            font-size: 0.8rem;
-            color: var(--text-primary);
-        }
-
-        .ai-rec-score {
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 0.15rem 0.5rem;
-            border-radius: 3px;
-            background: linear-gradient(135deg, #0d6e8a 0%, #1c8ea5 100%);
-            color: #fff;
-        }
-
-        .ai-rec-reason {
-            font-size: 0.7rem;
-            color: var(--text-tertiary);
-            line-height: 1.35;
-        }
-
-        .ai-rec-empty {
-            text-align: center;
-            padding: 1rem 0.5rem;
-            color: var(--text-tertiary);
-            font-size: 0.8rem;
-        }
-
-        .ai-rec-empty-icon {
-            font-size: 1.2rem;
-            margin-bottom: 0.2rem;
-            opacity: 0.4;
-        }
-
-        .smart-weight-toast {
-            position: fixed;
-            bottom: 1.5rem;
-            left: 50%;
-            transform: translateX(-50%) translateY(80px);
-            background: linear-gradient(135deg, #0d6e8a 0%, #1c8ea5 100%);
-            color: #fff;
-            padding: 0.65rem 1.25rem;
-            border-radius: var(--radius-sm);
-            font-size: 0.8rem;
-            font-weight: 600;
-            box-shadow: 0 10px 28px rgba(13, 110, 138, 0.35);
-            z-index: 9999;
-            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            pointer-events: none;
-        }
-
-        .smart-weight-toast.show {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        /* Pulse animation for selected red marker */
-        @keyframes pulse-ring {
-            0%   { box-shadow: 0 0 0 3px rgba(231,76,60,0.4), 0 2px 8px rgba(0,0,0,0.35); }
-            70%  { box-shadow: 0 0 0 12px rgba(231,76,60,0), 0 2px 8px rgba(0,0,0,0.1); }
-            100% { box-shadow: 0 0 0 3px rgba(231,76,60,0.4), 0 2px 8px rgba(0,0,0,0.35); }
-        }
-        .selected-location-icon { background: transparent !important; border: none !important; }
-        .result-marker-icon { background: transparent !important; border: none !important; }
-    </style>
+    @media (max-width: 768px) {
+      .disclosure-box {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <a href="landing.html" style="text-decoration: none; color: inherit;"><div class="brand">Locus <span>Copilot</span></div></a>
-        <div class="header-right">
-            <span id="userEmail"></span>
-            <a href="dashboard.html" class="nav-btn" id="dashboardLink" onclick="navigateTo(event,'dashboard.html')">Dashboard</a>
-            <a href="admin.html" class="nav-btn" id="adminLink" style="display:none;" onclick="navigateTo(event,'admin.html')">Admin</a>
-            <label class="switch" title="Toggle theme">
-                <input type="checkbox" id="themeToggle" />
-                <span class="slider"></span>
-            </label>
-            <button class="nav-btn logout" onclick="logout()">Sign out</button>
-        </div>
-    </div>
-    
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Control Panel (Left) -->
-        <div class="control-panel" id="controlPanel">
-            <div class="control-panel-header" onclick="toggleMobileControls()">
-                <h1>Location Analysis</h1>
-                <span class="mobile-chevron" id="mobileChevron">▼</span>
-            </div>
-            
-            <div class="control-panel-body" id="controlPanelBody">
-                <div id="statusMessage" class="status-message"></div>
-            
-            <div class="section">
-                <div class="section-label">Step 1: Select Location</div>
-                <label>Locality / Area</label>
-                <select id="localitySelect" style="display:none;">
-                    <option value="">-- Select locality --</option>
-                </select>
-                <div class="searchable-select" id="localitySearchable">
-                    <input type="text" class="search-input" id="localitySearchInput" placeholder="Search locality..." autocomplete="off">
-                    <span class="dd-arrow">▼</span>
-                    <div class="dd-list" id="localityDropdownList"></div>
-                </div>
-                <div class="coord-info">
-                    <strong>Coordinates:</strong><br>
-                    Lat: <span id="latDisplay">-</span><br>
-                    Lon: <span id="lonDisplay">-</span>
-                </div>
-            </div>
-            
-            <div class="section">
-                <div class="section-label">Step 1B: Business Type</div>
-                <label>Business Category</label>
-                <select id="businessTypeSelect" onchange="onBusinessTypeChange()">
-                    <option value="">-- All Types --</option>
-                    <option value="medical">Medical</option>
-                    <option value="restaurant">Restaurant/Cafe</option>
-                    <option value="laptop">Laptop/Electronics</option>
-                    <option value="mobile">Mobile Services</option>
-                    <option value="automobile">Automobile Repairs</option>
-                    <option value="stationery">Stationery/Books</option>
-                </select>
 
-            </div>
-            
-            <div class="section">
-                <div class="section-label">Step 2: Search Radius</div>
-                <label>Radius (km)</label>
-                <input type="number" id="radiusInput" value="5" min="1" max="15" step="1" onchange="onRadiusChange()" oninput="onRadiusChange()">
-            </div>
-            
-            <div class="section">
-                <div class="section-label">Step 3: Profile</div>
-                <div class="presets">
-                    <button class="preset-btn" onclick="applyPreset('balanced')">Balanced</button>
-                    <button class="preset-btn" onclick="applyPreset('budget')">Budget</button>
-                    <button class="preset-btn" onclick="applyPreset('foot_traffic')">Traffic</button>
-                    <button class="preset-btn" onclick="applyPreset('low_competition')">Low Comp</button>
-                </div>
-                <button class="btn-tertiary" onclick="loadPreferences()" style="width:100%; margin-top: 1.2rem; font-size: 0.75rem; padding: 0.5rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Load Saved Preferences</button>
-            </div>
-            
-            <div class="section">
-                <div class="section-label">Step 4: Weights</div>
-                <div class="criteria-group">
-                    <div class="criterion">
-                        <div class="criterion-name">
-                            Affordability
-                            <span class="criterion-value" id="rentValue">25%</span>
-                        </div>
-                        <div class="criterion-description">Lower rent = higher score</div>
-                        <input type="range" id="rentWeight" value="25" min="0" max="100" step="5" onchange="updateValues()">
-                    </div>
-                    
-                    <div class="criterion">
-                        <div class="criterion-name">
-                            Crowd Density
-                            <span class="criterion-value" id="crowdValue">25%</span>
-                        </div>
-                        <div class="criterion-description">More footfall = higher score</div>
-                        <input type="range" id="crowdWeight" value="25" min="0" max="100" step="5" onchange="updateValues()">
-                    </div>
-                    
-                    <div class="criterion">
-                        <div class="criterion-name">
-                            Competition
-                            <span class="criterion-value" id="competitionValue">25%</span>
-                        </div>
-                        <div class="criterion-description">Use-case based: market strength or low same-type competition</div>
-                        <input type="range" id="competitionWeight" value="25" min="0" max="100" step="5" onchange="updateValues()">
-                    </div>
-                    
-                    <div class="criterion">
-                        <div class="criterion-name">
-                            Accessibility
-                            <span class="criterion-value" id="accessibilityValue">25%</span>
-                        </div>
-                        <div class="criterion-description">More transit = higher score</div>
-                        <input type="range" id="accessibilityWeight" value="25" min="0" max="100" step="5" onchange="updateValues()">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section">
-                <div class="section-label">AI / ML Features</div>
-                <div class="zone-toggle" id="zoneToggle" onclick="toggleZoneOverlay()">
-                    <span class="zone-toggle-label">🌐 Show Zone Clusters <span class="ml-badge">ML</span></span>
-                    <div class="toggle-switch"></div>
-                </div>
-                <div class="zone-legend" id="zoneLegend"></div>
-            </div>
-            
-            <div class="button-group">
-                <button class="btn-primary" id="analyzeBtn" onclick="analyzeLocation()">Analyze</button>
-                <button class="btn-secondary" onclick="resetWeights()">Reset</button>
-            </div>
-            <div class="button-group-full">
-                <button class="btn-secondary" onclick="saveSearch()">Save Search</button>
-                <button class="btn-secondary" onclick="exportResults()">Export CSV</button>
-                <button class="btn-secondary" onclick="getRecommendations()">Get Recommendations</button>
-            </div>
-            </div> <!-- End of control-panel-body -->
-
-
-        </div>
-        
-        <!-- Results Panel (Right) -->
-        <div class="results-panel">
-            <div class="map-container">
-                <div id="map"></div>
-            </div>
-            
-            <!-- Results Tab Navigation -->
-            <div class="results-tabs">
-                <button class="results-tab-btn active" id="tabAll" onclick="switchResultTab('all')">
-                    📋 Location Rankings
-                </button>
-                <button class="results-tab-btn" id="tabAi" onclick="switchResultTab('ai')">
-                    ✨ AI Personalized Picks <span class="ml-badge" style="background: var(--accent-primary); font-size: 0.6rem; padding: 0.1rem 0.35rem; border-radius: 4px; color: #fff; font-weight: bold; margin-left: 0.2rem;">AI</span>
-                </button>
-            </div>
-
-            <!-- Results Toolbar -->
-            <div class="results-toolbar" style="border-top: none;">
-                <div class="toolbar-left">
-                    <span id="resultCount" class="result-count">0 Results</span>
-                </div>
-                <div class="toolbar-right">
-                    <div class="sort-filter" id="sortFilterWrapper">
-                        <select id="sortBy" onchange="sortResults()">
-                            <option value="score">Sort by Score</option>
-                            <option value="distance">Sort by Distance</option>
-                            <option value="rent">Sort by Rent</option>
-                            <option value="crowd">Sort by Crowd</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Results List -->
-            <div class="results-list" id="resultsList">
-                <div class="empty">Select a locality and click Analyze</div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Comparison Modal -->
-    <div id="comparisonModal" class="comparison-modal" onclick="closeComparison(event)">
-        <div class="comparison-content" onclick="event.stopPropagation()">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2 style="font-family: Poppins; color: var(--text-primary);">Compare Locations</h2>
-                <button class="btn-secondary" onclick="closeComparison()" style="padding: 0.4rem 0.8rem;">Close</button>
-            </div>
-            <div class="comparison-grid" id="comparisonGrid"></div>
-        </div>
-    </div>
-    
-    <!-- Smart Weight Toast -->
-    <div class="smart-weight-toast" id="smartWeightToast"></div>
-
-    <!-- First-Time Onboarding -->
-    <div class="onboarding-modal" id="onboardingModal" onclick="closeOnboarding(false)">
-        <div class="onboarding-content" onclick="event.stopPropagation()">
-            <h3>Welcome to Locus Copilot</h3>
-            <p>Quick setup to get high-quality recommendations in under a minute.</p>
-            <div class="onboarding-list">
-                <div class="onboarding-item">1. Pick a locality and search radius for your target zone.</div>
-                <div class="onboarding-item">2. Select business type to apply type-aware ranking behavior.</div>
-                <div class="onboarding-item">3. Click Analyze and review the "Why this rank" panel under each result.</div>
-            </div>
-            <div class="onboarding-actions">
-                <button class="btn-secondary" onclick="closeOnboarding(false)">Skip for now</button>
-                <button class="btn-primary" onclick="startGuidedSetup()">Start setup</button>
-            </div>
-        </div>
-    </div>
-    
-    
-    
-    
-    <script>
-        // Global Fetch interceptor to handle 401 Unauthorized
-        const originalFetch = window.fetch;
-        window.fetch = async function(...args) {
-            const response = await originalFetch(...args);
-            if (response.status === 401) {
-                localStorage.removeItem("token");
-                localStorage.removeItem("email");
-                localStorage.removeItem("is_admin");
-                window.location.href = "login.html";
-            }
-            return response;
-        };
-
-        const isLocalDev = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-        const API_BASE = (isLocalDev && window.location.port !== "8000") ? "http://localhost:8000/api" : "/api";
-
-        // ==================== THEME MANAGEMENT ====================
-        
-        function initTheme() {
-            const theme = localStorage.getItem('theme') || 'light';
-            applyTheme(theme);
-            
-            const themeToggle = document.getElementById('themeToggle');
-            if (themeToggle) {
-                themeToggle.checked = (theme === 'dark');
-                themeToggle.addEventListener('change', (e) => {
-                    applyTheme(e.target.checked ? 'dark' : 'light');
-                });
-            }
-        }
-        
-        function applyTheme(theme, animate = true) {
-            if (animate) {
-                document.documentElement.classList.add('theme-transitioning');
-                setTimeout(() => document.documentElement.classList.remove('theme-transitioning'), 450);
-            }
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark-theme');
-                document.body.classList.add('dark-theme');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.documentElement.classList.remove('dark-theme');
-                document.body.classList.remove('dark-theme');
-                localStorage.setItem('theme', 'light');
-            }
-            const themeToggle = document.getElementById('themeToggle');
-            if (themeToggle) {
-                themeToggle.checked = (theme === 'dark');
-            }
-            updateMapTileLayer();
-        }
-        
-        // ==================== AUTHENTICATION ====================
-        
-        function navigateTo(e, url) {
-            if (e && e.preventDefault) e.preventDefault();
-            if (typeof e === 'string' && !url) { url = e; }
-            window.location.href = url;
-        }
-
-        function checkAuth() {
-            const token = localStorage.getItem("token");
-            const email = localStorage.getItem("email");
-            const isAdmin = localStorage.getItem("is_admin") === "true";
-            
-            if (!token) {
-                window.location.href = "login.html";
-                return null;
-            }
-            
-            if (email) {
-                document.getElementById("userEmail").textContent = email;
-            }
-            
-            if (isAdmin) {
-                document.getElementById("adminLink").style.display = "block";
-            }
-            
-            return token;
-        }
-        
-        function logout() {
-            localStorage.removeItem("token");
-            localStorage.removeItem("email");
-            localStorage.removeItem("is_admin");
-            document.body.classList.add('page-exit');
-            setTimeout(() => { window.location.href = 'landing.html'; }, 250);
-        }
-        
-        function getAuthHeaders() {
-            const token = localStorage.getItem("token");
-            return {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            };
-        }
-        
-        // ==================== GLOBAL VARIABLES ====================
-        
-        let localities = [];
-        let map = null;
-        let tileLayer = null;
-        let currentResults = [];
-        let selectedComparison = [];
-        let zoneOverlayVisible = false;
-        let zoneCircles = [];
-        let zoneOverlayData = null;
-        let zoneClusterSummary = null;
-        let currentTab = 'all';
-        let aiRecommendations = [];
-        let smartWeightsCache = null;
-        let selectedMarker = null;
-        let radiusCircle = null;
-        let resultMarkers = [];
-        let competitorMarkers = [];
-        let infoWindow = null;
-        let currentLiveIntel = null;
-        let ddHighlightIndex = -1;
-        let currentDataQuality = null;
-
-        // ==================== MAP INITIALIZATION ====================
-
-        const APPLE_DARK_MAP_STYLE = [
-            { elementType: "geometry", stylers: [{ color: "#13161f" }] },
-            { elementType: "labels.text.stroke", stylers: [{ color: "#13161f" }] },
-            { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
-            { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#f1f5f9" }] },
-            { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#38bdf8" }] },
-            { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#112022" }] },
-            { featureType: "road", elementType: "geometry", stylers: [{ color: "#1e2433" }] },
-            { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#181d28" }] },
-            { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#2d3748" }] },
-            { featureType: "transit", elementType: "geometry", stylers: [{ color: "#1b212d" }] },
-            { featureType: "water", elementType: "geometry", stylers: [{ color: "#09101a" }] },
-            { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#475569" }] }
-        ];
-
-        function updateMapTileLayer() {
-            if (map && window.google && window.google.maps) {
-                const isDark = document.documentElement.classList.contains('dark-theme') || document.body.classList.contains('dark-theme');
-                map.setOptions({
-                    styles: isDark ? APPLE_DARK_MAP_STYLE : []
-                });
-            }
-        }
-
-        function ensureMap(lat, lon, zoom) {
-            lat = lat || 13.0827;
-            lon = lon || 80.2707;
-            zoom = zoom || 13;
-            if (!map && window.google && window.google.maps) {
-                const isDark = document.documentElement.classList.contains('dark-theme') || document.body.classList.contains('dark-theme');
-                map = new google.maps.Map(document.getElementById('map'), {
-                    center: { lat: lat, lng: lon },
-                    zoom: zoom,
-                    mapTypeControl: true,
-                    zoomControl: true,
-                    streetViewControl: true,
-                    fullscreenControl: true,
-                    styles: isDark ? APPLE_DARK_MAP_STYLE : []
-                });
-                infoWindow = new google.maps.InfoWindow();
-            }
-            return map;
-        }
-
-        function clearResultMarkers() {
-            resultMarkers.forEach(m => { if (m && m.setMap) m.setMap(null); });
-            resultMarkers = [];
-            competitorMarkers.forEach(m => { if (m && m.setMap) m.setMap(null); });
-            competitorMarkers = [];
-        }
-        
-        // ==================== LOCALITY LOADING ====================
-        
-        async function loadLocalities() {
-            try {
-                const response = await fetch(`${API_BASE}/localities`);
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const data = await response.json();
-                localities = data.localities || [];
-                
-                if (localities.length === 0) {
-                    console.warn("No localities returned from API");
-                    showStatus("No localities available. Please try again.", "error");
-                    return;
-                }
-                
-                const select = document.getElementById("localitySelect");
-                while (select.options.length > 1) {
-                    select.remove(1);
-                }
-                
-                localities.forEach(locality => {
-                    const option = document.createElement("option");
-                    option.value = locality.name;
-                    const displayName = locality.locality_name 
-                        ? `${locality.locality_name} (${locality.name})`
-                        : locality.name;
-                    option.textContent = displayName;
-                    select.appendChild(option);
-                });
-                
-                console.log(`Successfully loaded ${localities.length} localities`);
-                select.addEventListener("change", updateCoordinates);
-                initSearchableDropdown();
-
-                const resumeSearchRaw = localStorage.getItem("resumeSearch");
-                if (resumeSearchRaw) {
-                    try {
-                        const resume = JSON.parse(resumeSearchRaw);
-                        const match = localities.find(l => l.name === resume.locality || l.locality_name === resume.locality);
-                        if (match) {
-                            select.value = match.name;
-                            document.getElementById("localitySearchInput").value = match.locality_name || match.name;
-                            if (Number.isFinite(Number(resume.radius))) {
-                                document.getElementById("radiusInput").value = Number(resume.radius);
-                            }
-                            updateCoordinates();
-                        }
-                    } catch (e) {
-                        console.warn("Invalid resume search payload", e);
-                    }
-                    localStorage.removeItem("resumeSearch");
-                }
-            } catch (error) {
-                console.error("Error loading localities:", error);
-                showStatus("Error: Could not load localities. " + error.message, "error");
-            }
-        }
-        
-        function updateCoordinates() {
-            const localityName = document.getElementById("localitySelect").value;
-            if (!localityName) {
-                document.getElementById("latDisplay").textContent = "-";
-                document.getElementById("lonDisplay").textContent = "-";
-                clearSelectionOverlay();
-                return;
-            }
-            
-            const locality = localities.find(l => l.name === localityName);
-            if (locality) {
-                // Use actual coordinates (from real-world data) if available, fall back to grid center
-                const lat = locality.actual_lat || locality.lat || locality.center_lat;
-                const lon = locality.actual_lon || locality.lon || locality.center_lon;
-                document.getElementById("latDisplay").textContent = lat.toFixed(4);
-                document.getElementById("lonDisplay").textContent = lon.toFixed(4);
-                showSelectionOverlay(lat, lon);
-            }
-        }
-
-        // ==================== SEARCHABLE DROPDOWN ====================
-
-        function initSearchableDropdown() {
-            const wrapper = document.getElementById('localitySearchable');
-            const input = document.getElementById('localitySearchInput');
-            const list = document.getElementById('localityDropdownList');
-
-            function renderList(filter = '') {
-                const lower = filter.toLowerCase();
-                const filtered = localities.filter(l => {
-                    const n = (l.locality_name || l.name || '').toLowerCase();
-                    return n.includes(lower);
-                });
-
-                if (filtered.length === 0) {
-                    list.innerHTML = '<div class="dd-empty">No matching localities</div>';
-                    ddHighlightIndex = -1;
-                    return;
-                }
-
-                list.innerHTML = filtered.map((l, i) => {
-                    const display = l.locality_name ? `${l.locality_name}` : l.name;
-                    const isSelected = document.getElementById('localitySelect').value === l.name;
-                    return `<div class="dd-item${isSelected ? ' selected' : ''}" data-value="${l.name}" data-index="${i}">${display}</div>`;
-                }).join('');
-                ddHighlightIndex = -1;
-
-                list.querySelectorAll('.dd-item').forEach(item => {
-                    item.addEventListener('mousedown', (e) => {
-                        e.preventDefault();
-                        selectLocality(item.dataset.value, item.textContent);
-                    });
-                });
-            }
-
-            function selectLocality(value, label) {
-                document.getElementById('localitySelect').value = value;
-                input.value = label;
-                wrapper.classList.remove('open');
-                updateCoordinates();
-                onBusinessTypeChange();
-            }
-
-            input.addEventListener('focus', () => {
-                wrapper.classList.add('open');
-                renderList(input.value);
-            });
-
-            input.addEventListener('input', () => {
-                wrapper.classList.add('open');
-                renderList(input.value);
-            });
-
-            input.addEventListener('blur', () => {
-                setTimeout(() => {
-                    wrapper.classList.remove('open');
-                    const val = input.value.trim().toLowerCase();
-                    let resolved = false;
-                    if (val) {
-                        const match = localities.find(l => 
-                            (l.locality_name || '').toLowerCase() === val || 
-                            (l.name || '').toLowerCase() === val
-                        );
-                        if (match) {
-                            selectLocality(match.name, match.locality_name || match.name);
-                            resolved = true;
-                        } else {
-                            const partial = localities.find(l => 
-                                (l.locality_name || '').toLowerCase().includes(val) || 
-                                (l.name || '').toLowerCase().includes(val)
-                            );
-                            if (partial) {
-                                selectLocality(partial.name, partial.locality_name || partial.name);
-                                resolved = true;
-                            }
-                        }
-                    }
-                    if (!resolved) {
-                        const selectedVal = document.getElementById('localitySelect').value;
-                        const match = localities.find(l => l.name === selectedVal);
-                        if (match) {
-                            input.value = match.locality_name || match.name;
-                        } else {
-                            input.value = '';
-                        }
-                    }
-                }, 180);
-            });
-
-            input.addEventListener('keydown', (e) => {
-                const items = list.querySelectorAll('.dd-item');
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    ddHighlightIndex = Math.min(ddHighlightIndex + 1, items.length - 1);
-                    updateHighlight(items);
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    ddHighlightIndex = Math.max(ddHighlightIndex - 1, 0);
-                    updateHighlight(items);
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (ddHighlightIndex >= 0 && items[ddHighlightIndex]) {
-                        const item = items[ddHighlightIndex];
-                        selectLocality(item.dataset.value, item.textContent);
-                    }
-                } else if (e.key === 'Escape') {
-                    wrapper.classList.remove('open');
-                    input.blur();
-                }
-            });
-
-            function updateHighlight(items) {
-                items.forEach((el, i) => {
-                    el.classList.toggle('highlighted', i === ddHighlightIndex);
-                });
-                if (items[ddHighlightIndex]) {
-                    items[ddHighlightIndex].scrollIntoView({ block: 'nearest' });
-                }
-            }
-        }
-
-        // ==================== SELECTED LOCATION OVERLAY ====================
-
-        function clearSelectionOverlay() {
-            if (selectedMarker) {
-                if (selectedMarker.setMap) selectedMarker.setMap(null);
-                selectedMarker = null;
-            }
-            if (radiusCircle) {
-                if (radiusCircle.setMap) radiusCircle.setMap(null);
-                radiusCircle = null;
-            }
-        }
-
-        function showSelectionOverlay(lat, lon) {
-            ensureMap(lat, lon, 13);
-            clearSelectionOverlay();
-
-            selectedMarker = new google.maps.Marker({
-                position: { lat: lat, lng: lon },
-                map: map,
-                title: 'Selected Reference Location',
-                icon: {
-                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                        <circle cx="16" cy="16" r="14" fill="#0284c7" stroke="#ffffff" stroke-width="3"/>
-                        <circle cx="16" cy="16" r="5" fill="#ffffff"/>
-                      </svg>
-                    `),
-                    scaledSize: new google.maps.Size(28, 28),
-                    anchor: new google.maps.Point(14, 14)
-                },
-                zIndex: 100
-            });
-
-            const radiusKm = parseFloat(document.getElementById('radiusInput').value) || 5;
-            radiusCircle = new google.maps.Circle({
-                center: { lat: lat, lng: lon },
-                radius: radiusKm * 1000,
-                strokeColor: '#0284c7',
-                strokeOpacity: 0.85,
-                strokeWeight: 2,
-                fillColor: '#0ea5e9',
-                fillOpacity: 0.08,
-                map: map
-            });
-            if (map && map.panTo) map.panTo({ lat: lat, lng: lon });
-        }
-
-        function onRadiusChange() {
-            const localityName = document.getElementById('localitySelect').value;
-            if (!localityName) return;
-            const locality = localities.find(l => l.name === localityName);
-            if (locality) {
-                const lat = locality.actual_lat || locality.lat || locality.center_lat;
-                const lon = locality.actual_lon || locality.lon || locality.center_lon;
-                showSelectionOverlay(lat, lon);
-            }
-        }
-        
-        // ==================== WEIGHT MANAGEMENT ====================
-        
-        function updateValues() {
-            const rent = parseInt(document.getElementById("rentWeight").value);
-            const crowd = parseInt(document.getElementById("crowdWeight").value);
-            const competition = parseInt(document.getElementById("competitionWeight").value);
-            const accessibility = parseInt(document.getElementById("accessibilityWeight").value);
-            
-            document.getElementById("rentValue").textContent = rent + "%";
-            document.getElementById("crowdValue").textContent = crowd + "%";
-            document.getElementById("competitionValue").textContent = competition + "%";
-            document.getElementById("accessibilityValue").textContent = accessibility + "%";
-        }
-        
-        function resetWeights() {
-            document.getElementById("rentWeight").value = 25;
-            document.getElementById("crowdWeight").value = 25;
-            document.getElementById("competitionWeight").value = 25;
-            document.getElementById("accessibilityWeight").value = 25;
-            updateValues();
-        }
-        
-        function applyPreset(preset) {
-            const presets = {
-                balanced: { rent: 25, crowd: 25, competition: 25, accessibility: 25 },
-                budget: { rent: 40, crowd: 20, competition: 20, accessibility: 20 },
-                foot_traffic: { rent: 15, crowd: 50, competition: 20, accessibility: 15 },
-                low_competition: { rent: 20, crowd: 25, competition: 50, accessibility: 5 }
-            };
-            
-            if (presets[preset]) {
-                const p = presets[preset];
-                document.getElementById("rentWeight").value = p.rent;
-                document.getElementById("crowdWeight").value = p.crowd;
-                document.getElementById("competitionWeight").value = p.competition;
-                document.getElementById("accessibilityWeight").value = p.accessibility;
-                updateValues();
-            }
-        }
-        
-        // ==================== STATUS MESSAGES ====================
-        
-        function showStatus(message, type = "info") {
-            const statusEl = document.getElementById("statusMessage");
-            statusEl.textContent = message;
-            statusEl.className = `status-message show ${type}`;
-            
-            if (type !== "error") {
-                setTimeout(() => statusEl.classList.remove("show"), 4000);
-            }
-        }
-        
-        // ==================== ANALYSIS & RESULTS ====================
-        
-        async function analyzeLocation() {
-            const token = checkAuth();
-            if (!token) return;
-            
-            const localityName = document.getElementById("localitySelect").value;
-            if (!localityName) {
-                showStatus("Please select a locality", "error");
-                return;
-            }
-            
-            const locality = localities.find(l => l.name === localityName);
-            if (!locality) {
-                showStatus("Locality not found", "error");
-                return;
-            }
-            
-            const businessType = document.getElementById("businessTypeSelect").value || null;
-            const radius = parseFloat(document.getElementById("radiusInput").value);
-            
-            const rent = parseInt(document.getElementById("rentWeight").value) / 100;
-            const crowd = parseInt(document.getElementById("crowdWeight").value) / 100;
-            const competition = parseInt(document.getElementById("competitionWeight").value) / 100;
-            const accessibility = parseInt(document.getElementById("accessibilityWeight").value) / 100;
-            
-            const btn = document.getElementById("analyzeBtn");
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loading-spinner"></span> Analyzing...';
-            
-            try {
-                const lat = locality.actual_lat || locality.lat || locality.center_lat;
-                const lon = locality.actual_lon || locality.lon || locality.center_lon;
-                
-                const requestBody = {
-                    reference_lat: lat,
-                    reference_lon: lon,
-                    search_radius_km: radius,
-                    weights: {
-                        rent: rent,
-                        crowd: crowd,
-                        competition: competition,
-                        accessibility: accessibility
-                    },
-                    business_type: businessType,
-                    limit: 10
-                };
-                
-                const response = await fetch(`${API_BASE}/analyze`, {
-                    method: "POST",
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify(requestBody)
-                });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || "Analysis failed");
-                }
-                
-                const data = await response.json();
-                currentResults = data.results || [];
-                currentDataQuality = data.data_quality || null;
-                currentLiveIntel = data.live_google_intelligence || null;
-                selectedComparison = [];
-                
-                currentTab = 'all';
-                document.querySelectorAll('.results-tab-btn').forEach(btn => btn.classList.remove('active'));
-                document.getElementById('tabAll').classList.add('active');
-                document.getElementById('sortFilterWrapper').style.display = 'block';
-                displayResults(currentResults);
-                showStatus(`Found ${currentResults.length} suitable locations!`, "success");
-                if (window.innerWidth <= 768) {
-                    document.getElementById("controlPanel").classList.remove("open");
-                }
-            } catch (error) {
-                console.error("Analysis error:", error);
-                showStatus(`Error: ${error.message}`, "error");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = "Analyze";
-            }
-        }
-        
-        function buildConstraintDetailsHtml(result) {
-            const cd = result.constraint_details;
-            if (!cd) return "";
-            
-            const aff = cd.affordability || {};
-            const crowd = cd.crowd_density || {};
-            const comp = cd.competition || {};
-            const acc = cd.accessibility || {};
-            
-            return `
-                <div class="constraint-details" style="margin-top: 0.6rem;">
-                    <div class="constraint-row">
-                        <span class="constraint-label">Rent Info</span>
-                        <span class="constraint-value">${aff.rent_amount || 'N/A'} (Conf: ${aff.confidence || 0}%, Source: ${aff.source || 'unknown'})</span>
-                        <span class="constraint-score">${aff.normalized_score || 0}%</span>
-                    </div>
-                    <div class="constraint-row">
-                        <span class="constraint-label">Footfall / POIs</span>
-                        <span class="constraint-value">${crowd.poi_count || 0} POIs mapped</span>
-                        <span class="constraint-score">${crowd.normalized_score || 0}%</span>
-                    </div>
-                    <div class="constraint-row">
-                        <span class="constraint-label">Competition</span>
-                        <span class="constraint-value">${comp.shop_count || 0} shops (${comp.label || 'Market Presence'})</span>
-                        <span class="constraint-score">${comp.normalized_score || 0}%</span>
-                    </div>
-                    <div class="constraint-row">
-                        <span class="constraint-label">Accessibility</span>
-                        <span class="constraint-value">${acc.transit_stops || 0} stops (Bus: ${acc.bus_stops || 0}, Metro: ${acc.metro_stops || 0})</span>
-                        <span class="constraint-score">${acc.normalized_score || 0}%</span>
-                    </div>
-                </div>
-            `;
-        }
-
-        function displayResults(results) {
-            const resultsList = document.getElementById("resultsList");
-            const resultCount = document.getElementById("resultCount");
-            
-            if (!results || results.length === 0) {
-                resultsList.innerHTML = '<div class="empty">No results found. Adjust your criteria.</div>';
-                resultCount.textContent = "0 Results";
-                return;
-            }
-            
-            resultCount.textContent = `${results.length} Results`;
-            
-            let groundTruthHtml = '';
-            if (currentLiveIntel && currentLiveIntel.success) {
-                const isCached = currentLiveIntel.source === 'cache';
-                groundTruthHtml = `
-                    <div style="margin-bottom:14px; padding:12px 14px; border-radius:10px; background:linear-gradient(135deg, rgba(14,165,233,0.08) 0%, rgba(99,102,241,0.08) 100%); border:1px solid rgba(14,165,233,0.25);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                            <div style="font-weight:700; font-size:0.8rem; color:#0284c7; text-transform:uppercase;">📍 Google Places Ground Truth</div>
-                            <span style="font-size:0.68rem; font-weight:600; padding:2px 8px; border-radius:12px; background:${isCached ? 'rgba(16,185,129,0.15)' : 'rgba(14,165,233,0.15)'}; color:${isCached ? '#059669' : '#0284c7'};">
-                                ${isCached ? '⚡ Cached (0 Quota)' : '🟢 Live Verified'}
-                            </span>
-                        </div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; text-align:center;">
-                            <div style="background:rgba(255,255,255,0.7); padding:6px; border-radius:6px; border:1px solid rgba(0,0,0,0.05);">
-                                <div style="font-size:0.68rem; color:#64748b;">Competitors</div>
-                                <div style="font-size:1rem; font-weight:700; color:#0f172a;">${currentLiveIntel.competitor_count}</div>
-                            </div>
-                            <div style="background:rgba(255,255,255,0.7); padding:6px; border-radius:6px; border:1px solid rgba(0,0,0,0.05);">
-                                <div style="font-size:0.68rem; color:#64748b;">Avg Rating</div>
-                                <div style="font-size:1rem; font-weight:700; color:#eab308;">★ ${currentLiveIntel.avg_competitor_rating}</div>
-                            </div>
-                            <div style="background:rgba(255,255,255,0.7); padding:6px; border-radius:6px; border:1px solid rgba(0,0,0,0.05);">
-                                <div style="font-size:0.68rem; color:#64748b;">Footfall Volume</div>
-                                <div style="font-size:1rem; font-weight:700; color:#10b981;">
-                                    ${currentLiveIntel.total_footfall_reviews > 1000 ? (currentLiveIntel.total_footfall_reviews/1000).toFixed(1) + 'k' : currentLiveIntel.total_footfall_reviews}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            resultsList.innerHTML = groundTruthHtml + results.map((result, index) => {
-                const breakdown = result.breakdown || {};
-                const cd = result.constraint_details || {};
-                const rentScore = cd.affordability?.normalized_score ?? 0;
-                const crowdScore = cd.crowd_density?.normalized_score ?? 0;
-                const competitionScore = cd.competition?.normalized_score ?? 0;
-                const accessibilityScore = cd.accessibility?.normalized_score ?? 0;
-                const explainabilityHtml = buildExplainabilityHtml(result, breakdown);
-                const constraintDetailsHtml = buildConstraintDetailsHtml(result);
-                
-                return `
-                <div class="result-item ${selectedComparison.includes(index) ? 'selected' : ''}" id="result-${index}" onclick="toggleComparison(${index})">
-                    <div class="result-header">
-                        <div class="result-title-section">
-                            <div class="result-locality">${result.locality_name || 'Location ' + result.id}</div>
-                            <div class="result-distance">${(result.distance_km || 0).toFixed(2)} km away</div>
-                        </div>
-                        <div class="result-score">${result.score_percent || 0}%</div>
-                    </div>
-                    
-                    <div class="criteria-bars">
-                        <div class="criterion-bar">
-                            <div class="bar-label"><span>Afford</span><span>${rentScore.toFixed(0)}%</span></div>
-                            <div class="bar-fill"><div class="bar-value" style="width: ${rentScore}%"></div></div>
-                        </div>
-                        <div class="criterion-bar">
-                            <div class="bar-label"><span>Crowd</span><span>${crowdScore.toFixed(0)}%</span></div>
-                            <div class="bar-fill"><div class="bar-value" style="width: ${crowdScore}%"></div></div>
-                        </div>
-                        <div class="criterion-bar">
-                            <div class="bar-label"><span>Comp</span><span>${competitionScore.toFixed(0)}%</span></div>
-                            <div class="bar-fill"><div class="bar-value" style="width: ${competitionScore}%"></div></div>
-                        </div>
-                        <div class="criterion-bar">
-                            <div class="bar-label"><span>Access</span><span>${accessibilityScore.toFixed(0)}%</span></div>
-                            <div class="bar-fill"><div class="bar-value" style="width: ${accessibilityScore}%"></div></div>
-                        </div>
-                    </div>
-                    
-                    ${constraintDetailsHtml}
-                    
-                    ${explainabilityHtml}
-                    
-                    <div class="result-actions">
-                        <button class="btn-secondary" onclick="event.stopPropagation(); addFavorite(${index})">Favorite</button>
-                        <button class="btn-secondary" onclick="event.stopPropagation(); viewMap(${index})">View Map</button>
-                    </div>
-                </div>
-            `}).join("");
-            
-            // Initialize Google Map
-            ensureMap();
-            clearResultMarkers();
-
-            const selLocality = document.getElementById('localitySelect').value;
-            if (selLocality) {
-                const selLoc = localities.find(l => l.name === selLocality);
-                if (selLoc) {
-                    const sLat = selLoc.actual_lat || selLoc.lat || selLoc.center_lat;
-                    const sLon = selLoc.actual_lon || selLoc.lon || selLoc.center_lon;
-                    showSelectionOverlay(sLat, sLon);
-                }
-            }
-
-            // Plot Live Google Competitors
-            if (currentLiveIntel && currentLiveIntel.top_competitors) {
-                currentLiveIntel.top_competitors.forEach(comp => {
-                    if (!comp.lat || !comp.lon) return;
-                    const compMarker = new google.maps.Marker({
-                        position: { lat: comp.lat, lng: comp.lon },
-                        map: map,
-                        title: comp.name,
-                        icon: {
-                            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
-                                <circle cx="14" cy="14" r="12" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
-                                <text x="14" y="18" font-size="11" text-anchor="middle" fill="#ffffff">🏬</text>
-                              </svg>
-                            `),
-                            scaledSize: new google.maps.Size(24, 24),
-                            anchor: new google.maps.Point(12, 12)
-                        },
-                        zIndex: 50
-                    });
-                    compMarker.addListener('click', () => {
-                        infoWindow.setContent(`
-                            <div style="padding:6px; font-family:sans-serif; min-width:180px;">
-                                <span style="background:rgba(239,68,68,0.12); color:#dc2626; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px;">VERIFIED COMPETITOR</span>
-                                <div style="font-weight:700; font-size:13px; margin:4px 0 2px 0;">${comp.name}</div>
-                                <div style="color:#64748b; font-size:12px;">★ ${comp.rating} (${comp.reviews} reviews) · ${comp.distance_meters}m away</div>
-                            </div>
-                        `);
-                        infoWindow.open(map, compMarker);
-                    });
-                    competitorMarkers.push(compMarker);
-                });
-            }
-
-            // Plot Ranked Locations
-            const rankColors = ['#0284c7', '#8b5cf6', '#10b981', '#64748b'];
-            const bounds = new google.maps.LatLngBounds();
-            if (selectedMarker) bounds.extend(selectedMarker.getPosition());
-
-            results.forEach((result, idx) => {
-                const rank = idx + 1;
-                const color = rankColors[Math.min(idx, rankColors.length - 1)];
-                const markerLat = result.display_lat || result.lat;
-                const markerLon = result.display_lon || result.lon;
-
-                const marker = new google.maps.Marker({
-                    position: { lat: markerLat, lng: markerLon },
-                    map: map,
-                    title: `#${rank} ${result.locality_name || result.name}`,
-                    icon: {
-                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                          <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
-                            <circle cx="17" cy="17" r="14" fill="${color}" stroke="#ffffff" stroke-width="2.5"/>
-                            <text x="17" y="21.5" font-size="12" font-family="Arial, sans-serif" font-weight="bold" text-anchor="middle" fill="#ffffff">${rank}</text>
-                          </svg>
-                        `),
-                        scaledSize: new google.maps.Size(28, 28),
-                        anchor: new google.maps.Point(14, 14)
-                    },
-                    zIndex: 80 - idx
-                });
-
-                bounds.extend({ lat: markerLat, lng: markerLon });
-
-                marker.addListener('click', () => {
-                    infoWindow.setContent(`
-                        <div style="padding:6px; font-family:sans-serif; min-width:180px;">
-                            <strong style="color:${color}; font-size:13px;">#${rank} ${result.locality_name || result.name}</strong><br>
-                            <span style="color:#0284c7; font-weight:700;">Score: ${result.score_percent}%</span><br>
-                            <small style="color:#64748b;">${(result.distance_km || 0).toFixed(2)} km away</small><br>
-                            <small style="color:#64748b;">Rent: ₹${result.features?.rent || 'N/A'}/sqft</small>
-                        </div>
-                    `);
-                    infoWindow.open(map, marker);
-                });
-                resultMarkers.push(marker);
-            });
-
-            if (results.length > 0 && map && map.fitBounds) {
-                map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
-            }
-        }
-
-        function getDriverLabel(key) {
-            const labels = {
-                rent: "Affordability",
-                crowd: "Crowd Potential",
-                competition: "Market Signal",
-                accessibility: "Accessibility"
-            };
-            return labels[key] || key;
-        }
-
-        function getStrategyHint(label) {
-            const text = String(label || "").toLowerCase();
-            if (text.includes("opportunity")) {
-                return "This mode boosts areas with lower direct same-type competition.";
-            }
-            if (text.includes("demand")) {
-                return "This mode favors active zones where demand signals are stronger.";
-            }
-            return "This mode balances demand strength and competition pressure.";
-        }
-
-        function buildExplainabilityHtml(result, breakdown) {
-            const ranked = Object.entries({
-                rent: Number(breakdown.rent || 0),
-                crowd: Number(breakdown.crowd || 0),
-                competition: Number(breakdown.competition || 0),
-                accessibility: Number(breakdown.accessibility || 0)
-            }).sort((a, b) => b[1] - a[1]);
-
-            const topDrivers = ranked.slice(0, 2).map(([key, score]) => ({
-                key,
-                score: Math.round(score * 100)
-            }));
-            const chips = topDrivers
-                .map(d => `<span class="driver-chip">${getDriverLabel(d.key)} ${d.score}%</span>`)
-                .join("");
-
-            const competitionLabel = result?.constraint_details?.competition?.label || "Market Fit";
-            const strategyHint = getStrategyHint(competitionLabel);
-
-            return `
-                <div class="explain-panel">
-                    <div class="explain-title">Why this rank</div>
-                    <div class="explain-text">
-                        Top score drivers are ${topDrivers.map(d => `${getDriverLabel(d.key)} (${d.score}%)`).join(" and ")}. ${strategyHint}
-                    </div>
-                    <div class="driver-chips">${chips}<span class="driver-chip">${competitionLabel}</span></div>
-                </div>
-            `;
-        }
-
-        function showOnboardingIfNeeded() {
-            if (localStorage.getItem("onboarding_done_v1") === "1") {
-                return;
-            }
-            const modal = document.getElementById("onboardingModal");
-            if (modal) {
-                modal.classList.add("active");
-            }
-        }
-
-        function closeOnboarding(markDone = true) {
-            const modal = document.getElementById("onboardingModal");
-            if (modal) {
-                modal.classList.remove("active");
-            }
-            if (markDone) {
-                localStorage.setItem("onboarding_done_v1", "1");
-            }
-        }
-
-        function startGuidedSetup() {
-            closeOnboarding(true);
-            const searchInput = document.getElementById("localitySearchInput");
-            if (searchInput) {
-                searchInput.focus();
-            }
-            showStatus("Start by searching locality, then pick business type and click Analyze.", "info");
-        }
-        
-        function viewMap(index) {
-            const result = currentResults[index];
-            if (map && result) {
-                map.setView([result.lat, result.lon], 14);
-                if (resultMarkers[index]) {
-                    if (resultMarkers[index] && google.maps.event) google.maps.event.trigger(resultMarkers[index], 'click');
-                }
-            }
-        }
-        
-        // ==================== SORTING ====================
-        
-        function sortResults() {
-            const sortBy = document.getElementById("sortBy").value;
-            
-            const sorted = [...currentResults].sort((a, b) => {
-                switch(sortBy) {
-                    case "distance":
-                        return (a.distance_km || 0) - (b.distance_km || 0);
-                    case "rent":
-                        return ((b.breakdown?.rent || 0) * 100) - ((a.breakdown?.rent || 0) * 100);
-                    case "crowd":
-                        return ((b.breakdown?.crowd || 0) * 100) - ((a.breakdown?.crowd || 0) * 100);
-                    default:
-                        return (b.score_percent || 0) - (a.score_percent || 0);
-                }
-            });
-            
-            displayResults(sorted);
-        }
-        
-        // ==================== COMPARISON ====================
-        
-        function toggleComparison(index) {
-            if (selectedComparison.includes(index)) {
-                selectedComparison = selectedComparison.filter(i => i !== index);
-                document.getElementById(`result-${index}`)?.classList.remove("selected");
-            } else {
-                if (selectedComparison.length < 5) {
-                    selectedComparison.push(index);
-                    document.getElementById(`result-${index}`)?.classList.add("selected");
-                } else {
-                    showStatus("Max 5 locations to compare", "error");
-                    return;
-                }
-            }
-        }
-        
-        function showComparison() {
-            if (selectedComparison.length === 0) {
-                showStatus("Select at least 1 location to compare", "error");
-                return;
-            }
-            
-            const modal = document.getElementById("comparisonModal");
-            const grid = document.getElementById("comparisonGrid");
-            
-            const selected = selectedComparison.map(i => currentResults[i]);
-            
-            grid.innerHTML = selected.map(result => {
-                const breakdown = result.breakdown || {};
-                return `
-                <div class="comparison-card">
-                    <h3>${result.name || result.locality_name}</h3>
-                    <div class="comparison-metric">
-                        <span class="comparison-metric-label">Overall Score</span>
-                        <span class="comparison-metric-value">${result.score_percent}%</span>
-                    </div>
-                    <div class="comparison-metric">
-                        <span class="comparison-metric-label">Distance</span>
-                        <span class="comparison-metric-value">${(result.distance_km || 0).toFixed(2)} km</span>
-                    </div>
-                    <div class="comparison-metric">
-                        <span class="comparison-metric-label">Affordability</span>
-                        <span class="comparison-metric-value">${((breakdown.rent || 0) * 100).toFixed(0)}%</span>
-                    </div>
-                    <div class="comparison-metric">
-                        <span class="comparison-metric-label">Crowd Density</span>
-                        <span class="comparison-metric-value">${((breakdown.crowd || 0) * 100).toFixed(0)}%</span>
-                    </div>
-                    <div class="comparison-metric">
-                        <span class="comparison-metric-label">Competition</span>
-                        <span class="comparison-metric-value">${((breakdown.competition || 0) * 100).toFixed(0)}%</span>
-                    </div>
-                    <div class="comparison-metric">
-                        <span class="comparison-metric-label">Accessibility</span>
-                        <span class="comparison-metric-value">${((breakdown.accessibility || 0) * 100).toFixed(0)}%</span>
-                    </div>
-                    <div class="comparison-metric">
-                        <span class="comparison-metric-label">Rent</span>
-                        <span class="comparison-metric-value">₹${result.features?.rent || "N/A"}</span>
-                    </div>
-                </div>
-            `}).join("");
-            
-            modal.classList.add("active");
-        }
-        
-        function closeComparison(e) {
-            if (e && e.target.id !== "comparisonModal") return;
-            document.getElementById("comparisonModal").classList.remove("active");
-        }
-        
-        // ==================== CSV EXPORT ====================
-        
-        function exportResults() {
-            if (currentResults.length === 0) {
-                showStatus("Analyze a location first", "error");
-                return;
-            }
-            
-            const headers = ["Name", "Score", "Distance (km)", "Affordability", "Crowd", "Competition", "Accessibility", "Rent"];
-            const rows = currentResults.map(r => {
-                const breakdown = r.breakdown || {};
-                return [
-                    r.name || r.locality_name,
-                    r.score_percent || 0,
-                    (r.distance_km || 0).toFixed(2),
-                    ((breakdown.rent || 0) * 100).toFixed(0),
-                    ((breakdown.crowd || 0) * 100).toFixed(0),
-                    ((breakdown.competition || 0) * 100).toFixed(0),
-                    ((breakdown.accessibility || 0) * 100).toFixed(0),
-                    r.features?.rent || "N/A"
-                ];
-            });
-            
-            const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
-            const blob = new Blob([csv], { type: "text/csv" });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `locus-results-${new Date().toISOString().slice(0,10)}.csv`;
-            a.click();
-            
-            showStatus("Results exported as CSV", "success");
-        }
-        
-        // ==================== RECOMMENDATIONS ====================
-        
-        async function getRecommendations() {
-            if (currentResults.length === 0) {
-                showStatus("Analyze a location first", "error");
-                return;
-            }
-            
-            try {
-                const weights = {
-                    rent: parseInt(document.getElementById("rentWeight").value) / 100,
-                    crowd: parseInt(document.getElementById("crowdWeight").value) / 100,
-                    competition: parseInt(document.getElementById("competitionWeight").value) / 100,
-                    accessibility: parseInt(document.getElementById("accessibilityWeight").value) / 100
-                };
-                
-                const scored = currentResults.map((result, idx) => {
-                    const cd = result.constraint_details || {};
-                    const rentVal = (cd.affordability?.normalized_score || 0) / 100;
-                    const crowdVal = (cd.crowd_density?.normalized_score || 0) / 100;
-                    const compVal = (cd.competition?.normalized_score || 0) / 100;
-                    const accessVal = (cd.accessibility?.normalized_score || 0) / 100;
-                    const totalW = weights.rent + weights.crowd + weights.competition + weights.accessibility || 1;
-                    
-                    return {
-                        ...result,
-                        customScore: (
-                            rentVal * weights.rent +
-                            crowdVal * weights.crowd +
-                            compVal * weights.competition +
-                            accessVal * weights.accessibility
-                        ) / totalW * 100,
-                        idx
-                    };
-                });
-                
-                const top3 = scored.sort((a, b) => b.customScore - a.customScore).slice(0, 3);
-                
-                // Clear any previous highlights
-                document.querySelectorAll(".result-item").forEach(item => item.classList.remove("selected"));
-                selectedComparison = top3.map(r => r.idx);
-                
-                top3.forEach((r) => {
-                    document.getElementById(`result-${r.idx}`)?.classList.add("selected");
-                });
-                
-                showComparison();
-                showStatus(`Top ${top3.length} recommendations shown!`, "success");
-            } catch (error) {
-                showStatus(`Error: ${error.message}`, "error");
-            }
-        }
-        
-        // ==================== USER PREFERENCES ====================
-        
-        async function saveSearch() {
-            const token = checkAuth();
-            if (!token) return;
-            
-            const locality = document.getElementById("localitySelect").value;
-            if (!locality) {
-                showStatus("Analyze a location first", "error");
-                return;
-            }
-            
-            try {
-                const selectedLocality = localities.find(l => l.name === locality);
-                const lat = selectedLocality.actual_lat || selectedLocality.lat || selectedLocality.center_lat;
-                const lon = selectedLocality.actual_lon || selectedLocality.lon || selectedLocality.center_lon;
-                
-                const response = await fetch(`${API_BASE}/user/save-search`, {
-                    method: "POST",
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({
-                        locality_name: locality,
-                        latitude: lat,
-                        longitude: lon,
-                        search_radius: parseFloat(document.getElementById("radiusInput").value),
-                        business_type: document.getElementById("businessTypeSelect").value || null,
-                        weights: {
-                            rent: parseInt(document.getElementById("rentWeight").value) / 100,
-                            crowd: parseInt(document.getElementById("crowdWeight").value) / 100,
-                            competition: parseInt(document.getElementById("competitionWeight").value) / 100,
-                            accessibility: parseInt(document.getElementById("accessibilityWeight").value) / 100
-                        },
-                        result_count: currentResults.length
-                    })
-                });
-                
-                if (response.ok) {
-                    showStatus("Search saved successfully!", "success");
-                } else {
-                    showStatus("Failed to save search", "error");
-                }
-            } catch (error) {
-                showStatus(`Error: ${error.message}`, "error");
-            }
-        }
-        
-        async function loadPreferences() {
-            const token = checkAuth();
-            if (!token) return;
-            
-            try {
-                const response = await fetch(`${API_BASE}/user/preferences`, {
-                    headers: getAuthHeaders()
-                });
-                
-                if (!response.ok) throw new Error("Load failed");
-                
-                const data = await response.json();
-                const prefs = data.preferences || [];
-                
-                if (prefs.length === 0) {
-                    showStatus("No saved preferences yet", "info");
-                    return;
-                }
-                
-                const choice = prompt("Select profile:\n\n" + prefs.map((p, i) => `${i+1}. ${p.preference_name}`).join("\n"));
-                if (!choice) return;
-                
-                const idx = parseInt(choice) - 1;
-                if (prefs[idx] && prefs[idx].weights) {
-                    const w = prefs[idx].weights;
-                    document.getElementById("rentWeight").value = (w.rent * 100).toFixed(0);
-                    document.getElementById("crowdWeight").value = (w.crowd * 100).toFixed(0);
-                    document.getElementById("competitionWeight").value = (w.competition * 100).toFixed(0);
-                    document.getElementById("accessibilityWeight").value = (w.accessibility * 100).toFixed(0);
-                    updateValues();
-                    showStatus(`Loaded "${prefs[idx].preference_name}"`, "success");
-                }
-            } catch (error) {
-                showStatus(`Error: ${error.message}`, "error");
-            }
-        }
-        
-        async function addFavorite(index) {
-            const token = checkAuth();
-            if (!token) return;
-            
-            const result = currentResults[index];
-            if (!result) return;
-            
-            try {
-                const notes = prompt("Add notes (optional):", `${result.name || result.locality_name} - Score: ${result.score_percent}%`);
-                
-                const response = await fetch(`${API_BASE}/user/favorites`, {
-                    method: "POST",
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({
-                        location_id: `${result.lat}_${result.lon}`,
-                        location_name: result.name || result.locality_name,
-                        latitude: result.lat,
-                        longitude: result.lon,
-                        notes: notes || ""
-                    })
-                });
-                
-                if (response.ok) {
-                    showStatus("Added to favorites!", "success");
-                } else {
-                    throw new Error("Failed to add");
-                }
-            } catch (error) {
-                showStatus(`Error: ${error.message}`, "error");
-            }
-        }
-        
-        // ==================== INITIALIZATION ====================
-        
-        window.addEventListener("load", () => {
-            initTheme();
-            const token = checkAuth();
-            if (token) {
-                loadLocalities();
-                preloadSmartWeights();
-                setTimeout(showOnboardingIfNeeded, 280);
-                const savedPreference = localStorage.getItem("resumePreference");
-                if (savedPreference) {
-                    try {
-                        const w = JSON.parse(savedPreference);
-                        document.getElementById("rentWeight").value = Math.round((w.rent || 0.25) * 100);
-                        document.getElementById("crowdWeight").value = Math.round((w.crowd || 0.25) * 100);
-                        document.getElementById("competitionWeight").value = Math.round((w.competition || 0.25) * 100);
-                        document.getElementById("accessibilityWeight").value = Math.round((w.accessibility || 0.25) * 100);
-                        updateValues();
-                    } catch (e) {
-                        console.warn("Invalid saved preference payload", e);
-                    }
-                    localStorage.removeItem("resumePreference");
-                }
-            }
-        });
-
-
-        // ==================== ML: SMART WEIGHTS ====================
-
-        async function preloadSmartWeights() {
-            try {
-                const res = await fetch(`${API_BASE}/ml/smart-weights`);
-                if (res.ok) {
-                    const data = await res.json();
-                    smartWeightsCache = data.recommendations || {};
-                    console.log("Smart weights preloaded");
-                }
-            } catch (e) {
-                console.warn("Smart weights not available", e);
-            }
-        }
-
-        function onBusinessTypeChange() {
-            const bt = document.getElementById("businessTypeSelect").value;
-            if (!bt) return;
-
-            const presets = {
-                "medical": { rent: 0.2, crowd: 0.1, competition: 0.3, accessibility: 0.4 },
-                "restaurant": { rent: 0.2, crowd: 0.45, competition: 0.15, accessibility: 0.2 },
-                "laptop": { rent: 0.25, crowd: 0.3, competition: 0.25, accessibility: 0.2 },
-                "mobile": { rent: 0.2, crowd: 0.35, competition: 0.2, accessibility: 0.25 },
-                "automobile": { rent: 0.45, crowd: 0.05, competition: 0.3, accessibility: 0.2 },
-                "stationery": { rent: 0.2, crowd: 0.25, competition: 0.2, accessibility: 0.35 }
-            };
-
-            const w = (smartWeightsCache && smartWeightsCache[bt]) ? smartWeightsCache[bt].weights : presets[bt];
-
-            if (w) {
-                document.getElementById("rentWeight").value = Math.round(w.rent * 100);
-                document.getElementById("crowdWeight").value = Math.round(w.crowd * 100);
-                document.getElementById("competitionWeight").value = Math.round(w.competition * 100);
-                document.getElementById("accessibilityWeight").value = Math.round(w.accessibility * 100);
-                updateValues();
-                
-                const source = (smartWeightsCache && smartWeightsCache[bt]) ? "ML recommended" : "preset";
-                showStatus(`Weights automatically optimized (${source}) for ${bt}`, "success");
-            }
-        }
-        // ==================== ML: ZONE CLUSTERS ====================
-
-        function renderClusterLegend() {
-            const legend = document.getElementById("zoneLegend");
-            if (!zoneClusterSummary) return;
-            
-            legend.innerHTML = Object.values(zoneClusterSummary).map(c => `
-                <div class="zone-legend-item">
-                    <span class="zone-dot" style="background:${c.color}"></span>
-                    <span class="zone-legend-name">${c.icon || ''} ${c.name}</span>
-                    <span class="zone-legend-count">${c.locality_count} areas</span>
-                </div>
-            `).join("");
-            legend.classList.add("show");
-        }
-
-        function clearZoneOverlay() {
-            zoneCircles.forEach(c => { if (map) map.removeLayer(c); });
-            zoneCircles = [];
-        }
-
-        function updateZoneOverlayMap() {
-            if (!zoneOverlayVisible || !map || !zoneOverlayData) return;
-            
-            clearZoneOverlay();
-            
-            const zoom = map.getZoom();
-            const legend = document.getElementById("zoneLegend");
-            
-            if (zoom < 12) {
-                legend.innerHTML = `
-                    <div style="font-size:0.75rem; text-align:center; padding: 0.6rem; color: var(--text-secondary); background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border-color);">
-                        🔍 Please zoom in closer to view zone classifications on the map.
-                    </div>
-                `;
-                return;
-            }
-            
-            renderClusterLegend();
-
-            const bounds = map.getBounds();
-            let renderedCount = 0;
-            const maxRender = 800;
-            
-            zoneOverlayData.forEach(loc => {
-                if (!loc.lat || !loc.lon) return;
-                if (renderedCount >= maxRender) return;
-                
-                const circle = new google.maps.Circle({
-                    center: { lat: loc.lat, lng: loc.lon },
-                    radius: 250,
-                    fillColor: loc.cluster_color || '#95a5a6',
-                    fillOpacity: 0.45,
-                    strokeColor: loc.cluster_color || '#95a5a6',
-                    strokeWeight: 1,
-                    map: map
-                });
-                zoneCircles.push(circle);
-                renderedCount++;
-            });
-        }
-
-        async function toggleZoneOverlay() {
-            const toggle = document.getElementById("zoneToggle");
-            const legend = document.getElementById("zoneLegend");
-
-            if (zoneOverlayVisible) {
-                // Turn off
-                zoneOverlayVisible = false;
-                toggle.classList.remove("active");
-                legend.classList.remove("show");
-                
-                if (map) {
-                    map.off("moveend", updateZoneOverlayMap);
-                    map.off("zoomend", updateZoneOverlayMap);
-                }
-                clearZoneOverlay();
-                return;
-            }
-
-            // Turn on
-            zoneOverlayVisible = true;
-            toggle.classList.add("active");
-
-            ensureMap();
-
-            try {
-                legend.innerHTML = '<div style="font-size:0.75rem; text-align:center; padding: 0.5rem; color: var(--text-secondary);">⌛ Loading zone data...</div>';
-                legend.classList.add("show");
-
-                if (!zoneOverlayData || !zoneClusterSummary) {
-                    const [mapRes, clusterRes] = await Promise.all([
-                        fetch(`${API_BASE}/ml/clusters/map`),
-                        fetch(`${API_BASE}/ml/clusters`)
-                    ]);
-
-                    if (!mapRes.ok || !clusterRes.ok) throw new Error("ML API unavailable");
-
-                    const mapData = await mapRes.json();
-                    const clusterData = await clusterRes.json();
-
-                    zoneOverlayData = mapData.localities || [];
-                    zoneClusterSummary = clusterData.clusters || {};
-                }
-
-                updateZoneOverlayMap();
-
-                map.on("moveend", updateZoneOverlayMap);
-                map.on("zoomend", updateZoneOverlayMap);
-
-            } catch (e) {
-                console.error("Zone overlay error", e);
-                showStatus("Could not load zone data", "error");
-                zoneOverlayVisible = false;
-                toggle.classList.remove("active");
-                legend.classList.remove("show");
-                legend.innerHTML = "";
-            }
-        }
-
-
-        // ==================== ML: PERSONALIZED RECOMMENDATIONS (TABS) ====================
-
-        function switchResultTab(tab) {
-            currentTab = tab;
-            document.querySelectorAll('.results-tab-btn').forEach(btn => btn.classList.remove('active'));
-            
-            if (tab === 'all') {
-                document.getElementById('tabAll').classList.add('active');
-                document.getElementById('sortFilterWrapper').style.display = 'block';
-                displayResults(currentResults);
-            } else if (tab === 'ai') {
-                document.getElementById('tabAi').classList.add('active');
-                document.getElementById('sortFilterWrapper').style.display = 'none';
-                loadAIRecommendationsForTab();
-            }
-        }
-
-        async function loadAIRecommendationsForTab() {
-            const token = checkAuth();
-            const resultsList = document.getElementById("resultsList");
-            const resultCount = document.getElementById("resultCount");
-
-            if (!token) {
-                resultsList.innerHTML = '<div class="empty">Please login to view personalized recommendations.</div>';
-                resultCount.textContent = "0 Results";
-                return;
-            }
-
-            resultsList.innerHTML = '<div class="empty"><div class="loading-spinner" style="margin: 2rem auto;"></div>Analyzing your search history and preferences...</div>';
-            resultCount.textContent = "Loading...";
-
-            try {
-                const res = await fetch(`${API_BASE}/ml/personalized?limit=5`, {
-                    headers: getAuthHeaders()
-                });
-
-                if (!res.ok) throw new Error("Failed to load");
-                const data = await res.json();
-                const recs = data.recommendations || [];
-                aiRecommendations = recs;
-
-                if (recs.length === 0) {
-                    resultsList.innerHTML = `
-                        <div class="empty" style="text-align: center; padding: 2.5rem 1rem;">
-                            <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">🔮</span>
-                            <strong>No search history yet.</strong><br>
-                            <span style="font-size: 0.85rem; color: var(--text-tertiary);">
-                                ${data.message || 'Explore different localities and save favorites to get personalized picks!'}
-                            </span>
-                        </div>
-                    `;
-                    resultCount.textContent = "0 Recommendations";
-                    return;
-                }
-
-                resultCount.textContent = `${recs.length} AI Recommendations`;
-                displayAiRecommendationsList(recs);
-
-            } catch (e) {
-                resultsList.innerHTML = '<div class="empty">Could not load recommendations. Please try again.</div>';
-                resultCount.textContent = "Error";
-                console.error(e);
-            }
-        }
-
-        function displayAiRecommendationsList(recs) {
-            const resultsList = document.getElementById("resultsList");
-            
-            resultsList.innerHTML = recs.map((rec, index) => {
-                const cd = rec.constraint_details || {};
-                const rentScore = cd.affordability?.normalized_score ?? 0;
-                const crowdScore = cd.crowd_density?.normalized_score ?? 0;
-                const competitionScore = cd.competition?.normalized_score ?? 0;
-                const accessibilityScore = cd.accessibility?.normalized_score ?? 0;
-                
-                return `
-                <div class="result-item" style="border-left: 4px solid #8b5cf6;" onclick="viewAIRec(${rec.lat}, ${rec.lon}, '${(rec.locality_name || rec.name || '').replace(/'/g, "\\'")}')">
-                    <div class="result-header">
-                        <div class="result-title-section">
-                            <div class="result-locality" style="display: flex; align-items: center; gap: 0.4rem;">
-                                ✨ ${rec.locality_name || rec.name}
-                            </div>
-                            <div class="result-distance" style="color: #8b5cf6; font-weight: 600;">Match Score: ${rec.match_score || 0}%</div>
-                        </div>
-                        <div class="result-score" style="background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%); font-size: 1rem; padding: 0.3rem 0.6rem;">${rec.match_score || 0}%</div>
-                    </div>
-                    
-                    <div style="font-size: 0.78rem; color: var(--text-secondary); background: var(--bg-secondary); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); margin: 0.5rem 0; border-left: 2px solid #8b5cf6; font-style: italic;">
-                        "${rec.reason || 'Recommended based on your user profile'}"
-                    </div>
-
-                    <div class="criteria-bars">
-                        <div class="criterion-bar">
-                            <div class="bar-label"><span>Afford</span><span>${rentScore.toFixed(0)}%</span></div>
-                            <div class="bar-fill"><div class="bar-value" style="width: ${rentScore}%"></div></div>
-                        </div>
-                        <div class="criterion-bar">
-                            <div class="bar-label"><span>Crowd</span><span>${crowdScore.toFixed(0)}%</span></div>
-                            <div class="bar-fill"><div class="bar-value" style="width: ${crowdScore}%"></div></div>
-                        </div>
-                        <div class="criterion-bar">
-                            <div class="bar-label"><span>Comp</span><span>${competitionScore.toFixed(0)}%</span></div>
-                            <div class="bar-fill"><div class="bar-value" style="width: ${competitionScore}%"></div></div>
-                        </div>
-                        <div class="criterion-bar">
-                            <div class="bar-label"><span>Access</span><span>${accessibilityScore.toFixed(0)}%</span></div>
-                            <div class="bar-fill"><div class="bar-value" style="width: ${accessibilityScore}%"></div></div>
-                        </div>
-                    </div>
-                    
-                    <div class="result-actions">
-                        <button class="btn-secondary" onclick="event.stopPropagation(); viewAIRec(${rec.lat}, ${rec.lon}, '${(rec.locality_name || rec.name || '').replace(/'/g, "\\'")}')">View Map</button>
-                    </div>
-                </div>
-            `}).join("");
-        }
-
-        function viewAIRec(lat, lon, name) {
-            ensureMap(lat, lon, 14);
-            clearResultMarkers();
-
-            const m = new google.maps.Marker({
-                position: { lat: lat, lng: lon },
-                map: map,
-                title: name,
-                icon: {
-                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                      <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
-                        <circle cx="17" cy="17" r="14" fill="#8b5cf6" stroke="#ffffff" stroke-width="2.5"/>
-                        <text x="17" y="21.5" font-size="12" font-family="Arial, sans-serif" font-weight="bold" text-anchor="middle" fill="#ffffff">★</text>
-                      </svg>
-                    `),
-                    scaledSize: new google.maps.Size(28, 28),
-                    anchor: new google.maps.Point(14, 14)
-                }
-            });
-
-            infoWindow.setContent(`<strong>${name}</strong><br>AI Recommended Location`);
-            infoWindow.open(map, m);
-            resultMarkers.push(m);
-            if (map && map.panTo) map.panTo({ lat: lat, lng: lon });
-        }
-
-        // Subtle cursor-reactive lift on interactive cards (very gentle, barely noticeable)
-        function initCardHover() {
-            document.querySelectorAll('.criterion, .ai-rec-card').forEach(card => {
-                card.addEventListener('mousemove', e => {
-                    const rect = card.getBoundingClientRect();
-                    const x = (e.clientX - rect.left) / rect.width - 0.5;
-                    const y = (e.clientY - rect.top) / rect.height - 0.5;
-                    card.style.transform = `perspective(800px) rotateX(${-y * 1.5}deg) rotateY(${x * 1.5}deg)`;
-                });
-                card.addEventListener('mouseleave', () => {
-                    card.style.transform = '';
-                    card.style.transition = 'transform 0.4s cubic-bezier(0.4,0,0.2,1)';
-                    setTimeout(() => { card.style.transition = ''; }, 400);
-                });
-            });
-        }
-        initCardHover();
-
-        // Smooth number counter on result scores
-        function animateScore(el, target) {
-            const start = performance.now();
-            const dur = 600;
-            function tick(now) {
-                const t = Math.min((now - start) / dur, 1);
-                el.textContent = Math.round((1 - Math.pow(1 - t, 3)) * target) + '%';
-                if (t < 1) requestAnimationFrame(tick);
-            }
-            requestAnimationFrame(tick);
-        }
-
-        function toggleMobileControls() {
-            if (window.innerWidth <= 768) {
-                document.getElementById("controlPanel").classList.toggle("open");
-            }
-        }
-    </script>
-    <div class="menu">
-      <a href="landing.html" onclick="navigateTo(event, 'landing.html'); return false;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z"></path>
-          <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z"></path>
+  <!-- Universal Top Header -->
+  <header class="site-header" role="banner">
+    <div class="nav-container">
+      <a href="index.html" class="brand-logo" aria-label="Locus Copilot Home">
+        <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
         </svg>
-        <span>Home</span>
+        <span>Locus <span class="brand-accent">Copilot</span></span>
       </a>
-      <a href="index.html" class="active" onclick="navigateTo(event, 'index.html'); return false;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z"></path>
-        </svg>
-        <span>Analysis</span>
-      </a>
-      <a href="about.html" onclick="navigateTo(event, 'about.html'); return false;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z" clip-rule="evenodd"></path>
-        </svg>
-        <span>About</span>
-      </a>
-      <a href="contact.html" onclick="navigateTo(event, 'contact.html'); return false;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M17.004 10.407c.138.435-.216.842-.672.842h-3.465a.75.75 0 0 1-.65-.375l-1.732-3c-.229-.396-.053-.907.393-1.004a5.252 5.252 0 0 1 6.126 3.537ZM8.12 8.464c.307-.338.838-.235 1.066.16l1.732 3a.75.75 0 0 1 0 .75l-1.732 3c-.229.397-.76.5-1.067.161A5.23 5.23 0 0 1 6.75 12a5.23 5.23 0 0 1 1.37-3.536ZM10.878 17.13c-.447-.098-.623-.608-.394-1.004l1.733-3.002a.75.75 0 0 1 .65-.375h3.465c.457 0 .81.407.672.842a5.252 5.252 0 0 1-6.126 3.539Z"></path>
-          <path fill-rule="evenodd" d="M21 12.75a.75.75 0 1 0 0-1.5h-.783a8.22 8.22 0 0 0-.237-1.357l.734-.267a.75.75 0 1 0-.513-1.41l-.735.268a8.24 8.24 0 0 0-.689-1.192l.6-.503a.75.75 0 1 0-.964-1.149l-.6.504a8.3 8.3 0 0 0-1.054-.885l.391-.678a.75.75 0 1 0-1.299-.75l-.39.676a8.188 8.188 0 0 0-1.295-.47l.136-.77a.75.75 0 0 0-1.477-.26l-.136.77a8.36 8.36 0 0 0-1.377 0l-.136-.77a.75.75 0 1 0-1.477.26l.136.77c-.448.121-.88.28-1.294.47l-.39-.676a.75.75 0 0 0-1.3.75l.392.678a8.29 8.29 0 0 0-1.054.885l-.6-.504a.75.75 0 1 0-.965 1.149l.6.503a8.243 8.243 0 0 0-.689 1.192L3.8 8.216a.75.75 0 1 0-.513 1.41l.735.267a8.222 8.222 0 0 0-.238 1.356h-.783a.75.75 0 0 0 0 1.5h.783c.042.464.122.917.238 1.356l-.735.268a.75.75 0 0 0 .513 1.41l.735-.268c.197.417.428.816.69 1.191l-.6.504a.75.75 0 0 0 .963 1.15l.601-.505c.326.323.679.62 1.054.885l-.392.68a.75.75 0 0 0 1.3.75l.39-.679c.414.192.847.35 1.294.471l-.136.77a.75.75 0 0 0 1.477.261l.137-.772a8.332 8.332 0 0 0 1.376 0l.136.772a.75.75 0 1 0 1.477-.26l-.136-.771a8.19 8.19 0 0 0 1.294-.47l.391.677a.75.75 0 0 0 1.3-.75l-.393-.679a8.29 8.29 0 0 0 1.054-.885l.601.504a.75.75 0 0 0 .964-1.15l-.6-.503c.261-.375.492-.774.69-1.191l.735.267a.75.75 0 1 0 .512-1.41l-.734-.267c.115-.439.195-.892.237-1.356h.784Zm-2.657-3.06a6.744 6.744 0 0 0-1.19-2.053 6.784 6.784 0 0 0-1.82-1.51A6.705 6.705 0 0 0 12 5.25a6.8 6.8 0 0 0-1.225.11 6.7 6.7 0 0 0-2.15.793 6.784 6.784 0 0 0-2.952 3.489.76.76 0 0 1-.036.098A6.74 6.74 0 0 0 5.251 12a6.74 6.74 0 0 0 3.366 5.842l.009.005a6.704 6.704 0 0 0 2.18.798l.022.003a6.792 6.792 0 0 0 2.368-.004 6.704 6.704 0 0 0 2.205-.811 6.785 6.785 0 0 0 1.762-1.484l.009-.01.009-.01a6.743 6.743 0 0 0 1.18-2.066c.253-.707.39-1.469.39-2.263a6.74 6.74 0 0 0-.408-2.309Z" clip-rule="evenodd"></path>
-        </svg>
-        <span>Contact</span>
-      </a>
+
+      <nav aria-label="Main Navigation">
+        <ul class="nav-links">
+          <li><a href="app.html">Analysis</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <button type="button" class="theme-switch-btn" id="themeToggleBtn" onclick="Theme.toggleTheme()" aria-label="Toggle theme">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <div id="navAuthContainer">
+          <a href="login.html" class="btn btn-secondary btn-sm">Sign in</a>
+        </div>
+      </div>
     </div>
+  </header>
+
+  <main id="mainContent">
+    <!-- Hero Section -->
+    <section class="hero-section" aria-labelledby="heroTitle">
+      <div class="hero-content">
+        <div class="hero-tagline-badge">
+          <span>Official Chennai Commercial Geospatial Engine</span>
+        </div>
+        <h1 id="heroTitle">Where should your next shop open in Chennai?</h1>
+        <p>
+          Evaluate commercial localities across footfall density, market competition, transit accessibility, and rental affordability. Powered by spatial multi-criteria decision mathematics.
+        </p>
+        <div class="hero-actions">
+          <a href="app.html" class="btn btn-primary" style="font-size:var(--text-base);padding:0.75rem 1.4rem;">
+            Try an analysis
+          </a>
+          <span style="font-size:var(--text-sm);color:var(--color-text-tertiary);">(No signup required)</span>
+        </div>
+      </div>
+
+      <!-- Real Product Preview Card with Orchestrated Pins -->
+      <div class="hero-preview-card" aria-hidden="true">
+        <div class="preview-header">
+          <span>📍 Reference: T. Nagar (5 km radius)</span>
+          <span class="badge badge-success">Live Places Verified</span>
+        </div>
+        <div class="preview-map-mock">
+          <!-- Orchestrated Pin Drop: 5 -> 1 -->
+          <div class="map-pin-mock pin-5">5</div>
+          <div class="map-pin-mock pin-4">4</div>
+          <div class="map-pin-mock pin-3">3</div>
+          <div class="map-pin-mock pin-2">2</div>
+          <div class="map-pin-mock pin-1">1</div>
+        </div>
+        <div class="preview-score-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <span class="badge badge-top-pick" style="margin-bottom:0.25rem;">Rank #1 Top Pick</span>
+              <div style="font-weight:700;font-size:var(--text-base);color:var(--color-ink);">Perungudi OMR Corridor</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="tabular" style="font-size:var(--text-xl);font-weight:700;color:var(--color-primary);">84.2%</div>
+              <div style="font-size:var(--text-xs);color:var(--color-text-tertiary);">Fit Score</div>
+            </div>
+          </div>
+          <!-- Live stacked breakdown bar -->
+          <div class="why-rank-bar" style="height:8px;">
+            <div class="why-bar-part seg-rent" style="width:28%;" title="Affordability 28%"></div>
+            <div class="why-bar-part seg-crowd" style="width:34%;" title="Footfall 34%"></div>
+            <div class="why-bar-part seg-comp" style="width:20%;" title="Market Activity 20%"></div>
+            <div class="why-bar-part seg-access" style="width:18%;" title="Transit 18%"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How We Rank: Real 4-Step Sequence -->
+    <section class="section-wrap" aria-labelledby="rankingSequenceTitle" style="border-top:1px solid var(--color-border);">
+      <div class="section-title-wrap">
+        <h2 id="rankingSequenceTitle">How Locus Copilot Ranks Locations</h2>
+        <p>A transparent 4-step decision algorithm that transforms raw urban data into site recommendations.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h3>Spatial Boundary Filtering</h3>
+          <p>
+            You select a focal reference location and radius (1–15 km). The engine calculates exact Haversine spherical distances to extract candidate commercial zones.
+          </p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h3>Multi-Criteria Aggregation</h3>
+          <p>
+            Extracts point-of-interest density, retail shop concentrations, metro/bus transit stops, and square-foot commercial rental benchmarks.
+          </p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h3>Vertical Strategy Tuning</h3>
+          <p>
+            Each business type applies distinct criteria weights. For instance, restaurants prioritize foot traffic, while automobile centers prioritize affordable footprint.
+          </p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <h3>Places Ground-Truth Validation</h3>
+          <p>
+            Top candidates are verified against Google Places to assess verified competitors, review velocity, and real-time market saturation.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pick a Business Type -->
+    <section class="section-wrap" aria-labelledby="businessTypesTitle" style="border-top:1px solid var(--color-border);background:var(--color-sheet);">
+      <div class="section-title-wrap">
+        <h2 id="businessTypesTitle">Pick Your Business Vertical</h2>
+        <p>Select your retail category to launch an analysis pre-configured with industry weight profiles.</p>
+      </div>
+
+      <div class="business-grid">
+        <a href="app.html?type=restaurant" class="business-card">
+          <div class="biz-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          </div>
+          <span class="biz-title">Restaurant / Cafe</span>
+          <span class="biz-hint">Footfall priority (45%)</span>
+        </a>
+
+        <a href="app.html?type=medical" class="business-card">
+          <div class="biz-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <span class="biz-title">Medical / Pharmacy</span>
+          <span class="biz-hint">Transit accessibility (40%)</span>
+        </a>
+
+        <a href="app.html?type=laptop" class="business-card">
+          <div class="biz-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+          </div>
+          <span class="biz-title">Electronics / Laptop</span>
+          <span class="biz-hint">Cluster demand (30%)</span>
+        </a>
+
+        <a href="app.html?type=mobile" class="business-card">
+          <div class="biz-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <span class="biz-title">Mobile Retail</span>
+          <span class="biz-hint">Balanced footfall & access</span>
+        </a>
+
+        <a href="app.html?type=automobile" class="business-card">
+          <div class="biz-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/></svg>
+          </div>
+          <span class="biz-title">Automobile & Care</span>
+          <span class="biz-hint">Low rent priority (45%)</span>
+        </a>
+
+        <a href="app.html?type=stationery" class="business-card">
+          <div class="biz-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </div>
+          <span class="biz-title">Stationery & Books</span>
+          <span class="biz-hint">Institutional proximity</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Data Sources, Freshness, & Limitations -->
+    <section class="section-wrap" aria-labelledby="dataDisclosureTitle">
+      <div class="section-title-wrap">
+        <h2 id="dataDisclosureTitle">Data Sources, Freshness & Known Limits</h2>
+        <p>Honest disclosures regarding urban data provenance and modeling constraints.</p>
+      </div>
+
+      <div class="disclosure-box">
+        <div>
+          <h3 style="font-size:var(--text-base);margin-bottom:0.75rem;">Provenances & Updates</h3>
+          <ul style="color:var(--color-text-secondary);font-size:var(--text-sm);line-height:1.7;padding-left:1.25rem;">
+            <li><strong>Commercial POIs:</strong> Overture Maps & OpenStreetMap Chennai registries.</li>
+            <li><strong>Transit Stops:</strong> Metropolitan Transport Corporation (MTC) and Chennai Metro Rail (CMRL) network layers.</li>
+            <li><strong>Rental Benchmarks:</strong> Locality-level commercial survey estimates compiled for demonstration purposes.</li>
+            <li><strong>Live Competitors:</strong> Google Places API (New) cached for 14 days to preserve quota limits.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 style="font-size:var(--text-base);margin-bottom:0.75rem;">Operational Constraints</h3>
+          <ul style="color:var(--color-text-secondary);font-size:var(--text-sm);line-height:1.7;padding-left:1.25rem;">
+            <li><strong>Geographic Scope:</strong> Currently tuned strictly for the Greater Chennai metropolitan area.</li>
+            <li><strong>Radius Limits:</strong> Capped between 1 km and 15 km to ensure computational precision.</li>
+            <li><strong>Decision Support Only:</strong> Scores provide algorithmic prioritization; physical site diligence and lease verification are always recommended.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Universal Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-container">
+      <div class="footer-copy">
+        &copy; 2026 Locus Copilot. Engineering project for commercial location intelligence.
+      </div>
+      <ul class="footer-nav">
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="terms.html">Terms</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="https://github.com/Vikas17187/Locus_Copilot.git" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- Phone Bottom Tab Bar (Visible on mobile <= 768px) -->
+  <nav class="phone-tab-bar" aria-label="Mobile Navigation">
+    <a href="app.html" class="phone-tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+      <span>Analyse</span>
+    </a>
+    <a href="dashboard.html" class="phone-tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      <span>Saved</span>
+    </a>
+    <a href="about.html" class="phone-tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <span>About</span>
+    </a>
+    <a href="login.html" class="phone-tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Account</span>
+    </a>
+  </nav>
+
+  <!-- Shared JavaScript Modules -->
+  <script src="js/dom.js?v=3.0"></script>
+  <script src="js/theme.js?v=3.0"></script>
+  <script src="js/auth.js?v=3.0"></script>
+  <script src="js/api.js?v=3.0"></script>
 </body>
 </html>

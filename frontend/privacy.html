@@ -1,208 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy - Locus Copilot</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="theme.css?v=2.0">
-    <script>
-        (function() {
-            var t = localStorage.getItem('theme');
-            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (t === 'dark' || (!t && prefersDark)) {
-                document.documentElement.classList.add('dark-theme');
-            } else {
-                document.documentElement.classList.remove('dark-theme');
-            }
-        })();
-    </script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--page-gradient), var(--bg-secondary);
-            background-attachment: fixed;
-            color: var(--text-primary);
-            background-color: var(--bg-secondary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .navbar {
-            background: var(--bg-panel);
-            border-bottom: 1px solid var(--border-color);
-            padding: 0.85rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-
-        .navbar-content {
-            max-width: 1100px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .brand {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            text-decoration: none;
-        }
-        .brand span { color: var(--accent-primary); }
-        .nav-links { display: flex; gap: 0.4rem; align-items: center; }
-        .nav-link {
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-weight: 500;
-            font-size: 0.85rem;
-            padding: 0.45rem 0.85rem;
-            border-radius: var(--radius-sm);
-            border: none;
-            background: none;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-        .nav-link:hover { color: var(--text-primary); background: var(--bg-tertiary); }
-
-        .page {
-            max-width: 900px;
-            margin: 0 auto;
-            width: 100%;
-            padding: 3.2rem 2rem 4.5rem;
-            flex: 1;
-        }
-        h1 {
-            font-family: 'Poppins', sans-serif;
-            font-size: 2rem;
-            margin-bottom: 0.8rem;
-        }
-        .intro {
-            color: var(--text-secondary);
-            margin-bottom: 1.6rem;
-            line-height: 1.6;
-        }
-        .section {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 1rem 1.1rem;
-            margin-bottom: 0.75rem;
-        }
-        .section h2 {
-            font-size: 0.98rem;
-            margin-bottom: 0.45rem;
-            font-family: 'Poppins', sans-serif;
-        }
-        .section p {
-            color: var(--text-secondary);
-            font-size: 0.86rem;
-            line-height: 1.6;
-        }
-        .footer {
-            background: var(--bg-primary);
-            border-top: 1px solid var(--border-color);
-            padding: 1.4rem 2rem;
-            text-align: center;
-            color: var(--text-tertiary);
-            font-size: 0.8rem;
-        }
-        .footer a { color: var(--accent-primary); text-decoration: none; font-weight: 500; }
-
-        @media (max-width: 640px) {
-            .page { padding: 2.4rem 1.2rem 3.8rem; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - Locus Copilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script>
+    (function() {
+      var t = localStorage.getItem('theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (t === 'dark' || (!t && prefersDark)) {
+        document.documentElement.classList.add('dark-theme');
+      } else {
+        document.documentElement.classList.remove('dark-theme');
+      }
+    })();
+  </script>
+  <style>
+    .page-container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 5rem;
+    }
+    .policy-header {
+      margin-bottom: 2.5rem;
+    }
+    .policy-header h1 {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .policy-header p {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+    }
+    .policy-section {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-panel);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .policy-section h2 {
+      font-size: var(--text-md);
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 0.6rem;
+    }
+    .policy-section p {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.65;
+      margin-bottom: 0.75rem;
+    }
+    .policy-section p:last-child {
+      margin-bottom: 0;
+    }
+    .policy-section ul {
+      margin-left: 1.25rem;
+      margin-bottom: 0.75rem;
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+  </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-content">
-            <a class="brand" href="landing.html">Locus <span>Copilot</span></a>
-            <div class="nav-links">
-                <label class="switch" title="Toggle theme">
-                    <input type="checkbox" id="themeToggle" />
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-    </nav>
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="index.html" class="brand-logo" aria-label="Locus Copilot Home">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2a10 10 0 0 1 10 10c0 5.25-7 10-10 10S2 17.25 2 12A10 10 0 0 1 12 2z"/>
+        </svg>
+        <span>Locus <span class="brand-accent">Copilot</span></span>
+      </a>
 
-    <main class="page">
-        <h1>Privacy Notice</h1>
-        <p class="intro">This demo application keeps user data handling intentionally simple. Use this page to set expectations clearly when presenting to evaluators or stakeholders.</p>
+      <nav aria-label="Primary Navigation">
+        <ul class="nav-links">
+          <li><a href="app.html">Analysis</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
 
-        <section class="section">
-            <h2>Data We Store</h2>
-            <p>Account details required for login, your saved preferences, and optional saved searches or favorites. Contact form submissions are stored locally in browser storage in this demo setup.</p>
-        </section>
+      <div class="nav-actions">
+        <button type="button" class="theme-switch-btn" onclick="Theme.toggleTheme()" aria-label="Toggle theme">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+        <div id="navAuthContainer"></div>
+      </div>
+    </div>
+  </header>
 
-        <section class="section">
-            <h2>How Data Is Used</h2>
-            <p>Data is used only to authenticate users, personalize ranking behavior, and improve repeat session experience. No ad targeting or third-party analytics are enabled by default in this project.</p>
-        </section>
+  <main class="page-container">
+    <div class="policy-header">
+      <h1>Privacy Policy</h1>
+      <p>Last updated: October 2026 · Transparent disclosure of data practices</p>
+    </div>
 
-        <section class="section">
-            <h2>Security Model</h2>
-            <p>Passwords are hashed on the backend. Environment variables are used for sensitive values. For production, add HTTPS, rate limiting, and stricter access control before external release.</p>
-        </section>
+    <section class="policy-section">
+      <h2>Information We Collect</h2>
+      <p>When you create an account or interact with Locus Copilot, we process:</p>
+      <ul>
+        <li><strong>Account Credentials:</strong> Full name, email address, and a salted bcrypt-hashed password.</li>
+        <li><strong>User Preferences:</strong> Custom multi-criteria scoring weights (Rent, Footfall, Transit, Competition).</li>
+        <li><strong>Activity Records:</strong> Search queries (chosen anchor locality, business category, search radius) and bookmarked favorite locations.</li>
+        <li><strong>Contact Inquiries:</strong> Name, email address, subject line, and message content submitted through the contact form.</li>
+      </ul>
+    </section>
 
-        <section class="section">
-            <h2>Retention and Deletion</h2>
-            <p>As this is a demo, retention is minimal and operational. You can clear local browser storage at any time and reset server-side demo data directly from the database for testing cycles.</p>
-        </section>
-    </main>
+    <section class="policy-section">
+      <h2>Third-Party Services</h2>
+      <p>Locus Copilot integrates external platforms necessary to provide map visualization, typography, and live venue verification:</p>
+      <ul>
+        <li><strong>Google Maps Platform:</strong> Loads vector map tiles, geocoding, and renders interactive map pins. Governed by Google's Privacy Policy.</li>
+        <li><strong>Google Places API (New):</strong> Performs live queries for competitor density and place ratings in Chennai micro-localities.</li>
+        <li><strong>Google Fonts:</strong> Delivers typography assets (IBM Plex Sans and Noto Sans Tamil) via Google's global CDN.</li>
+        <li><strong>Google Cloud Firestore:</strong> Synchronizes user accounts, saved searches, criteria weights, and favorites across serverless instances.</li>
+      </ul>
+      <p>We do not sell personal information or deploy commercial advertising trackers.</p>
+    </section>
 
+    <section class="policy-section">
+      <h2>Data Storage &amp; Retention</h2>
+      <p>
+        Account data and user configurations are persisted in Google Cloud Firestore with a local SQLite fallback database during offline or testing runs. You may delete saved favorites or remove your preferences at any time from your account dashboard.
+      </p>
+    </section>
 
-    <script>
-        function navigateTo(e, url) {
-            if (e && e.preventDefault) e.preventDefault();
-            if (typeof e === 'string' && !url) { url = e; }
-            window.location.href = url;
-        }
+    <section class="policy-section">
+      <h2>Local Storage Usage</h2>
+      <p>
+        We use browser <code>localStorage</code> solely for operational preferences:
+      </p>
+      <ul>
+        <li><code>theme</code>: Records your chosen interface mode (light or dark) when explicitly toggled.</li>
+        <li><code>token</code>, <code>email</code>, <code>is_admin</code>: Maintains your authenticated session state across navigation.</li>
+      </ul>
+    </section>
 
-        // Theme management
-        function initTheme() {
-            const theme = localStorage.getItem('theme') || 'light';
-            applyTheme(theme);
-            const themeToggle = document.getElementById('themeToggle');
-            if (themeToggle) {
-                themeToggle.checked = (theme === 'dark');
-                themeToggle.addEventListener('change', (e) => {
-                    applyTheme(e.target.checked ? 'dark' : 'light');
-                });
-            }
-        }
-        
-        function applyTheme(theme) {
-            document.documentElement.classList.add('theme-transitioning');
-            document.body.classList.add('theme-transitioning');
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark-theme');
-                document.body.classList.add('dark-theme');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.documentElement.classList.remove('dark-theme');
-                document.body.classList.remove('dark-theme');
-                localStorage.setItem('theme', 'light');
-            }
-            const themeToggle = document.getElementById('themeToggle');
-            if (themeToggle) {
-                themeToggle.checked = (theme === 'dark');
-            }
-            setTimeout(() => {
-                document.documentElement.classList.remove('theme-transitioning');
-                document.body.classList.remove('theme-transitioning');
-            }, 450);
-        }
+    <section class="policy-section">
+      <h2>Contact for Privacy Inquiries</h2>
+      <p>
+        For questions regarding your data or to request account deletion, reach out directly at <a href="mailto:vikasoo474@gmail.com" style="color:var(--color-primary);font-weight:600;">vikasoo474@gmail.com</a>.
+      </p>
+    </section>
+  </main>
 
-        initTheme();
-    </script>
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-copy">
+        &copy; 2026 Locus Copilot. Built with Google Maps Platform &amp; Python FastAPI.
+      </div>
+      <ul class="footer-nav">
+        <li><a href="app.html">Analysis Tool</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="terms.html">Terms</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="js/dom.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
 </body>
 </html>

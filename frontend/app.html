@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Locus Copilot — Commercial Location Intelligence</title>
+  <meta name="description" content="Map-first location copilot for commercial site selection in Chennai. Linked priority optimization, candidate explainability, and live Places intelligence.">
+  
+  <!-- Typography: IBM Plex Sans, IBM Plex Sans Condensed & Noto Sans Tamil -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Modular Design System -->
+  <link rel="stylesheet" href="css/tokens.css?v=3.0">
+  <link rel="stylesheet" href="css/base.css?v=3.0">
+  <link rel="stylesheet" href="css/layout.css?v=3.0">
+  <link rel="stylesheet" href="css/components.css?v=3.0">
+
+  <!-- Blocking Theme Bootstrapper -->
+  <script>
+    (function() {
+      var saved = localStorage.getItem('theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark-theme');
+      } else {
+        document.documentElement.classList.remove('dark-theme');
+      }
+    })();
+  </script>
+
+  <!-- Google Maps JavaScript API with Places Library -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZ4Egrbf8zXbG0yYXAmbkqTiUY68KBsRA&libraries=places" defer></script>
+
+  <style>
+    /* Searchable Locality Dropdown */
+    .locality-dropdown-wrap {
+      position: relative;
+    }
+    .locality-menu-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-control);
+      box-shadow: var(--shadow-lg);
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: var(--z-dropdown, 350);
+      display: none;
+    }
+    .locality-menu-list.show {
+      display: block;
+    }
+    .locality-menu-item {
+      padding: 0.6rem 0.85rem;
+      cursor: pointer;
+      font-size: var(--text-sm);
+      display: flex;
+      justify-content: space-between;
+      color: var(--color-ink);
+    }
+    .locality-menu-item:hover,
+    .locality-menu-item.active {
+      background: var(--color-sheet);
+      color: var(--color-primary);
+    }
+
+    /* Live Google Places Verification Badge */
+    .google-intel-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-control);
+      padding: 0.85rem;
+      font-size: var(--text-xs);
+    }
+
+    .google-intel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+
+    /* Comparison Drawer Content */
+    .compare-items-row {
+      display: flex;
+      gap: 1rem;
+      flex: 1;
+      overflow-x: auto;
+    }
+    .compare-pill {
+      background: var(--color-sheet);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-control);
+      padding: 0.4rem 0.75rem;
+      font-size: var(--text-xs);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    /* Map Tooltips & Overlays */
+    .map-status-overlay {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      z-index: 10;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-control);
+      padding: 0.5rem 0.85rem;
+      box-shadow: var(--shadow-md);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-ink);
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Universal Top Header -->
+  <header class="site-header" role="banner">
+    <div class="nav-container">
+      <a href="index.html" class="brand-logo" aria-label="Locus Copilot Home">
+        <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <span>Locus <span class="brand-accent">Copilot</span></span>
+      </a>
+
+      <nav aria-label="Main Navigation">
+        <ul class="nav-links">
+          <li><a href="app.html" class="active" aria-current="page">Analysis</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <button type="button" class="theme-switch-btn" id="themeToggleBtn" onclick="Theme.toggleTheme()" aria-label="Toggle theme">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <div id="navAuthContainer">
+          <a href="login.html" class="btn btn-secondary btn-sm">Sign in</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3-Column Map-First App Shell -->
+  <main class="app-shell" id="appShell">
+    
+    <!-- LEFT COLUMN: Brief (Where/What & Linked 100% Priorities) -->
+    <aside class="brief-panel" aria-label="Analysis Controls">
+      <div>
+        <h1 style="font-size:var(--text-md);margin-bottom:0.25rem;">Site Selection Brief</h1>
+        <p style="font-size:var(--text-xs);color:var(--color-text-tertiary);">Configure focal locality, radius, and linked weights.</p>
+      </div>
+
+      <!-- Locality Input -->
+      <div class="form-group" style="margin-bottom:0.75rem;">
+        <label for="localitySearchInput" class="form-label">Focal Locality (Chennai)</label>
+        <div class="locality-dropdown-wrap">
+          <input type="text" id="localitySearchInput" class="form-control" placeholder="Search locality (e.g. T. Nagar, Adyar)" autocomplete="off">
+          <input type="hidden" id="selectedLocalityKey" value="T. Nagar">
+          <div id="localityMenuList" class="locality-menu-list" role="listbox"></div>
+        </div>
+      </div>
+
+      <!-- Business Vertical -->
+      <div class="form-group" style="margin-bottom:0.75rem;">
+        <label for="businessTypeSelect" class="form-label">Business Vertical</label>
+        <select id="businessTypeSelect" class="form-control" onchange="onBusinessTypeChanged()">
+          <option value="restaurant">Restaurant / Food & Beverage</option>
+          <option value="medical">Medical / Pharmacy / Clinic</option>
+          <option value="laptop">Electronics & Laptop Store</option>
+          <option value="mobile">Mobile Retail & Accessories</option>
+          <option value="automobile">Automobile Care & Workshop</option>
+          <option value="stationery">Stationery & Bookshop</option>
+        </select>
+      </div>
+
+      <!-- Search Radius Slider -->
+      <div class="form-group" style="margin-bottom:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+          <label for="radiusSlider" class="form-label">Search Radius</label>
+          <span class="tabular" id="radiusValLabel" style="font-size:var(--text-sm);font-weight:700;color:var(--color-primary);">5 km</span>
+        </div>
+        <input type="range" id="radiusSlider" class="priority-slider" min="1" max="15" step="0.5" value="5" oninput="onRadiusChanged(this.value)">
+      </div>
+
+      <!-- Linked Priorities (Total Always 100%) -->
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+          <span class="form-label" style="font-size:var(--text-sm);">Decision Priorities</span>
+          <span class="tabular badge badge-primary" id="priorityTotalBadge">Total 100%</span>
+        </div>
+
+        <!-- Live Stacked Bar Representation -->
+        <div class="priority-stacked-bar" role="progressbar" aria-label="Priority weight distribution" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+          <div id="barRent" class="priority-bar-segment seg-rent" style="width:25%;" title="Affordability"></div>
+          <div id="barCrowd" class="priority-bar-segment seg-crowd" style="width:25%;" title="Footfall Density"></div>
+          <div id="barComp" class="priority-bar-segment seg-comp" style="width:25%;" title="Market Activity"></div>
+          <div id="barAccess" class="priority-bar-segment seg-access" style="width:25%;" title="Transit Access"></div>
+        </div>
+
+        <!-- Linked Slider: Affordability -->
+        <div class="priority-control">
+          <div class="priority-header">
+            <span style="color:var(--cluster-1);">Affordability (Rent)</span>
+            <span class="tabular num" id="valRent">25%</span>
+          </div>
+          <input type="range" id="sliderRent" class="priority-slider" min="0" max="100" value="25" oninput="onLinkedSliderInput('rent', this.value)">
+        </div>
+
+        <!-- Linked Slider: Footfall Density -->
+        <div class="priority-control">
+          <div class="priority-header">
+            <span style="color:var(--cluster-2);">Footfall Density</span>
+            <span class="tabular num" id="valCrowd">25%</span>
+          </div>
+          <input type="range" id="sliderCrowd" class="priority-slider" min="0" max="100" value="25" oninput="onLinkedSliderInput('crowd', this.value)">
+        </div>
+
+        <!-- Linked Slider: Market Signal -->
+        <div class="priority-control">
+          <div class="priority-header">
+            <span style="color:var(--cluster-3);">Market Signal</span>
+            <span class="tabular num" id="valComp">25%</span>
+          </div>
+          <input type="range" id="sliderComp" class="priority-slider" min="0" max="100" value="25" oninput="onLinkedSliderInput('comp', this.value)">
+        </div>
+
+        <!-- Linked Slider: Transit Accessibility -->
+        <div class="priority-control">
+          <div class="priority-header">
+            <span style="color:var(--cluster-4);">Transit Access</span>
+            <span class="tabular num" id="valAccess">25%</span>
+          </div>
+          <input type="range" id="sliderAccess" class="priority-slider" min="0" max="100" value="25" oninput="onLinkedSliderInput('access', this.value)">
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <button type="button" class="btn btn-primary btn-block" id="runAnalysisBtn" onclick="executeAnalysis()" style="margin-top:auto;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Run Copilot Analysis</span>
+      </button>
+    </aside>
+
+    <!-- CENTER COLUMN: Interactive Google Map -->
+    <div class="map-panel" id="mapContainer" aria-label="Interactive Map View">
+      <div id="map" style="width:100%;height:100%;"></div>
+      <div id="mapStatusOverlay" class="map-status-overlay">Updating map...</div>
+    </div>
+
+    <!-- RIGHT COLUMN: Ranked Candidate Results & "Why this rank" -->
+    <section class="results-panel" aria-label="Ranked Location Results">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <h2 style="font-size:var(--text-md);margin-bottom:0.15rem;">Ranked Recommendations</h2>
+          <span id="resultsCountLabel" style="font-size:var(--text-xs);color:var(--color-text-tertiary);">Run an analysis to see ranked candidate areas</span>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" id="saveSearchBtn" onclick="saveCurrentSearch()" title="Save search to dashboard" style="display:none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <span>Save</span>
+        </button>
+      </div>
+
+      <!-- Verified Google Places Live Card -->
+      <div id="googleIntelBox" class="google-intel-card" style="display:none;">
+        <div class="google-intel-header">
+          <span style="color:var(--color-ink);">📍 Real-time Market Intelligence</span>
+          <span class="badge badge-success" id="googleIntelSource">Google Places Verified</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;font-size:12px;color:var(--color-text-secondary);">
+          <div>Competitors nearby: <strong class="tabular" id="intelCompCount">0</strong></div>
+          <div>Avg rating: <strong class="tabular" id="intelAvgRating">★ 0.0</strong></div>
+        </div>
+      </div>
+
+      <!-- Candidate Rows Container -->
+      <div id="resultsList" style="display:flex;flex-direction:column;gap:0.75rem;">
+        <div class="card" style="text-align:center;padding:2.5rem 1rem;color:var(--color-text-tertiary);">
+          <svg style="margin:0 auto 0.75rem;opacity:0.4;" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          <div style="font-weight:600;font-size:var(--text-sm);color:var(--color-ink);margin-bottom:0.25rem;">No analysis active</div>
+          <div style="font-size:var(--text-xs);">Choose a locality and click "Run Copilot Analysis" to view top-ranked sites.</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Dockable Compare Tray (Appears when up to 3 candidates are selected) -->
+  <aside id="compareTray" class="compare-tray" aria-label="Candidate Comparison Tray">
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <span style="font-weight:700;font-size:var(--text-sm);color:var(--color-ink);">Compare:</span>
+      <div id="comparePillsContainer" class="compare-items-row"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <button type="button" class="btn btn-primary btn-sm" onclick="openCompareModal()">Compare Details</button>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="clearComparison()">Clear</button>
+    </div>
+  </aside>
+
+  <!-- Comparison Modal Dialog -->
+  <div id="compareModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-dialog" style="max-width:760px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Side-by-Side Candidate Comparison</h2>
+        <button type="button" class="modal-close-btn" onclick="DOM.closeModal('compareModal')" aria-label="Close dialog">&times;</button>
+      </div>
+      <div id="compareModalBody" style="overflow-x:auto;"></div>
+    </div>
+  </div>
+
+  <!-- Universal Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-container">
+      <div class="footer-copy">
+        &copy; 2026 Locus Copilot. Engineering project for commercial location intelligence.
+      </div>
+      <ul class="footer-nav">
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="terms.html">Terms</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="https://github.com/Vikas17187/Locus_Copilot.git" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- Phone Bottom Tab Bar (Mobile <= 768px) -->
+  <nav class="phone-tab-bar" aria-label="Mobile Navigation">
+    <a href="app.html" class="phone-tab-item active" aria-current="page">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+      <span>Analyse</span>
+    </a>
+    <a href="dashboard.html" class="phone-tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      <span>Saved</span>
+    </a>
+    <a href="about.html" class="phone-tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <span>About</span>
+    </a>
+    <a href="login.html" class="phone-tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Account</span>
+    </a>
+  </nav>
+
+  <!-- Shared Modules -->
+  <script src="js/dom.js?v=3.0"></script>
+  <script src="js/theme.js?v=3.0"></script>
+  <script src="js/auth.js?v=3.0"></script>
+  <script src="js/api.js?v=3.0"></script>
+
+  <!-- Application Controller Logic -->
+  <script>
+    'use strict';
+
+    // Global State
+    let localities = [];
+    let selectedLocality = null;
+    let map = null;
+    let radiusCircle = null;
+    let referenceMarker = null;
+    let resultMarkers = [];
+    let liveCompetitorMarkers = [];
+    let currentResults = [];
+    let selectedForCompare = [];
+
+    // Weights object (strictly sum to 100)
+    let weights = {
+      rent: 25,
+      crowd: 25,
+      comp: 25,
+      access: 25
+    };
+
+    // Apple Dark Map Style
+    const APPLE_DARK_MAP_STYLE = [
+      { elementType: "geometry", stylers: [{ color: "#13161f" }] },
+      { elementType: "labels.text.stroke", stylers: [{ color: "#13161f" }] },
+      { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
+      { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#f1f5f9" }] },
+      { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#38bdf8" }] },
+      { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#112022" }] },
+      { featureType: "road", elementType: "geometry", stylers: [{ color: "#1e2433" }] },
+      { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#181d28" }] },
+      { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#2d3748" }] },
+      { featureType: "transit", elementType: "geometry", stylers: [{ color: "#1b212d" }] },
+      { featureType: "water", elementType: "geometry", stylers: [{ color: "#09101a" }] },
+      { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#475569" }] }
+    ];
+
+    // ==================== 1. LINKED SLIDER SYSTEM (ALWAYS TOTALS 100%) ====================
+
+    function onLinkedSliderInput(changedKey, rawVal) {
+      const newVal = Math.min(100, Math.max(0, parseInt(rawVal, 10) || 0));
+      const oldVal = weights[changedKey];
+      const delta = newVal - oldVal;
+
+      if (delta === 0) return;
+
+      const otherKeys = ['rent', 'crowd', 'comp', 'access'].filter(k => k !== changedKey);
+      const otherSum = otherKeys.reduce((acc, k) => acc + weights[k], 0);
+
+      weights[changedKey] = newVal;
+
+      if (otherSum > 0) {
+        // Distribute -delta proportionately
+        let distributed = 0;
+        otherKeys.forEach((k, idx) => {
+          if (idx === otherKeys.length - 1) {
+            // Give remaining to last key to guarantee exactly 100
+            weights[k] = Math.max(0, 100 - (weights[changedKey] + distributed));
+          } else {
+            const ratio = weights[k] / otherSum;
+            const deduction = Math.round(delta * ratio);
+            weights[k] = Math.max(0, weights[k] - deduction);
+            distributed += weights[k];
+          }
+        });
+      } else {
+        // Equal split if all others were 0
+        const remainder = 100 - newVal;
+        const perOther = Math.floor(remainder / 3);
+        otherKeys.forEach((k, i) => {
+          weights[k] = (i === 2) ? remainder - (perOther * 2) : perOther;
+        });
+      }
+
+      updateSliderUI();
+    }
+
+    function updateSliderUI() {
+      // Sliders & Number Badges
+      ['rent', 'crowd', 'comp', 'access'].forEach(k => {
+        const slider = document.getElementById('slider' + capitalize(k));
+        const numLabel = document.getElementById('val' + capitalize(k));
+        if (slider) slider.value = weights[k];
+        if (numLabel) numLabel.textContent = weights[k] + '%';
+      });
+
+      // Stacked Bar
+      document.getElementById('barRent').style.width = weights.rent + '%';
+      document.getElementById('barCrowd').style.width = weights.crowd + '%';
+      document.getElementById('barComp').style.width = weights.comp + '%';
+      document.getElementById('barAccess').style.width = weights.access + '%';
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function onRadiusChanged(val) {
+      document.getElementById('radiusValLabel').textContent = val + ' km';
+      if (radiusCircle && map) {
+        radiusCircle.setRadius(parseFloat(val) * 1000);
+      }
+    }
+
+    function onBusinessTypeChanged() {
+      const type = document.getElementById('businessTypeSelect').value;
+      // Preset weight tuning per vertical
+      if (type === 'restaurant') {
+        setWeightDistribution(20, 45, 15, 20);
+      } else if (type === 'medical') {
+        setWeightDistribution(20, 15, 25, 40);
+      } else if (type === 'laptop') {
+        setWeightDistribution(25, 30, 25, 20);
+      } else if (type === 'mobile') {
+        setWeightDistribution(20, 35, 20, 25);
+      } else if (type === 'automobile') {
+        setWeightDistribution(45, 10, 25, 20);
+      } else if (type === 'stationery') {
+        setWeightDistribution(20, 25, 20, 35);
+      }
+    }
+
+    function setWeightDistribution(rent, crowd, comp, access) {
+      weights = { rent, crowd, comp, access };
+      updateSliderUI();
+    }
+
+    // ==================== 2. LOCALITY SEARCH & INITIALIZATION ====================
+
+    async function loadLocalities() {
+      try {
+        const data = await API.fetch('/localities');
+        localities = data.localities || [];
+        setupLocalitySearch();
+
+        // Check URL parameters (e.g. app.html?type=restaurant&locality=Adyar)
+        const params = new URLSearchParams(window.location.search);
+        const urlType = params.get('type');
+        const urlLoc = params.get('locality');
+
+        if (urlType) {
+          const select = document.getElementById('businessTypeSelect');
+          if (select) {
+            select.value = urlType;
+            onBusinessTypeChanged();
+          }
+        }
+
+        if (urlLoc) {
+          const match = localities.find(l => (l.locality_name || l.name || '').toLowerCase() === urlLoc.toLowerCase());
+          if (match) selectLocality(match);
+        } else if (localities.length > 0) {
+          // Default to T. Nagar or first locality
+          const def = localities.find(l => (l.name || '').includes('T. Nagar')) || localities[0];
+          selectLocality(def);
+        }
+      } catch (err) {
+        console.error('Failed to load localities:', err);
+      }
+    }
+
+    function setupLocalitySearch() {
+      const input = document.getElementById('localitySearchInput');
+      const list = document.getElementById('localityMenuList');
+
+      input.addEventListener('input', () => {
+        const query = input.value.trim().toLowerCase();
+        const matches = localities.filter(l => (l.locality_name || l.name || '').toLowerCase().includes(query)).slice(0, 15);
+
+        if (matches.length === 0) {
+          list.innerHTML = '<div style="padding:0.6rem;color:var(--color-text-tertiary);font-size:12px;">No matching localities</div>';
+        } else {
+          list.innerHTML = matches.map(l => `
+            <div class="locality-menu-item" onclick="onLocalityClicked('${DOM.escapeHtml(l.name)}')">
+              <span>${DOM.escapeHtml(l.locality_name || l.name)}</span>
+              <span style="font-size:11px;color:var(--color-text-tertiary);">${DOM.escapeHtml(l.name)}</span>
+            </div>
+          `).join('');
+        }
+        list.classList.add('show');
+      });
+
+      input.addEventListener('focus', () => {
+        if (!list.classList.contains('show')) input.dispatchEvent(new Event('input'));
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.locality-dropdown-wrap')) {
+          list.classList.remove('show');
+        }
+      });
+    }
+
+    function onLocalityClicked(name) {
+      const loc = localities.find(l => l.name === name);
+      if (loc) selectLocality(loc);
+      document.getElementById('localityMenuList').classList.remove('show');
+    }
+
+    function selectLocality(loc) {
+      selectedLocality = loc;
+      document.getElementById('localitySearchInput').value = loc.locality_name || loc.name;
+      document.getElementById('selectedLocalityKey').value = loc.name;
+
+      const lat = loc.actual_lat || loc.lat || loc.center_lat || 13.0827;
+      const lon = loc.actual_lon || loc.lon || loc.center_lon || 80.2707;
+
+      if (map) {
+        const center = new google.maps.LatLng(lat, lon);
+        map.panTo(center);
+        updateReferencePin(center, loc.locality_name || loc.name);
+      }
+    }
+
+    // ==================== 3. GOOGLE MAPS ENGINE ====================
+
+    function initMap() {
+      const isDark = document.documentElement.classList.contains('dark-theme');
+      const defaultCoord = { lat: 13.0827, lng: 80.2707 };
+
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: defaultCoord,
+        zoom: 13,
+        styles: isDark ? APPLE_DARK_MAP_STYLE : [],
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: true,
+        zoomControl: true
+      });
+
+      // Update map vector styles when theme changes
+      window.onThemeChanged = function(theme) {
+        if (map) {
+          map.setOptions({ styles: theme === 'dark' ? APPLE_DARK_MAP_STYLE : [] });
+        }
+      };
+
+      if (selectedLocality) {
+        selectLocality(selectedLocality);
+      }
+    }
+
+    function updateReferencePin(center, name) {
+      if (referenceMarker) referenceMarker.setMap(null);
+      if (radiusCircle) radiusCircle.setMap(null);
+
+      const radiusKm = parseFloat(document.getElementById('radiusSlider').value) || 5;
+
+      radiusCircle = new google.maps.Circle({
+        strokeColor: '#0E7C86',
+        strokeOpacity: 0.85,
+        strokeWeight: 2,
+        fillColor: '#0E7C86',
+        fillOpacity: 0.08,
+        map: map,
+        center: center,
+        radius: radiusKm * 1000
+      });
+
+      referenceMarker = new google.maps.Marker({
+        position: center,
+        map: map,
+        title: name,
+        icon: {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+              <circle cx="16" cy="16" r="14" fill="#0E7C86" stroke="#ffffff" stroke-width="3"/>
+              <circle cx="16" cy="16" r="5" fill="#ffffff"/>
+            </svg>
+          `),
+          scaledSize: new google.maps.Size(28, 28),
+          anchor: new google.maps.Point(14, 14)
+        },
+        zIndex: 100
+      });
+    }
+
+    // ==================== 4. RUN ANALYSIS & RENDER CANDIDATES ====================
+
+    async function executeAnalysis() {
+      if (!selectedLocality) {
+        alert('Please select a locality first.');
+        return;
+      }
+
+      const runBtn = document.getElementById('runAnalysisBtn');
+      runBtn.disabled = true;
+      runBtn.innerHTML = '<span class="loading-spinner"></span>Analyzing spatial data...';
+
+      const lat = selectedLocality.actual_lat || selectedLocality.lat || selectedLocality.center_lat || 13.0827;
+      const lon = selectedLocality.actual_lon || selectedLocality.lon || selectedLocality.center_lon || 80.2707;
+      const radiusKm = parseFloat(document.getElementById('radiusSlider').value) || 5;
+      const businessType = document.getElementById('businessTypeSelect').value;
+
+      const payload = {
+        reference_lat: lat,
+        reference_lon: lon,
+        search_radius_km: radiusKm,
+        business_type: businessType,
+        weights: {
+          rent: weights.rent / 100,
+          crowd: weights.crowd / 100,
+          competition: weights.comp / 100,
+          accessibility: weights.access / 100
+        },
+        limit: 10
+      };
+
+      try {
+        const data = await API.fetch('/analyze', {
+          method: 'POST',
+          body: payload
+        });
+
+        currentResults = data.results || [];
+        renderCandidateResults(currentResults);
+        renderGoogleIntelligence(data.live_google_intelligence);
+        renderMapMarkers(currentResults, data.live_google_intelligence);
+
+        // Show save button if user is authenticated
+        const token = Auth.getToken();
+        const saveBtn = document.getElementById('saveSearchBtn');
+        if (saveBtn && token) saveBtn.style.display = 'inline-flex';
+
+      } catch (err) {
+        console.error('Analysis error:', err);
+        alert(err.message || 'Analysis could not be completed.');
+      } finally {
+        runBtn.disabled = false;
+        runBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span>Run Copilot Analysis</span>';
+      }
+    }
+
+    function renderCandidateResults(results) {
+      const container = document.getElementById('resultsList');
+      const countLabel = document.getElementById('resultsCountLabel');
+
+      if (!results || results.length === 0) {
+        countLabel.textContent = '0 candidates found within radius';
+        container.innerHTML = '<div class="card" style="text-align:center;padding:1.5rem;font-size:var(--text-sm);color:var(--color-text-secondary);">No viable commercial zones found within this radius. Try expanding the radius slider.</div>';
+        return;
+      }
+
+      countLabel.textContent = `${results.length} ranked candidate zones`;
+
+      container.innerHTML = results.map((r, idx) => {
+        const rank = idx + 1;
+        const name = DOM.escapeHtml(r.locality_name || r.name);
+        const score = (r.score_percent || (r.score * 100)).toFixed(1);
+        const dist = (r.distance_km || 0).toFixed(2);
+        const rentRate = r.features && r.features.rent ? `₹${DOM.escapeHtml(r.features.rent)}/sqft` : 'Est. ₹55/sqft';
+        const isChecked = selectedForCompare.some(item => item.id === r.id);
+
+        // Breakdown values for "Why this rank" stacked bar
+        const bd = r.breakdown || {};
+        const wRent = Math.round((bd.rent || 0.25) * 100);
+        const wCrowd = Math.round((bd.crowd || 0.25) * 100);
+        const wComp = Math.round((bd.competition || 0.25) * 100);
+        const wAccess = Math.round((bd.accessibility || 0.25) * 100);
+
+        return `
+          <article class="candidate-row ${rank === 1 ? 'selected' : ''}" id="candRow_${rank}" 
+                   onmouseenter="highlightPin(${rank})" onmouseleave="unhighlightPin(${rank})"
+                   onclick="focusCandidate(${rank}, ${r.lat}, ${r.lon})">
+            <div class="candidate-top">
+              <div style="display:flex;align-items:center;gap:0.5rem;">
+                <span class="badge ${rank === 1 ? 'badge-top-pick' : 'badge-primary'}">#${rank}</span>
+                <span class="candidate-name">${name}</span>
+              </div>
+              <span class="candidate-score tabular">${score}%</span>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;font-size:var(--text-xs);color:var(--color-text-secondary);">
+              <span>Distance: ${dist} km</span>
+              <span>Rent: ${rentRate}</span>
+            </div>
+
+            <!-- "Why This Rank" Stacked Bar -->
+            <div style="display:flex;flex-direction:column;gap:0.25rem;">
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-tertiary);">
+                <span>Why this rank:</span>
+                <span>Afford ${wRent}% · Crowd ${wCrowd}% · Signal ${wComp}% · Transit ${wAccess}%</span>
+              </div>
+              <div class="why-rank-bar">
+                <div class="why-bar-part seg-rent" style="width:${wRent}%;" title="Affordability ${wRent}%"></div>
+                <div class="why-bar-part seg-crowd" style="width:${wCrowd}%;" title="Footfall ${wCrowd}%"></div>
+                <div class="why-bar-part seg-comp" style="width:${wComp}%;" title="Market Signal ${wComp}%"></div>
+                <div class="why-bar-part seg-access" style="width:${wAccess}%;" title="Transit ${wAccess}%"></div>
+              </div>
+            </div>
+
+            <!-- Compare Checkbox -->
+            <div style="display:flex;justify-content:flex-end;margin-top:0.2rem;" onclick="event.stopPropagation();">
+              <label style="display:inline-flex;align-items:center;gap:0.35rem;font-size:var(--text-xs);cursor:pointer;color:var(--color-text-secondary);">
+                <input type="checkbox" onchange="toggleCompareItem('${DOM.escapeHtml(r.id)}', this.checked)" ${isChecked ? 'checked' : ''}>
+                <span>Compare</span>
+              </label>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function renderGoogleIntelligence(intel) {
+      const box = document.getElementById('googleIntelBox');
+      if (!intel || !intel.success) {
+        box.style.display = 'none';
+        return;
+      }
+      box.style.display = 'block';
+      document.getElementById('intelCompCount').textContent = intel.competitor_count || 0;
+      document.getElementById('intelAvgRating').textContent = `★ ${intel.avg_competitor_rating || '0.0'}`;
+      document.getElementById('googleIntelSource').textContent = intel.source === 'cache' ? 'Cached (0 Quota)' : 'Google Verified';
+    }
+
+    function renderMapMarkers(results, intel) {
+      // Clear old markers
+      resultMarkers.forEach(m => m.setMap(null));
+      resultMarkers = [];
+      liveCompetitorMarkers.forEach(m => m.setMap(null));
+      liveCompetitorMarkers = [];
+
+      if (!map) return;
+
+      const bounds = new google.maps.LatLngBounds();
+      const lat = selectedLocality.actual_lat || selectedLocality.lat || selectedLocality.center_lat;
+      const lon = selectedLocality.actual_lon || selectedLocality.lon || selectedLocality.center_lon;
+      bounds.extend({ lat, lng: lon });
+
+      // Add Live Google Places Competitors
+      if (intel && intel.top_competitors) {
+        intel.top_competitors.forEach(comp => {
+          if (!comp.lat || !comp.lon) return;
+          const marker = new google.maps.Marker({
+            position: { lat: comp.lat, lng: comp.lon },
+            map: map,
+            title: `Competitor: ${comp.name}`,
+            icon: {
+              url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" fill="#B42318" stroke="#ffffff" stroke-width="2"/>
+                </svg>
+              `),
+              scaledSize: new google.maps.Size(18, 18),
+              anchor: new google.maps.Point(9, 9)
+            },
+            zIndex: 40
+          });
+          liveCompetitorMarkers.push(marker);
+        });
+      }
+
+      // Add Ranked Candidate Pins (Pin 1 is Top-Pick Amber)
+      results.forEach((r, idx) => {
+        const rank = idx + 1;
+        const color = rank === 1 ? '#F2A900' : '#0E7C86';
+        const marker = new google.maps.Marker({
+          position: { lat: r.lat, lng: r.lon },
+          map: map,
+          title: `#${rank} ${r.locality_name || r.name}`,
+          icon: {
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+              <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
+                <circle cx="17" cy="17" r="14" fill="${color}" stroke="#ffffff" stroke-width="2.5"/>
+                <text x="17" y="21.5" font-size="12" font-family="sans-serif" font-weight="bold" text-anchor="middle" fill="#0B1F33">${rank}</text>
+              </svg>
+            `),
+            scaledSize: new google.maps.Size(28, 28),
+            anchor: new google.maps.Point(14, 14)
+          },
+          zIndex: 80 - idx
+        });
+
+        marker.addListener('click', () => {
+          focusCandidate(rank, r.lat, r.lon);
+        });
+
+        bounds.extend({ lat: r.lat, lng: r.lon });
+        resultMarkers.push(marker);
+      });
+
+      if (results.length > 0) {
+        map.fitBounds(bounds, { top: 30, right: 30, bottom: 30, left: 30 });
+      }
+    }
+
+    // Interactive Pin & List Row Linkage
+    function highlightPin(rank) {
+      const marker = resultMarkers[rank - 1];
+      if (marker && marker.setAnimation) {
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+      }
+    }
+
+    function unhighlightPin(rank) {
+      const marker = resultMarkers[rank - 1];
+      if (marker && marker.setAnimation) {
+        marker.setAnimation(null);
+      }
+    }
+
+    function focusCandidate(rank, lat, lon) {
+      if (map) {
+        map.panTo({ lat, lng: lon });
+      }
+      document.querySelectorAll('.candidate-row').forEach(row => row.classList.remove('selected'));
+      const row = document.getElementById('candRow_' + rank);
+      if (row) {
+        row.classList.add('selected');
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    // ==================== 5. COMPARE TRAY (UP TO 3 CANDIDATES) ====================
+
+    function toggleCompareItem(id, isChecked) {
+      const item = currentResults.find(r => r.id === id);
+      if (!item) return;
+
+      if (isChecked) {
+        if (selectedForCompare.length >= 3) {
+          alert('You can compare a maximum of 3 locations simultaneously.');
+          renderCandidateResults(currentResults);
+          return;
+        }
+        selectedForCompare.push(item);
+      } else {
+        selectedForCompare = selectedForCompare.filter(i => i.id !== id);
+      }
+
+      updateCompareTray();
+    }
+
+    function updateCompareTray() {
+      const tray = document.getElementById('compareTray');
+      const container = document.getElementById('comparePillsContainer');
+
+      if (selectedForCompare.length > 0) {
+        container.innerHTML = selectedForCompare.map(item => `
+          <span class="compare-pill">
+            <strong>${DOM.escapeHtml(item.locality_name || item.name)}</strong>
+            <button type="button" style="background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);" onclick="toggleCompareItem('${DOM.escapeHtml(item.id)}', false)">&times;</button>
+          </span>
+        `).join('');
+        tray.classList.add('visible');
+      } else {
+        tray.classList.remove('visible');
+      }
+    }
+
+    function clearComparison() {
+      selectedForCompare = [];
+      updateCompareTray();
+      renderCandidateResults(currentResults);
+    }
+
+    function openCompareModal() {
+      if (selectedForCompare.length === 0) return;
+
+      const body = document.getElementById('compareModalBody');
+      body.innerHTML = `
+        <table style="width:100%;border-collapse:collapse;font-size:var(--text-sm);text-align:left;">
+          <thead>
+            <tr style="border-bottom:2px solid var(--color-border);">
+              <th style="padding:0.75rem;">Metric</th>
+              ${selectedForCompare.map(c => `<th style="padding:0.75rem;color:var(--color-primary);">${DOM.escapeHtml(c.locality_name || c.name)}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--color-border-subtle);">
+              <td style="padding:0.6rem;font-weight:600;">Overall Fit Score</td>
+              ${selectedForCompare.map(c => `<td class="tabular" style="padding:0.6rem;font-weight:700;">${(c.score_percent || c.score*100).toFixed(1)}%</td>`).join('')}
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-border-subtle);">
+              <td style="padding:0.6rem;font-weight:600;">Distance</td>
+              ${selectedForCompare.map(c => `<td class="tabular" style="padding:0.6rem;">${(c.distance_km || 0).toFixed(2)} km</td>`).join('')}
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-border-subtle);">
+              <td style="padding:0.6rem;font-weight:600;">Est. Commercial Rent</td>
+              ${selectedForCompare.map(c => `<td class="tabular" style="padding:0.6rem;">₹${DOM.escapeHtml(c.features?.rent || '55')}/sqft</td>`).join('')}
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-border-subtle);">
+              <td style="padding:0.6rem;font-weight:600;">Retail Shops</td>
+              ${selectedForCompare.map(c => `<td class="tabular" style="padding:0.6rem;">${c.features?.shops || 0}</td>`).join('')}
+            </tr>
+            <tr>
+              <td style="padding:0.6rem;font-weight:600;">Transit Stops Nearby</td>
+              ${selectedForCompare.map(c => `<td class="tabular" style="padding:0.6rem;">${c.features?.transit_stops || 0}</td>`).join('')}
+            </tr>
+          </tbody>
+        </table>
+      `;
+      DOM.openModal('compareModal');
+    }
+
+    // Save Search to Dashboard
+    async function saveCurrentSearch() {
+      if (!selectedLocality || currentResults.length === 0) return;
+      try {
+        await API.fetch('/user/save-search', {
+          method: 'POST',
+          body: {
+            locality_name: selectedLocality.locality_name || selectedLocality.name,
+            latitude: selectedLocality.actual_lat || selectedLocality.lat || 13.0827,
+            longitude: selectedLocality.actual_lon || selectedLocality.lon || 80.2707,
+            search_radius: parseFloat(document.getElementById('radiusSlider').value) || 5,
+            business_type: document.getElementById('businessTypeSelect').value,
+            weights: {
+              rent: weights.rent / 100,
+              crowd: weights.crowd / 100,
+              competition: weights.comp / 100,
+              accessibility: weights.access / 100
+            },
+            result_count: currentResults.length
+          }
+        });
+        alert('Search saved to your dashboard!');
+      } catch (err) {
+        alert(err.message || 'Could not save search.');
+      }
+    }
+
+    // Initialize Map and Localities on page ready
+    window.addEventListener('load', () => {
+      loadLocalities();
+      if (window.google && window.google.maps) {
+        initMap();
+      } else {
+        const checkGoogle = setInterval(() => {
+          if (window.google && window.google.maps) {
+            clearInterval(checkGoogle);
+            initMap();
+          }
+        }, 100);
+      }
+    });
+  </script>
+</body>
+</html>

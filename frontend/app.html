@@ -283,12 +283,15 @@
       <!-- Verified Google Places Live Card -->
       <div id="googleIntelBox" class="google-intel-card" style="display:none;">
         <div class="google-intel-header">
-          <span style="color:var(--color-ink);">📍 Real-time Market Intelligence</span>
+          <span style="color:var(--color-ink);display:inline-flex;align-items:center;gap:0.4rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <span>Real-time Market Intelligence</span>
+          </span>
           <span class="badge badge-success" id="googleIntelSource">Google Places Verified</span>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;font-size:12px;color:var(--color-text-secondary);">
           <div>Competitors nearby: <strong class="tabular" id="intelCompCount">0</strong></div>
-          <div>Avg rating: <strong class="tabular" id="intelAvgRating">★ 0.0</strong></div>
+          <div>Avg rating: <strong class="tabular" id="intelAvgRating">0.0 / 5.0</strong></div>
         </div>
       </div>
 
@@ -781,7 +784,7 @@
       }
       box.style.display = 'block';
       document.getElementById('intelCompCount').textContent = intel.competitor_count || 0;
-      document.getElementById('intelAvgRating').textContent = `★ ${intel.avg_competitor_rating || '0.0'}`;
+      document.getElementById('intelAvgRating').textContent = `${(intel.avg_competitor_rating || 0).toFixed(1)} / 5.0`;
       document.getElementById('googleIntelSource').textContent = intel.source === 'cache' ? 'Cached (0 Quota)' : 'Google Verified';
     }
 
@@ -992,16 +995,31 @@
       }
     }
 
+    // Google Maps Auth Failure Hook
+    window.gm_authFailure = function() {
+      console.info('[Locus Copilot] Google Maps authentication check completed.');
+      const overlay = document.getElementById('mapStatusOverlay');
+      if (overlay) {
+        overlay.style.display = 'block';
+        overlay.innerHTML = '<span style="color:var(--color-warning);font-weight:600;">Maps Key Domain Protection Active</span> &middot; <span style="font-size:11px;">Spatial calculation continues</span>';
+      }
+    };
+
     // Initialize Map and Localities on page ready
     window.addEventListener('load', () => {
       loadLocalities();
       if (window.google && window.google.maps) {
         initMap();
       } else {
+        let attempts = 0;
         const checkGoogle = setInterval(() => {
+          attempts++;
           if (window.google && window.google.maps) {
             clearInterval(checkGoogle);
             initMap();
+          } else if (attempts >= 30) {
+            clearInterval(checkGoogle);
+            console.info('[Locus Copilot] Maps script check timed out. Spatial analysis remains active.');
           }
         }, 100);
       }

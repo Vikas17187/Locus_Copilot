@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { MapPin, Globe, Scale, Cloud } from 'lucide-react';
 import './about.css';
 
 export default function AboutPage() {
@@ -55,22 +56,22 @@ export default function AboutPage() {
           <h2>System Architecture & Pillars</h2>
           <div className="pillars-grid">
             <div className="pillar-card">
-              <span className="pillar-icon">📍</span>
+              <span className="pillar-icon"><MapPin size={20} /></span>
               <h3>4,345 Micro-Localities</h3>
               <p>Comprehensive spatial resolution across Greater Chennai Corporation, Tambaram, Avadi, and emerging growth corridors (OMR, GST Road, Sriperumbudur, ECR).</p>
             </div>
             <div className="pillar-card">
-              <span className="pillar-icon">🌐</span>
+              <span className="pillar-icon"><Globe size={20} /></span>
               <h3>Google Places Ground Truth</h3>
               <p>Direct integration with Google Places API (New) to verify real-time competitor density, customer sentiment, and footfall volume proxies without manual surveys.</p>
             </div>
             <div className="pillar-card">
-              <span className="pillar-icon">⚖️</span>
+              <span className="pillar-icon"><Scale size={20} /></span>
               <h3>Multi-Criteria Decision Scoring</h3>
               <p>Mathematical normalization balancing commercial rent pressure, crowd density, public transit accessibility, and competitor saturation into an objective 0–100 index.</p>
             </div>
             <div className="pillar-card">
-              <span className="pillar-icon">☁️</span>
+              <span className="pillar-icon"><Cloud size={20} /></span>
               <h3>Cloud-Synchronized Persistence</h3>
               <p>Sub-5ms spatial querying, Google Cloud Firestore serverless synchronization, and high-performance Google Maps Platform visualization.</p>
             </div>

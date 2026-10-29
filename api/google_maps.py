@@ -117,7 +117,7 @@ def fetch_live_competitors_and_footfall(
     - Halts if daily cap (50 calls) is hit.
     - Zero loop calls.
     """
-    api_key = GOOGLE_MAPS_API_KEY or os.getenv("GOOGLE_MAPS_API_KEY", "")
+    api_key = GOOGLE_MAPS_API_KEY or os.getenv("GOOGLE_MAPS_API_KEY", "") or os.getenv("FIREBASE_API_KEY", "")
     if not api_key:
         return {"success": False, "source": "no_key", "error": "No Google Maps API Key provided"}
 

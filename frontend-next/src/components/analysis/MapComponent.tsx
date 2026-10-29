@@ -184,7 +184,7 @@ export default function MapComponent() {
       centerMarker.addListener('click', () => {
         infoWindowRef.current.setContent(`
           <div style="padding: 6px 8px; font-family: sans-serif; font-size: 13px;">
-            <div style="font-weight: bold; color: #0284c7; margin-bottom: 2px;">📍 Search Reference</div>
+            <div style="font-weight: bold; color: #0284c7; margin-bottom: 2px;">Search Reference</div>
             <div style="font-size: 14px; font-weight: 600;">${currentLoc?.locality_name || currentLoc?.name || selectedLocality}</div>
             <div style="color: #64748b; font-size: 11px; margin-top: 2px;">Search radius: ${radius} km</div>
           </div>
@@ -204,7 +204,7 @@ export default function MapComponent() {
           url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
               <circle cx="14" cy="14" r="12" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
-              <text x="14" y="18" font-size="11" text-anchor="middle" fill="#ffffff">🏬</text>
+              <path d="M9 19V9l5-3 5 3v10H9zm2-2h2v-3h-2v3zm4 0h2v-3h-2v3z" fill="#ffffff"/>
             </svg>
           `),
           scaledSize: new google.maps.Size(24, 24),
@@ -227,7 +227,7 @@ export default function MapComponent() {
               </span>
               <div style="font-weight: 700; font-size: 13px; margin: 4px 0 2px 0; color: #0f172a;">${comp.name}</div>
               <div style="display: flex; justify-content: space-between; font-size: 12px; color: #64748b; margin-top: 4px;">
-                <span style="color: #eab308; font-weight: bold;">★ ${comp.rating} (${comp.reviews} reviews)</span>
+                <span style="font-weight: 600;">Rating: ${comp.rating} / 5.0 (${comp.reviews} reviews)</span>
                 <span>${comp.distance_meters}m away</span>
               </div>
             </div>

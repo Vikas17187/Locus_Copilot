@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { ClipboardList, Sparkles, MapPin } from 'lucide-react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 
 export default function ResultsPanel() {
@@ -15,14 +16,14 @@ export default function ResultsPanel() {
           className={`tab ${activeTab === 'rankings' ? 'active' : ''}`}
           onClick={() => setActiveTab('rankings')}
         >
-          <span className="tab-icon">📋</span>
+          <ClipboardList size={14} style={{ marginRight: '6px' }} />
           LOCATION RANKINGS
         </div>
         <div 
           className={`tab ${activeTab === 'ai_picks' ? 'active' : ''}`}
           onClick={() => setActiveTab('ai_picks')}
         >
-          <span className="tab-icon">✨</span>
+          <Sparkles size={14} style={{ marginRight: '6px' }} />
           AI PERSONALIZED PICKS
           <span className="badge">AI</span>
         </div>
@@ -40,7 +41,7 @@ export default function ResultsPanel() {
         }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ fontSize: "16px" }}>📍</span>
+              <MapPin size={15} style={{ color: "var(--accent-primary, #0284c7)" }} />
               <span style={{ fontWeight: 700, fontSize: "0.85rem", letterSpacing: "0.5px", color: "var(--accent-primary, #0284c7)", textTransform: "uppercase" }}>
                 Google Places Ground Truth
               </span>
@@ -53,7 +54,7 @@ export default function ResultsPanel() {
               background: liveGoogleIntel.source === "cache" ? "rgba(16, 185, 129, 0.15)" : "rgba(14, 165, 233, 0.15)",
               color: liveGoogleIntel.source === "cache" ? "#059669" : "#0284c7"
             }}>
-              {liveGoogleIntel.source === "cache" ? "⚡ Cached (0 Quota)" : "🟢 Live Verified"}
+              {liveGoogleIntel.source === "cache" ? "Cached (0 Quota)" : "Live Places Verified"}
             </span>
           </div>
 
@@ -66,8 +67,8 @@ export default function ResultsPanel() {
             </div>
             <div style={{ background: "rgba(255,255,255,0.7)", padding: "6px", borderRadius: "6px", border: "1px solid rgba(0,0,0,0.06)" }}>
               <div style={{ fontSize: "0.7rem", color: "var(--text-secondary, #64748b)" }}>Avg Rating</div>
-              <div style={{ fontSize: "1.05rem", fontWeight: 700, color: "#eab308" }}>
-                ★ {liveGoogleIntel.avg_competitor_rating}
+              <div style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>
+                {liveGoogleIntel.avg_competitor_rating} / 5.0
               </div>
             </div>
             <div style={{ background: "rgba(255,255,255,0.7)", padding: "6px", borderRadius: "6px", border: "1px solid rgba(0,0,0,0.06)" }}>
@@ -122,7 +123,7 @@ export default function ResultsPanel() {
                         </div>
                       </div>
                       <div style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                        <span style={{ color: "#eab308", fontWeight: 700 }}>★ {comp.rating}</span>
+                        <span style={{ fontWeight: 600 }}>Rating: {comp.rating}</span>
                         <div style={{ fontSize: "0.65rem", color: "var(--text-secondary, #64748b)" }}>
                           ({comp.reviews} reviews)
                         </div>

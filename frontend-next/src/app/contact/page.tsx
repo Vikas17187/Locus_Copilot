@@ -64,23 +64,18 @@ export default function ContactPage() {
 
       if (res.ok && data.success) {
         setStatus({
-          message: `✓ Thank you, ${payload.name}! Your message has been received and saved to our cloud database. We will get back to you shortly.`,
+          message: `Thank you, ${payload.name}! Your message has been received. We will respond shortly.`,
           type: 'success'
         });
         setFormData({ name: '', email: '', subject: '', message: '' });
       } else {
-        throw new Error(data.detail || 'Server error');
+        throw new Error(data.detail || 'Unable to submit your message at this time.');
       }
-    } catch (err) {
-      console.warn('Backend contact failed, storing locally:', err);
-      const messages = JSON.parse(localStorage.getItem('contact_messages') || '[]');
-      messages.push({ ...payload, submitted_at: new Date().toISOString() });
-      localStorage.setItem('contact_messages', JSON.stringify(messages));
+    } catch (err: any) {
       setStatus({
-        message: `✓ Thank you, ${payload.name}! Your message has been recorded. We will review it shortly.`,
-        type: 'success'
+        message: err.message || 'Failed to send message. Please verify your connection and try again.',
+        type: 'error'
       });
-      setFormData({ name: '', email: '', subject: '', message: '' });
     } finally {
       setIsSubmitting(false);
     }

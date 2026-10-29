@@ -52,14 +52,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for frontend
-origins_env = os.getenv("LOCUS_ALLOWED_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080,http://localhost:3000,http://127.0.0.1:3000")
+# Enable CORS for frontend & Vercel deployments
+origins_env = os.getenv("LOCUS_ALLOWED_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080,http://localhost:3000,http://127.0.0.1:3000,https://vikas-locus.vercel.app")
 allowed_origins = [origin.strip() for origin in origins_env.split(",") if origin.strip()]
 allow_all_origins = "*" in allowed_origins
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins or ["http://localhost:8080"],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=not allow_all_origins,
     allow_methods=["*"],
     allow_headers=["*"],

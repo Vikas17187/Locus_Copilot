@@ -121,17 +121,21 @@
         <span>Locus <span class="brand-accent">Copilot</span></span>
       </a>
 
-      <nav aria-label="Primary Navigation">
+      <nav aria-label="Global Navigation">
         <ul class="nav-links">
+          <li><a href="index.html">Overview</a></li>
           <li><a href="app.html">Analysis</a></li>
+          <li><a href="index.html#verticals">Industries</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
           <li><a href="about.html">About</a></li>
           <li><a href="contact.html" class="active" aria-current="page">Contact</a></li>
+          <li id="navAdminItem" style="display:none;"><a href="admin.html">Admin</a></li>
         </ul>
       </nav>
 
       <div class="nav-actions">
         <button type="button" class="theme-switch-btn" onclick="Theme.toggleTheme()" aria-label="Toggle theme">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
         </button>
         <div id="navAuthContainer"></div>
       </div>
@@ -262,20 +266,24 @@
   </footer>
 
   <nav class="phone-tab-bar" aria-label="Mobile Navigation">
-    <a href="index.html" class="tab-item" style="display:flex;flex-direction:column;align-items:center;color:var(--color-text-secondary);text-decoration:none;font-size:var(--text-xs);gap:2px;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-      <span>Home</span>
+    <a href="index.html" class="phone-tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      <span>Overview</span>
     </a>
-    <a href="app.html" class="tab-item" style="display:flex;flex-direction:column;align-items:center;color:var(--color-text-secondary);text-decoration:none;font-size:var(--text-xs);gap:2px;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+    <a href="app.html" class="phone-tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
       <span>Analysis</span>
     </a>
-    <a href="about.html" class="tab-item" style="display:flex;flex-direction:column;align-items:center;color:var(--color-text-secondary);text-decoration:none;font-size:var(--text-xs);gap:2px;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+    <a href="dashboard.html" class="phone-tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="about.html" class="phone-tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
       <span>About</span>
     </a>
-    <a href="contact.html" class="tab-item" style="display:flex;flex-direction:column;align-items:center;color:var(--color-primary);text-decoration:none;font-size:var(--text-xs);gap:2px;font-weight:600;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+    <a href="contact.html" class="phone-tab-item active">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
       <span>Contact</span>
     </a>
   </nav>

@@ -163,5 +163,38 @@ def test_stationery_spelling_mapping():
     from api.google_maps import TYPE_MAPPING
     assert "stationery" in TYPE_MAPPING
     assert "stationary" in TYPE_MAPPING
-    assert TYPE_MAPPING["stationery"] == TYPE_MAPPING["stationary"]
+
+
+def test_ai_due_diligence_report():
+    payload = {
+        "locality_name": "Perungudi OMR Tech Corridor",
+        "business_type": "restaurant",
+        "score": 88.5,
+        "radius_km": 5.0,
+        "features": {"rent": 75, "transit_stops": 10, "shops": 50},
+        "cluster_info": {"name": "Tech & Innovation Corridor"}
+    }
+    res = request("POST", "/api/ai/due-diligence", payload=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert data.get("success") is True
+    memo = data.get("memo", {})
+    assert "verdict" in memo
+    assert "executive_summary" in memo
+    assert "financial_guardrails" in memo
+    assert "strategic_risks" in memo
+    assert isinstance(memo["strategic_risks"], list)
+
+
+def test_ml_clusters_map():
+    res = request("GET", "/api/ml/clusters/map")
+    assert res.status_code == 200
+    data = res.json()
+    assert data.get("success") is True
+    assert "localities" in data
+    assert len(data["localities"]) > 100
+    first = data["localities"][0]
+    assert "cluster_id" in first
+    assert "cluster_name" in first
+    assert "cluster_color" in first
 

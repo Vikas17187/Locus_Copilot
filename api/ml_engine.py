@@ -27,16 +27,16 @@ except ImportError:
 
 # Cluster profile labels (assigned after analyzing centroids)
 CLUSTER_PROFILES = {
-    0: {"name": "Commercial Hub", "icon": "🏬", "color": "#e74c3c",
-        "description": "High foot traffic, many shops, good transit access"},
-    1: {"name": "Residential Zone", "icon": "🏘️", "color": "#3498db",
-        "description": "Lower density, affordable rent, fewer shops"},
-    2: {"name": "Transit Corridor", "icon": "🚇", "color": "#2ecc71",
-        "description": "Well-connected by public transit, moderate activity"},
-    3: {"name": "Emerging Area", "icon": "🌱", "color": "#f39c12",
-        "description": "Developing area with growth potential, low competition"},
-    4: {"name": "Premium District", "icon": "💎", "color": "#9b59b6",
-        "description": "High rent but strong demand, established market"},
+    0: {"name": "Commercial Hub", "icon": "commercial", "color": "#0072B2",
+        "description": "High foot traffic, dense retail footprint, established customer catchment"},
+    1: {"name": "Residential Zone", "icon": "residential", "color": "#E69F00",
+        "description": "Lower commercial density, affordable rent, high neighborhood loyalty"},
+    2: {"name": "Transit Corridor", "icon": "transit", "color": "#009E73",
+        "description": "Multimodal CMRL and bus connectivity, high commuter velocity"},
+    3: {"name": "Emerging Area", "icon": "emerging", "color": "#CC79A7",
+        "description": "Rapid residential growth, expanding retail demand, low competition"},
+    4: {"name": "Premium District", "icon": "premium", "color": "#56B4E9",
+        "description": "High purchasing power, premier high-street retail, steep rental brackets"},
 }
 
 
@@ -180,7 +180,7 @@ class LocationClusterer:
             else:
                 self.cluster_profiles[cluster_id] = {
                     "name": f"Zone {cluster_id}",
-                    "icon": "📍",
+                    "icon": "zone",
                     "color": "#95a5a6",
                     "description": "Mixed-use area",
                 }
@@ -280,7 +280,7 @@ class LocationClusterer:
                 "cluster_id": cluster_id,
                 "cluster_name": profile.get("name", "Unknown"),
                 "cluster_color": profile.get("color", "#95a5a6"),
-                "cluster_icon": profile.get("icon", "📍"),
+                "cluster_icon": profile.get("icon", "zone"),
             })
 
         return result

@@ -12,7 +12,7 @@ Endpoints:
 from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 import os
 from pathlib import Path
 
@@ -28,6 +28,7 @@ try:
     from .auth import create_token, verify_token, extract_token_from_header
     from .ml_engine import MLEngine
     from .google_maps import fetch_live_competitors_and_footfall
+    from .ai_memo import generate_due_diligence_memo
 except ImportError:
     from scoring_engine import ScoringEngine, load_localities
     from database import (
@@ -40,6 +41,7 @@ except ImportError:
     from auth import create_token, verify_token, extract_token_from_header
     from ml_engine import MLEngine
     from google_maps import fetch_live_competitors_and_footfall
+    from ai_memo import generate_due_diligence_memo
 
 
 # ============================================================================
@@ -232,6 +234,17 @@ class AddFavoriteRequest(BaseModel):
     latitude: float
     longitude: float
     notes: str = ""
+
+
+class DueDiligenceRequest(BaseModel):
+    locality_id: Optional[str] = None
+    locality_name: str
+    business_type: str = "restaurant"
+    score: float = 75.0
+    radius_km: float = 5.0
+    cluster_info: Optional[Dict[str, Any]] = None
+    features: Optional[Dict[str, Any]] = None
+    google_intel: Optional[Dict[str, Any]] = None
 
 
 class ContactRequest(BaseModel):
@@ -745,6 +758,24 @@ async def get_smart_weights(business_type: str):
     if not rec:
         raise HTTPException(status_code=404, detail=f"No recommendation for '{business_type}'")
     return {"success": True, **rec}
+
+
+@app.post("/api/ai/due-diligence", tags=["AI"])
+async def get_due_diligence_report(req: DueDiligenceRequest):
+    """Generate an AI Commercial Due-Diligence & Investment Memo."""
+    try:
+        memo = generate_due_diligence_memo(
+            locality_name=req.locality_name,
+            business_type=req.business_type,
+            score=req.score,
+            cluster_info=req.cluster_info,
+            features=req.features,
+            google_intel=req.google_intel,
+            radius_km=req.radius_km
+        )
+        return {"success": True, "memo": memo}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/api/ml/personalized", tags=["ML"])

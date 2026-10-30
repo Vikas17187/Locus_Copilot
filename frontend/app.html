@@ -262,7 +262,29 @@
     </aside>
 
     <!-- CENTER COLUMN: Interactive Google Map -->
-    <div class="map-panel" id="mapContainer" aria-label="Interactive Map View">
+    <div class="map-panel" id="mapContainer" aria-label="Interactive Map View" style="position:relative;">
+      <!-- Apple-Style Floating Map Mode Switcher -->
+      <nav class="map-mode-bar" id="mapModeBar" aria-label="Map Visualisation Mode">
+        <button type="button" class="map-mode-btn active" id="btnModeCandidates" onclick="setMapDisplayMode('candidates')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>Ranked Candidates</span>
+        </button>
+        <button type="button" class="map-mode-btn" id="btnModeClusters" onclick="setMapDisplayMode('clusters')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/></svg>
+          <span>K-Means Economic Zones</span>
+        </button>
+      </nav>
+
+      <!-- K-Means Archetype Filter Pill Bar (Shown when mode === 'clusters') -->
+      <div class="cluster-legend-pill-bar" id="clusterLegendPillBar" style="display:none;" role="toolbar" aria-label="Filter Archetype">
+        <button type="button" class="cluster-pill-filter active" onclick="filterMapCluster('all')" data-cluster="all">All Corridors</button>
+        <button type="button" class="cluster-pill-filter" style="--c-col:#0072B2;" onclick="filterMapCluster(0)" data-cluster="0">Commercial Hubs</button>
+        <button type="button" class="cluster-pill-filter" style="--c-col:#E69F00;" onclick="filterMapCluster(1)" data-cluster="1">Residential Zones</button>
+        <button type="button" class="cluster-pill-filter" style="--c-col:#009E73;" onclick="filterMapCluster(2)" data-cluster="2">Transit Corridors</button>
+        <button type="button" class="cluster-pill-filter" style="--c-col:#CC79A7;" onclick="filterMapCluster(3)" data-cluster="3">Emerging Areas</button>
+        <button type="button" class="cluster-pill-filter" style="--c-col:#56B4E9;" onclick="filterMapCluster(4)" data-cluster="4">Premium Districts</button>
+      </div>
+
       <div id="map" style="width:100%;height:100%;"></div>
       <div id="mapStatusOverlay" class="map-status-overlay">Updating map...</div>
     </div>
@@ -330,6 +352,27 @@
     </div>
   </div>
 
+  <!-- AI Commercial Due-Diligence Modal -->
+  <div id="aiMemoModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-dialog" style="max-width:820px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;">
+      <div class="modal-header" style="position:sticky;top:0;background:inherit;backdrop-filter:blur(20px);z-index:10;padding-bottom:0.75rem;border-bottom:1px solid var(--color-border-subtle);">
+        <div>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <h2 class="modal-title" id="memoModalTitle">Commercial Due-Diligence Memo</h2>
+            <span class="badge badge-primary" id="memoConfidenceBadge">High Confidence</span>
+          </div>
+          <p style="font-size:var(--text-xs);color:var(--color-text-tertiary);margin-top:0.2rem;" id="memoModalSubtitle">
+            Spatial economist memorandum synthesized from demographic microdata, competitor density, and commercial benchmarks.
+          </p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="DOM.closeModal('aiMemoModal')" aria-label="Close memo">&times;</button>
+      </div>
+      <div id="memoModalBody" style="display:flex;flex-direction:column;gap:1rem;padding:1rem 0 0.5rem 0;">
+        <!-- Dynamic Memo Content -->
+      </div>
+    </div>
+  </div>
+
   <!-- Universal Footer -->
   <footer class="site-footer" role="contentinfo">
     <div class="footer-container">
@@ -385,6 +428,11 @@
     let liveCompetitorMarkers = [];
     let currentResults = [];
     let selectedForCompare = [];
+    let mapDisplayMode = 'candidates';
+    let clusterMarkers = [];
+    let clusterMapData = null;
+    let clusterInfoWindow = null;
+    let currentClusterFilter = 'all';
 
     // Weights object (strictly sum to 100)
     let weights = {
@@ -688,6 +736,7 @@
         });
 
         currentResults = data.results || [];
+        await setMapDisplayMode('candidates');
         renderCandidateResults(currentResults);
         renderGoogleIntelligence(data.live_google_intelligence);
         renderMapMarkers(currentResults, data.live_google_intelligence);
@@ -764,8 +813,12 @@
               </div>
             </div>
 
-            <!-- Compare Checkbox -->
-            <div style="display:flex;justify-content:flex-end;margin-top:0.2rem;" onclick="event.stopPropagation();">
+            <!-- Action Bar: AI Investment Memo & Compare Checkbox -->
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.4rem;padding-top:0.35rem;border-top:1px solid var(--color-border-subtle);" onclick="event.stopPropagation();">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openAiDueDiligence(${rank})" style="padding:0.25rem 0.6rem;font-size:11px;gap:0.35rem;" title="Generate AI Commercial Due-Diligence & Investment Memo">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                <span>AI Investment Memo</span>
+              </button>
               <label style="display:inline-flex;align-items:center;gap:0.35rem;font-size:var(--text-xs);cursor:pointer;color:var(--color-text-secondary);">
                 <input type="checkbox" onchange="toggleCompareItem('${DOM.escapeHtml(r.id)}', this.checked)" ${isChecked ? 'checked' : ''}>
                 <span>Compare</span>
@@ -966,6 +1019,367 @@
         </table>
       `;
       DOM.openModal('compareModal');
+    }
+
+    // ==================== 6. OPTION A: AI COMMERCIAL DUE-DILIGENCE MEMO ====================
+
+    async function openAiDueDiligence(rank) {
+      const candidate = currentResults[rank - 1];
+      if (!candidate) return;
+
+      const titleEl = document.getElementById('memoModalTitle');
+      const subEl = document.getElementById('memoModalSubtitle');
+      const confBadge = document.getElementById('memoConfidenceBadge');
+      const bodyEl = document.getElementById('memoModalBody');
+
+      const locName = candidate.locality_name || candidate.name;
+      const bType = document.getElementById('businessTypeSelect').value;
+      const displayBType = bType.charAt(0).toUpperCase() + bType.slice(1);
+
+      titleEl.textContent = `${locName} — Commercial Feasibility Memo`;
+      subEl.textContent = `Analyzing ${displayBType} investment suitability in ${locName} (Rank #${rank})`;
+      confBadge.textContent = 'Synthesizing...';
+      confBadge.className = 'badge badge-primary';
+
+      bodyEl.innerHTML = `
+        <div style="text-align:center;padding:3rem 1rem;">
+          <div class="loading-spinner" style="margin:0 auto 1rem;width:24px;height:24px;"></div>
+          <div style="font-weight:600;font-size:var(--text-sm);color:var(--color-ink);">Generating AI Commercial Due-Diligence Memo...</div>
+          <div style="font-size:var(--text-xs);color:var(--color-text-tertiary);margin-top:0.25rem;">Synthesizing market catchment, competitor saturation, and lease guardrails</div>
+        </div>
+      `;
+
+      DOM.openModal('aiMemoModal');
+
+      try {
+        const radiusKm = parseFloat(document.getElementById('radiusSlider').value) || 5;
+        const res = await API.fetch('/ai/due-diligence', {
+          method: 'POST',
+          body: {
+            locality_name: locName,
+            business_type: bType,
+            score: candidate.score_percent || (candidate.score * 100),
+            radius_km: radiusKm,
+            features: candidate.features || {},
+            cluster_info: candidate.cluster_info || {}
+          }
+        });
+
+        if (!res.success || !res.memo) {
+          throw new Error(res.message || 'Unable to generate memo.');
+        }
+
+        renderDueDiligenceMemo(res.memo, locName, displayBType, rank);
+      } catch (err) {
+        console.error('AI Memo error:', err);
+        bodyEl.innerHTML = `
+          <div class="card" style="text-align:center;padding:2rem;color:var(--color-error);">
+            <div style="font-weight:700;margin-bottom:0.5rem;">Failed to generate memo</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-secondary);margin-bottom:1rem;">${DOM.escapeHtml(err.message || 'Spatial synthesis error')}</div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openAiDueDiligence(${rank})">Retry Analysis</button>
+          </div>
+        `;
+      }
+    }
+
+    function renderDueDiligenceMemo(memo, locName, bType, rank) {
+      const confBadge = document.getElementById('memoConfidenceBadge');
+      const bodyEl = document.getElementById('memoModalBody');
+
+      // Confidence badge styling
+      confBadge.textContent = memo.confidence_score || 'High Confidence';
+      const verdict = (memo.verdict || '').toUpperCase();
+      let verdictBadgeClass = 'badge-primary';
+      if (verdict.includes('STRONG') || verdict.includes('BUY') || verdict.includes('RECOMMEND')) {
+        verdictBadgeClass = 'badge-success';
+      } else if (verdict.includes('RISK') || verdict.includes('CAUTION')) {
+        verdictBadgeClass = 'badge-warning';
+      }
+
+      const fg = memo.financial_guardrails || {};
+      const td = memo.trade_demographics || {};
+      const cv = memo.competitor_vulnerability || {};
+      const risks = Array.isArray(memo.strategic_risks) ? memo.strategic_risks : [];
+      const checklist = Array.isArray(memo.action_checklist) ? memo.action_checklist : [];
+
+      bodyEl.innerHTML = `
+        <!-- Executive Verdict Banner -->
+        <div class="memo-section-card" style="border-left:4px solid var(--color-primary);">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="memo-section-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Executive Investment Verdict
+            </span>
+            <span class="badge ${verdictBadgeClass}">${DOM.escapeHtml(memo.verdict || 'Evaluation Complete')}</span>
+          </div>
+          <p style="font-size:var(--text-sm);line-height:1.6;color:var(--color-ink);margin:0;">
+            ${DOM.escapeHtml(memo.executive_summary || '')}
+          </p>
+          <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:0.25rem;">
+            Powered by <strong>${DOM.escapeHtml(memo.powered_by || 'Locus Spatial Economist Model')}</strong>
+          </div>
+        </div>
+
+        <!-- Financial Guardrails & Walk-away Rent -->
+        <div class="memo-section-card">
+          <span class="memo-section-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            Lease & Financial Underwriting Guardrails
+          </span>
+          <div class="memo-guardrail-grid">
+            <div class="memo-metric-chip">
+              <span class="memo-chip-label">Target Fair Rent</span>
+              <span class="memo-chip-val tabular">${DOM.escapeHtml(fg.target_rent_sqft || 'Market Median')}</span>
+            </div>
+            <div class="memo-metric-chip" style="border-color:var(--color-warning);">
+              <span class="memo-chip-label" style="color:var(--color-warning);">Ceiling Walk-Away Rent</span>
+              <span class="memo-chip-val tabular" style="color:var(--color-warning);">${DOM.escapeHtml(fg.walk_away_ceiling_rent || 'Max Benchmark')}</span>
+            </div>
+            <div class="memo-metric-chip">
+              <span class="memo-chip-label">Estimated Capex Payback</span>
+              <span class="memo-chip-val tabular">${DOM.escapeHtml(fg.estimated_payback_months || '12-18 months')}</span>
+            </div>
+            <div class="memo-metric-chip">
+              <span class="memo-chip-label">Breakeven Daily Customer Volume</span>
+              <span class="memo-chip-val tabular">${DOM.escapeHtml(fg.breakeven_daily_transactions || '75-100 orders')}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demographics & Trade Catchment -->
+        <div class="memo-section-card">
+          <span class="memo-section-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Catchment Demographics & Peak Trading Windows
+          </span>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;font-size:12.5px;">
+            <div>
+              <span style="font-weight:600;color:var(--color-ink);">Target Consumer Profile:</span>
+              <div style="color:var(--color-text-secondary);margin-top:0.2rem;">${DOM.escapeHtml(td.target_customer || 'Mixed urban residential and commercial footfall')}</div>
+            </div>
+            <div>
+              <span style="font-weight:600;color:var(--color-ink);">Peak Sales Window:</span>
+              <div style="color:var(--color-text-secondary);margin-top:0.2rem;">${DOM.escapeHtml(td.peak_hours || 'Evening 6:00 PM - 9:30 PM & Weekends')}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Competitor Vulnerability & Market Whitespace -->
+        <div class="memo-section-card">
+          <span class="memo-section-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>
+            Competitor Vulnerability & Market Whitespace
+          </span>
+          <div style="display:flex;flex-direction:column;gap:0.5rem;font-size:12.5px;">
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span style="font-weight:600;color:var(--color-ink);">Saturation Level:</span>
+              <span class="badge ${cv.saturation_level === 'Intense' ? 'badge-warning' : 'badge-primary'}">${DOM.escapeHtml(cv.saturation_level || 'Moderate')}</span>
+            </div>
+            <div style="color:var(--color-text-secondary);">
+              <strong style="color:var(--color-ink);">Exploitable Market Gap:</strong> ${DOM.escapeHtml(cv.market_gap || 'Differentiated quality service and digital takeaway delivery.')}
+            </div>
+            <div style="color:var(--color-text-tertiary);font-size:11.5px;">
+              ${DOM.escapeHtml(cv.competitor_summary || '')}
+            </div>
+          </div>
+        </div>
+
+        <!-- Strategic Site Risks & Mitigations -->
+        ${risks.length > 0 ? `
+          <div class="memo-section-card">
+            <span class="memo-section-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Key Underwriting Risks & Operator Mitigations
+            </span>
+            <div style="display:flex;flex-direction:column;gap:0.5rem;">
+              ${risks.map(r => `
+                <div class="memo-risk-item">
+                  <div class="memo-risk-title">${DOM.escapeHtml(r.risk)}</div>
+                  <div class="memo-risk-mitigation">${DOM.escapeHtml(r.mitigation)}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Diligence Action Checklist -->
+        ${checklist.length > 0 ? `
+          <div class="memo-section-card">
+            <span class="memo-section-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              Recommended Due-Diligence Action Checklist
+            </span>
+            <div style="display:flex;flex-direction:column;gap:0.4rem;">
+              ${checklist.map(item => `
+                <div class="memo-checklist-item">
+                  <span class="memo-check-icon">&check;</span>
+                  <span>${DOM.escapeHtml(item)}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    // ==================== 7. OPTION B: K-MEANS ECONOMIC CORRIDORS LAYER ====================
+
+    async function setMapDisplayMode(mode) {
+      if (mode === mapDisplayMode && clusterMarkers.length > 0) return;
+      mapDisplayMode = mode;
+
+      const btnCand = document.getElementById('btnModeCandidates');
+      const btnClust = document.getElementById('btnModeClusters');
+      const legendBar = document.getElementById('clusterLegendPillBar');
+
+      if (mode === 'candidates') {
+        if (btnCand) btnCand.classList.add('active');
+        if (btnClust) btnClust.classList.remove('active');
+        if (legendBar) legendBar.style.display = 'none';
+
+        // Clear cluster markers
+        clusterMarkers.forEach(m => m.setMap(null));
+
+        // Restore candidate & competitor markers
+        resultMarkers.forEach(m => m.setMap(map));
+        liveCompetitorMarkers.forEach(m => m.setMap(map));
+        if (referenceMarker) referenceMarker.setMap(map);
+        if (radiusCircle) radiusCircle.setMap(map);
+
+        // Refit bounds to candidates if any
+        if (resultMarkers.length > 0 && map) {
+          const bounds = new google.maps.LatLngBounds();
+          resultMarkers.forEach(m => bounds.extend(m.getPosition()));
+          map.fitBounds(bounds, { top: 30, right: 30, bottom: 30, left: 30 });
+        }
+      } else {
+        if (btnClust) btnClust.classList.add('active');
+        if (btnCand) btnCand.classList.remove('active');
+        if (legendBar) legendBar.style.display = 'flex';
+
+        // Hide candidate & competitor markers
+        resultMarkers.forEach(m => m.setMap(null));
+        liveCompetitorMarkers.forEach(m => m.setMap(null));
+        if (referenceMarker) referenceMarker.setMap(null);
+        if (radiusCircle) radiusCircle.setMap(null);
+
+        // Load cluster data if not already loaded
+        if (!clusterMapData) {
+          await loadClusterMapData();
+        } else {
+          renderClusterMarkers(clusterMapData, currentClusterFilter);
+        }
+      }
+    }
+
+    async function loadClusterMapData() {
+      const statusOverlay = document.getElementById('mapStatusOverlay');
+      if (statusOverlay) {
+        statusOverlay.style.display = 'block';
+        statusOverlay.textContent = 'Clustering 4,345 localities into economic zones...';
+      }
+
+      try {
+        const res = await API.fetch('/ml/clusters/map');
+        if (res.success && res.localities) {
+          clusterMapData = res.localities;
+          renderClusterMarkers(clusterMapData, currentClusterFilter);
+        }
+      } catch (err) {
+        console.error('Failed to load cluster map:', err);
+        alert('Could not load ML cluster data: ' + err.message);
+      } finally {
+        if (statusOverlay) statusOverlay.style.display = 'none';
+      }
+    }
+
+    function renderClusterMarkers(localities, filter) {
+      if (!map) return;
+
+      // Clear existing cluster markers
+      clusterMarkers.forEach(m => m.setMap(null));
+      clusterMarkers = [];
+
+      const filtered = filter === 'all' 
+        ? localities 
+        : localities.filter(l => String(l.cluster_id) === String(filter));
+
+      // Limit max markers rendered simultaneously to preserve 60fps interaction
+      const renderPool = filtered.slice(0, 800);
+      const bounds = new google.maps.LatLngBounds();
+
+      if (!clusterInfoWindow) {
+        clusterInfoWindow = new google.maps.InfoWindow();
+      }
+
+      renderPool.forEach(loc => {
+        if (!loc.lat || !loc.lon) return;
+
+        const pos = { lat: loc.lat, lng: loc.lon };
+        bounds.extend(pos);
+
+        const marker = new google.maps.Marker({
+          position: pos,
+          map: map,
+          title: `${loc.locality_name || loc.name} (${loc.cluster_name})`,
+          clusterId: loc.cluster_id,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 5,
+            fillColor: loc.cluster_color || '#0E7C86',
+            fillOpacity: 0.85,
+            strokeWeight: 1.5,
+            strokeColor: '#FFFFFF'
+          },
+          zIndex: 20
+        });
+
+        marker.addListener('click', () => {
+          const content = `
+            <div style="font-family:inherit;padding:0.25rem;max-width:240px;color:#0B1F33;">
+              <div style="font-weight:700;font-size:14px;margin-bottom:0.2rem;">${DOM.escapeHtml(loc.locality_name || loc.name)}</div>
+              <div style="display:inline-flex;align-items:center;gap:0.35rem;font-size:11px;font-weight:600;padding:0.2rem 0.5rem;border-radius:9999px;background:${DOM.escapeHtml(loc.cluster_color)};color:#FFFFFF;margin-bottom:0.5rem;">
+                ${DOM.escapeHtml(loc.cluster_name)}
+              </div>
+              <div style="font-size:11.5px;color:#3E5266;margin-bottom:0.6rem;">
+                Machine-learned economic archetype classified by POI density, transit velocity, and rental bracket.
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" style="width:100%;font-size:11px;padding:0.35rem 0.5rem;" onclick="selectClusterLocalityAndAnalyze('${DOM.escapeHtml(loc.name)}')">
+                Set as Focal Locality
+              </button>
+            </div>
+          `;
+          clusterInfoWindow.setContent(content);
+          clusterInfoWindow.open(map, marker);
+        });
+
+        clusterMarkers.push(marker);
+      });
+
+      if (!bounds.isEmpty()) {
+        map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
+      }
+    }
+
+    function filterMapCluster(clusterId) {
+      currentClusterFilter = clusterId;
+      document.querySelectorAll('.cluster-pill-filter').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-cluster') === String(clusterId));
+      });
+
+      if (clusterMapData) {
+        renderClusterMarkers(clusterMapData, clusterId);
+      }
+    }
+
+    function selectClusterLocalityAndAnalyze(localityName) {
+      if (clusterInfoWindow) clusterInfoWindow.close();
+      const match = localities.find(l => l.name === localityName || l.locality_name === localityName);
+      if (match) {
+        selectLocality(match);
+      }
+      setMapDisplayMode('candidates');
+      executeAnalysis();
     }
 
     // Save Search to Dashboard

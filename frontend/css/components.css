@@ -1057,3 +1057,215 @@ body:not(.dark-theme) .zone-c5 { background: rgba(86, 180, 233, 0.1); color: #03
     transform: translateX(100%);
   }
 }
+
+/* ==================== OPTION B: MAP LAYER SWITCHER & CLUSTER LEGEND ==================== */
+.map-mode-bar {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: inline-flex;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  padding: 0.25rem;
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  gap: 0.25rem;
+}
+
+body.dark-theme .map-mode-bar {
+  background: rgba(18, 18, 24, 0.75);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.map-mode-btn {
+  background: transparent;
+  border: none;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.map-mode-btn:hover {
+  color: var(--color-ink);
+  background: var(--color-sheet);
+}
+
+.map-mode-btn.active {
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  box-shadow: var(--shadow-sm);
+}
+
+body.dark-theme .map-mode-btn.active {
+  background: #FFFFFF;
+  color: #000000;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+}
+
+.cluster-legend-pill-bar {
+  position: absolute;
+  top: 3.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 19;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+  max-width: 90%;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(20px);
+}
+
+body.dark-theme .cluster-legend-pill-bar {
+  background: rgba(18, 18, 24, 0.85);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.cluster-pill-filter {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background: var(--color-sheet);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cluster-pill-filter::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--c-col, var(--color-primary));
+}
+
+.cluster-pill-filter:hover,
+.cluster-pill-filter.active {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  border-color: var(--c-col, var(--color-primary));
+  font-weight: 700;
+}
+
+/* ==================== OPTION A: AI DUE-DILIGENCE MEMO STYLES ==================== */
+.memo-section-card {
+  background: var(--color-sheet);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.memo-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.memo-guardrail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 540px) {
+  .memo-guardrail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.memo-metric-chip {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.memo-chip-label {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+}
+
+.memo-chip-val {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.memo-risk-item {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-warning);
+  border-radius: var(--radius-control);
+  padding: 0.65rem 0.85rem;
+  font-size: 12.5px;
+}
+
+.memo-risk-title {
+  font-weight: 700;
+  color: var(--color-ink);
+  margin-bottom: 0.2rem;
+}
+
+.memo-risk-mitigation {
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+}
+
+.memo-checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 12.5px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.memo-check-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
